@@ -1,0 +1,89 @@
+﻿
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<div class="border_card">
+<div class="card-header with-border" style="margin-bottom: 12px">
+        <h2 class="card-title">Most Purchased Items</h2>
+</div>
+<div class="card-body">
+<table id="BestsellerbyQuantity" class="display">
+    <thead>
+        <tr>
+            <th>ProductName</th>
+            <th>TotalQuantity</th>
+            <th>TotalAmount</th>
+            <th>Action</th>
+
+        </tr>
+    </thead>
+</table>
+</div>
+</div>
+<input type="hidden" id="hdnseller"/>
+<script>
+    $('#BestsellerbyQuantity').DataTable({
+        serverSide: true,
+        processing: true,
+        pageLength: 5, // Set fixed page length
+        lengthChange: false, // Disable the page length dropdown
+        searching: false,
+        ajax: {
+            url: '/Customer/BestsellerbyQuantity',
+            type: 'Get',
+            error: function (xhr, error, code) {
+                console.error("Ajax Error:", error);
+                console.error("Response Text:", xhr.responseText);
+            }
+        },
+        columns: [
+            { data: 'ProductName' },
+            { data: 'TotalQuantity' },
+            { data: 'TotalAmount' },
+            // {
+            //     data: 'seoname',
+            //     render: function (data, type, row) {
+            //         return '<td class="button-column"><a class="btn btn-default" href="' + data + '"><i class="far fa-eye"></i> View</a></td>';
+            //     }
+            // },
+                      {
+    data: 'seoname',
+    render: function (data, type, row) {
+        
+        var viewButton = '';
+        if (data) {
+            
+            var splitdata = data.split(","); 
+            viewButton = `<a class="btn btn-default" href="${splitdata[0]}"><i class="far fa-eye"></i> View</a>`;
+        }
+
+        var addToCartButton = '';
+        if (row.ProductId) {
+            addToCartButton = `
+                <button type="button"
+                        id="add-to-cart-button-${row.ProductId}"
+                        class="btn btn-primary add-to-cart-link"
+                        data-productid="${row.ProductId}"
+                        onclick="window.location.href='ShoppingCart/AddProductToCart_Detailsfromdashboard?productId=${row.ProductId}&shoppingCartTypeId=1&portaldata=portaldata';">
+                    Add To Cart
+                </button>
+            `;
+        }
+
+        return `
+            <td class="button-column">
+                ${viewButton}
+                ${addToCartButton}
+            </td>
+        `;
+    }
+}
+        ]
+
+
+    });
+
+   
+</script>

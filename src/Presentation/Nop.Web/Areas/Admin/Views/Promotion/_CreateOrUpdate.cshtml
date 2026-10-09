@@ -1,0 +1,395 @@
+﻿@model CustomPromotionModel
+
+@Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.Id)
+
+
+@if (ViewBag.RefreshPage == true)
+{
+    <script type="text/javascript">
+        try {
+            window.opener.document.forms['@(ViewBag.formId)'].@(ViewBag.btnId).click();
+
+        }
+        catch (e) { }
+        window.close();
+    </script>
+}
+
+
+<div class="card-body">
+    <div class="content">
+        <div class="form-horizontal">
+            <div class="panel-group">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="FromRange" title="">
+                                        Select Type
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-1 Categorycheck">
+                                @Html.RadioButtonFor(model => model.DDlValue, "Category", new { @id = "chkCategory", @class = "chkboxClick" })
+                                @{
+                                    Html.ValidationMessageFor(model => model.DDlValue);
+                                }
+                                <label class="control-label" for="category" title="Category">
+                                    Category
+                                </label>
+                            </div>
+                            <div class="col-md-1 Brandcheck">
+                                @Html.RadioButtonFor(model => model.DDlValue, "Designer", new { @id = "chkDesigner", @class = "chkboxClick" })
+                                @{
+                                    Html.ValidationMessageFor(model => model.DDlValue);
+                                }
+                                <label class="control-label" for="designer" title="Designer">
+                                    Brand
+                                </label>
+                            </div>
+                            <div class="col-md-1 Productcheck">
+                                @Html.RadioButtonFor(model => model.DDlValue, "Product", new { @id = "chkProduct", @class = "chkboxClick" })
+                                @{
+                                    Html.ValidationMessageFor(model => model.DDlValue);
+                                }
+                                <label class="control-label" for="product" title="Product">
+                                    Product
+                                </label>
+                            </div>
+                        </div>
+                        <div id="category" class="form-group row" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="categoryId" title="">
+                                        Select Category
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.HiddenFor(x => x.CategoryId, new { @Id = "CategoryId" })
+                                @Html.DropDownList("ddlCategory", Model.AvailableCategories, new { @class = "form-control ddlChangeValue" })
+                            </div>
+                        </div>
+                        <div id="designer" class="form-group row" style="display:none" @(Model.AvailableCategories.SelectionIsNotPossible() ? Html.Raw("style=\"display:none\"") : null)>
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="designerId" title="">
+                                        Select Brand
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.HiddenFor(x => x.DesignerId, new { @Id = "DesignerId" })
+                                @Html.DropDownList("ddlDesigner", Model.AvailableManufacturers, new { @class = "form-control ddlChangeValue" })
+                            </div>
+                        </div>
+                        <div id="simpleProduct" class="form-group row" style="display:none">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="SingleProductId" title="">
+                                        Select Single Product
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.SingleProductId, new { @class = "form-control text-box single-line", @readonly = "readonly" })
+                                @Html.HiddenFor(x => x.SingleProductId, new { @Id = "SingleProductId" })
+                                @Html.HiddenFor(x => x.SingleProductName, new { @Id = "hdnSingleProductName" })
+                                @Html.ValidationMessageFor(model => model.SingleProductId)
+                                <div id="singleproductname">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <button class="btn btn-primary" type="submit" id="btnAddProduct" onclick="javascript:OpenWindow('@(Url.Action("ProductAddPopup", "Promotion", new { categoryId = Model.Id, btnId = "singleproduct", formId = "category-form" }))', 800, 800, true); return false;"
+                                <i class="fa fa-plus-square"></i>
+                                Add Product
+                            </button>
+                                <button type="button" id="btnRefreshSingleProducts" style="display: none" />
+                                <script type="text/javascript">
+                                    $(document).ready(function () {
+                                        $('#btnRefreshSingleProducts').click(function () {
+
+                                            // not reload page
+                                            return false;
+                                        });
+                                    });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="ProductId" title="">
+                                        Select Product(Free)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                @Html.TextBoxFor(model => model.ProductId, new { @class = "form-control text-box single-line", @readonly = "readonly" })
+                                @Html.HiddenFor(x => x.ProductId, new { @Id = "ProductId" })
+                                @Html.HiddenFor(x => x.ProductName, new { @Id = "hdnProductName" })
+                                @Html.ValidationMessageFor(model => model.ProductId)
+                                <div id="productname">
+                                </div>
+                            </div>
+                            <div class="col-md-5">
+                                <button class="btn btn-primary" type="submit" id="btnAddProduct" onclick="javascript:OpenWindow('@(Url.Action("ProductAddPopup", "Promotion", new { categoryId = Model.SingleProductId, btnId = "btnRefreshProducts", formId = "category-form" }))', 800, 800, true); return false;"
+                                <i class="fa fa-plus-square"></i>
+                                Add Product
+                            </button>
+                                <button type="button" id="btnRefreshPromoProducts" style="display: none" />
+                                <script type="text/javascript">
+                                    $(document).ready(function () {
+                                        $('#btnRefreshPromoProducts').click(function () {
+                                            return false;
+                                        });
+                                    });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="CustomerRoleName" />
+                            </div>
+
+                            <div class="col-md-9">
+                                <div class="input-group-append input-group-required">
+                                    <div class="input-group">
+                                        <nop-select asp-for="CustomerRoleid" asp-items="Model.AvailableCustomerRoles" asp-multiple="true" />
+                                    </div>
+                                    <input type="hidden" id="hdncustomerrole" />
+                                    <div class="input-group-btn">
+                                        <nop-required />
+                                    </div>
+                                </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        var customerRoleIdsInput = $('#@Html.IdFor(model => model.CustomerRoleid)').data("kendoMultiSelect");
+                                        customerRoleIdsInput.setOptions({
+                                            customerRoleIdsInput: false,
+                                            filter: "contains"
+                                        });
+
+                                    @if (Model.AvailableCustomerRoles.Count == 0)
+                                    {
+                                        <text>
+                                                customerRoleIdsInput.setOptions({
+                                                    enable: false,
+                                                    placeholder: '@T("Admin.Customers.Customers.Fields.CustomerRoles.NoRoles")'
+                                                });
+                                            customerRoleIdsInput._placeholder();
+                                            customerRoleIdsInput._enable();
+                                        </text>
+                                    }
+                                                                                                                                                                                                                                                        });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label for="quantity">Quantity</label>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input class="SelectedOption" type="radio" id="quantity" name="SelectedOption" value="Quantity" @(Model.SelectedOption == "Quantity" ? "checked" : "") />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label for="price">Price</label>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <input class="SelectedOption" type="radio" id="price" name="SelectedOption" value="Price" @(Model.SelectedOption == "Price" ? "checked" : "") />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label PriceRangeFrom" for="FromRange" title="">
+                                        Price Range From
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.FromRange) <a id="USD">[USD]</a>
+                                @Html.ValidationMessageFor(model => model.FromRange)
+                            </div>
+                        </div>
+
+                        <div class="form-group row ToRangeclass">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="control-label" for="FromRange" title="">
+                                        Price Range To
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                @Html.EditorFor(model => model.ToRange) [USD]
+                                @Html.ValidationMessageFor(model => model.ToRange)
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <nop-label asp-for="PromotionDateFrom" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="PromotionDateFrom" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <nop-label asp-for="PromotionDateTo" />
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="PromotionDateTo" />
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                @Html.LabelFor(model => model.Price)
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            @Html.EditorFor(model => model.Price) [USD]
+                            @Html.ValidationMessageFor(model => model.Price)
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                @Html.LabelFor(model => model.IsActive)
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            @Html.EditorFor(model => model.IsActive)
+                            @Html.ValidationMessageFor(model => model.IsActive)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            $(document).ready(function () {
+                if ($('#quantity').is(':checked')) {
+                    $(".ToRangeclass").hide();
+                    $("#USD").hide();
+                    $(".PriceRangeFrom").text("Add Quantity");
+                }
+                else {
+                    $(".ToRangeclass").show();
+                    $("#USD").show();
+                    $(".PriceRangeFrom").text("Price Range From");
+                }
+                document.getElementById("productname").innerHTML = ' ';
+                var productNameParts = document.getElementById("hdnProductName").value.split('$');
+
+                var productNameDiv = document.getElementById("productname");
+                for (var i = 0; i < productNameParts.length; i++) {
+                    productNameDiv.innerHTML += productNameParts[i] + "<br>"; // Append each part with a line break
+                }
+                document.getElementById("singleproductname").innerHTML = ' ';
+                var productNameParts = document.getElementById("hdnSingleProductName").value.split('$');
+
+                var productNameDiv = document.getElementById("singleproductname");
+                for (var i = 0; i < productNameParts.length; i++) {
+                    productNameDiv.innerHTML += productNameParts[i] + "<br>"; // Append each part with a line break
+                }
+
+                if ($('#Id').val() == 0) {
+                    $('.chkboxClick').filter('[value=Category]').prop('checked', true);
+                } else {
+                    $('.chkboxClick').filter('[value=@Model.DDlValue]').prop('checked', true);
+                    if ("@Model.DDlValue" == "Category") {
+                        $('#category').show();
+                        $('#designer').hide();
+                        $('#simpleProduct').hide();
+                        $('.Brandcheck').hide();
+                        $('.Productcheck').hide();
+                        $("#ddlCategory").val($('#CategoryId').val());
+                    } else if ("@Model.DDlValue" == "Designer") {
+                        $('#designer').show();
+                        $('#category').hide();
+                        $('.Categorycheck').hide();
+                        $('.Productcheck').hide();
+                        $('#simpleProduct').hide();
+                        $("#ddlDesigner").val($('#DesignerId').val());
+                    } else {
+                        $('#simpleProduct').show();
+                        $('#category').hide();
+                        $('#designer').hide();
+                        $('.Categorycheck').hide();
+                        $('.Brandcheck').hide();
+                    }
+                }
+            });
+
+            $('.chkboxClick').change(function () {
+                var value = $(this).filter(':checked').val();
+                if (value == "Category") {
+                    $('#category').show();
+                    $('#designer').hide();
+                    $('#simpleProduct').hide();
+                    $('#designer').find('select').prop('selectedIndex', 0);
+                    $("#DesignerId").val(0);
+                    $("#SingleProductId").val(0);
+                    $("#SingleProductName").val('');
+
+                }
+                else if (value == "Designer") {
+                    $('#category').hide();
+                    $('#designer').show();
+                    $('#simpleProduct').hide();
+                    $('#category').find('select').prop('selectedIndex', 0);
+                    $("#CategoryId").val(0);
+                    $("#SingleProductId").val(0);
+                    $("#SingleProductName").val('');
+                } else {
+                    $('#category').hide();
+                    $('#designer').hide();
+                    $('#simpleProduct').show();
+                    $('#category').find('select').prop('selectedIndex', 0);
+                    $('#designer').find('select').prop('selectedIndex', 0);
+                    $("#CategoryId").val(0);
+                    $("#DesignerId").val(0);
+                }
+            });
+
+            $('.ddlChangeValue').change(function () {
+                var value = $(this).attr('id');
+                if (value == "ddlCategory") {
+                    $("#CategoryId").val($(this).val());
+                    $("#DesignerId").val(0);
+                } else if (value == "ddlDesigner") {
+                    $("#DesignerId").val($(this).val());
+                    $("#CategoryId").val(0);
+                }
+            });
+            $('#hdncustomerrole').change(function () {
+
+            })
+            $(".SelectedOption").click(function () {               
+                if ($('#quantity').is(':checked')) {
+                    $(".ToRangeclass").hide();
+                    $("#USD").hide();
+                    $(".PriceRangeFrom").text("Add Quantity");
+                }
+                else{
+                    $(".ToRangeclass").show();
+                    $("#USD").show();
+                    $(".PriceRangeFrom").text("Price Range From");
+                }
+            });
+        </script>
+    </div>
+</div>
+</div>

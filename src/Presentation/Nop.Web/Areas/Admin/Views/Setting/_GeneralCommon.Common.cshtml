@@ -1,0 +1,473 @@
+﻿@model GeneralCommonSettingsModel
+@inject Nop.Services.Stores.IStoreService storeService
+@using Nop.Web.Framework.Models.AdminAreaTour
+
+@{
+    //tour step
+    ViewBag.TourStep = TourStep.GeneralSettings;
+}
+
+@await Html.PartialAsync("_AdminTour")
+
+<div class="card-body">
+    <div class="form-group row" id="theme-area">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.DefaultStoreTheme_OverrideForStore" asp-parent-container="theme-selection-block" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.DefaultStoreTheme" />
+        </div>
+        <div class="col-md-9">
+            <div id="theme-selection-block" class="theme-selection-block clearfix">
+                @foreach (var theme in Model.StoreInformationSettings.AvailableStoreThemes)
+                {
+                    @*<div class="checkbox">
+                <label>
+                <span>
+                <input type="radio" name="@Html.NameFor(x => x.StoreInformationSettings.DefaultStoreTheme)" value="@theme.SystemName" @if (theme.SystemName.Equals(Model.StoreInformationSettings.DefaultStoreTheme, StringComparison.InvariantCultureIgnoreCase)) { <text> checked="checked" </text> }>
+                @theme.FriendlyName
+                </span>
+                <img src="@Url.Content(theme.PreviewImageUrl)" alt="@theme.PreviewText" title="@theme.PreviewText">
+                </label>
+                </div>*@
+                    <div class="checkbox form-check">
+                        <label class="form-check-label">
+                            <span>
+                                <input type="radio" name="@Html.NameFor(x => x.StoreInformationSettings.DefaultStoreTheme)" value="@theme.SystemName" @if (theme.SystemName.Equals(Model.StoreInformationSettings.DefaultStoreTheme, StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    <text> checked="checked" </text>
+                                }>
+                                @theme.FriendlyName
+                            </span>
+                            <img src="@Url.Content(theme.PreviewImageUrl)" alt="@theme.PreviewText" title="@theme.PreviewText">
+                        </label>
+                    </div>
+                }
+            </div>
+            <span asp-validation-for="StoreInformationSettings.DefaultStoreTheme"></span>
+            <p><em>@T("Admin.Configuration.Settings.GeneralCommon.DefaultStoreTheme.GetMore", OfficialSite.Themes + Utm.OnAdminThemes)</em></p>
+        </div>
+    </div>
+    <div class="form-group row" @(Model.StoreInformationSettings.AvailableStoreThemes.Count == 1 ? Html.Raw("style=\"display:none\"") : null)>
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.AllowCustomerToSelectTheme_OverrideForStore" asp-input="StoreInformationSettings.AllowCustomerToSelectTheme" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.AllowCustomerToSelectTheme" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="StoreInformationSettings.AllowCustomerToSelectTheme" />
+            <span asp-validation-for="StoreInformationSettings.AllowCustomerToSelectTheme"></span>
+        </div>
+    </div>
+    <div class="form-group row" id="logo-area">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.LogoPictureId_OverrideForStore" asp-parent-container="logo-block" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.LogoPictureId" />
+        </div>
+        <div class="col-md-9" id="logo-block">
+            <nop-editor asp-for="StoreInformationSettings.LogoPictureId" />
+            <span asp-validation-for="StoreInformationSettings.LogoPictureId"></span>
+        </div>
+    </div>
+    <div class="form-group row advanced-setting">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.DisplayEuCookieLawWarning_OverrideForStore" asp-input="StoreInformationSettings.DisplayEuCookieLawWarning" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.DisplayEuCookieLawWarning" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="StoreInformationSettings.DisplayEuCookieLawWarning" />
+            <span asp-validation-for="StoreInformationSettings.DisplayEuCookieLawWarning"></span>
+        </div>
+    </div>
+    <div class="form-group row advanced-setting">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.StoreClosed_OverrideForStore" asp-input="StoreInformationSettings.StoreClosed" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.StoreClosed" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="StoreInformationSettings.StoreClosed" />
+            <span asp-validation-for="StoreInformationSettings.StoreClosed"></span>
+        </div>
+    </div>
+    <div class="form-group row advanced-setting">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.SubjectFieldOnContactUsForm_OverrideForStore" asp-input="StoreInformationSettings.SubjectFieldOnContactUsForm" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.SubjectFieldOnContactUsForm" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="StoreInformationSettings.SubjectFieldOnContactUsForm" />
+            <span asp-validation-for="StoreInformationSettings.SubjectFieldOnContactUsForm"></span>
+        </div>
+    </div>
+    <div class="form-group row advanced-setting">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.UseSystemEmailForContactUsForm_OverrideForStore" asp-input="StoreInformationSettings.UseSystemEmailForContactUsForm" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.UseSystemEmailForContactUsForm" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="StoreInformationSettings.UseSystemEmailForContactUsForm" />
+            <span asp-validation-for="StoreInformationSettings.UseSystemEmailForContactUsForm"></span>
+        </div>
+    </div>
+    <div class="form-group row advanced-setting">
+        <div class="col-md-3">
+            <nop-override-store-checkbox asp-for="StoreInformationSettings.PopupForTermsOfServiceLinks_OverrideForStore" asp-input="StoreInformationSettings.PopupForTermsOfServiceLinks" asp-store-scope="@Model.ActiveStoreScopeConfiguration" />
+            <nop-label asp-for="StoreInformationSettings.PopupForTermsOfServiceLinks" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="StoreInformationSettings.PopupForTermsOfServiceLinks" />
+            <span asp-validation-for="StoreInformationSettings.PopupForTermsOfServiceLinks"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <label class="label-wrapper" for="ActiveInactive" title="">
+                ChatBot Access Button(Active / InActive)
+            </label>
+        </div>
+        <div class="col-md-9">
+            <input type="checkbox" id="ChatBotAccessButtonCHECKBOX"
+            @(Convert.ToBoolean(ViewBag.ChatBotButtoncheckbox) ? "checked" : "")>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-8 col-md-offset-4">
+            <span id="showrangemsgMarketing"></span>
+        </div>
+    </div>
+
+    <div id="ChatBotAccessform" style="display:@(Convert.ToBoolean(ViewBag.ChatBotButtoncheckbox) ? "block" : "none")">
+
+        @***** Chat Bot Before Login Check Box ******@
+        <div class="form-group row">
+            <div class="col-md-3">
+                <label class="label-wrapper" for="BeforeActiveInactive" title="">
+                    ChatBot Access Popup Before Login (Active / InActive)
+                </label>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.ChatBotButtonBeforeLoginCheckbox" />
+                <span asp-validation-for="StoreInformationSettings.ChatBotButtonBeforeLoginCheckbox"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatBotAccessButton">Open Api Key</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <nop-editor asp-for="StoreInformationSettings.ChatBotAccessButton" />
+                <span asp-validation-for="StoreInformationSettings.ChatBotAccessButton"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatbotLabelColor">Label Color</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div id="color-picker"></div>
+                <input type="hidden" id="colorValue" name="StoreInformationSettings.ChatbotLabelColor" value="@Model.StoreInformationSettings.ChatbotLabelColor" />
+                @* <input style="width:23%" type="color" id="StoreInformationSettings_ChatbotLabelColor" name="StoreInformationSettings.ChatbotLabelColor" class="form-control form-control-color" value="@Model.StoreInformationSettings.ChatbotLabelColor" title="Choose your color"> *@
+                <span asp-validation-for="StoreInformationSettings.ChatbotLabelColor" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatbotAskme">Ask me label</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.ChatbotAskme" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.ChatbotAskme"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatbotAskbutton">Ask me Button</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.ChatbotAskbutton" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.ChatbotAskbutton"></span>
+            </div>
+        </div>
+
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatbotProductinfotab">Product info tab</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.ChatbotProductinfotab" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.ChatbotProductinfotab"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatbotOtherinfotab">Other info tab</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.ChatbotOtherinfotab" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.ChatbotOtherinfotab"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_Chatbotheader">Chatbot header</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.Chatbotheader" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.Chatbotheader"></span>
+            </div>
+        </div>
+        <form id="bannerForm" asp-action="Saveimage" enctype="multipart/form-data">
+            <div class="mb-3 row">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="col-form-label" for="StoreInformationSettings_ImageFile">Banner Image</label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <input type="file" name="ImageFile" id="ImageFile" asp-template="RichEditor" />
+                    <span asp-validation-for="StoreInformationSettings.ImageFile"></span>
+                </div>
+            </div>
+
+
+
+
+        </form>
+        <div class="mb-3 row">
+            <div class="col-md-4">
+                <p class="mt-3"><img src="~/Uploads/@Model.StoreInformationSettings.ImagePath" height="200px" width="200px" style="object-fit:cover"></img></p>
+                @*  <button type="button" id="ChatBotAccessbutton" class="btn btn-primary mt-3">Submit</button> *@
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label">Feed the bot</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div><button onclick="rebuildEmbeddings()" type="button">Feed the Bot</button></div>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatBotTime">Chat Bot Time/InMinutes</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <nop-editor asp-for="StoreInformationSettings.ChatBotTime" />
+                <span asp-validation-for="StoreInformationSettings.ChatBotTime"></span>
+            </div>
+            </div>
+
+        @***** Chat Bot Before Login  ******@
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatBotnumberofquestionsBefore">Number of questions Before Login</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <nop-editor asp-for="StoreInformationSettings.ChatBotnumberofquestionsBefore" />
+                <span asp-validation-for="StoreInformationSettings.ChatBotnumberofquestionsBefore"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_chatbotfreeaccesssBefore">Question limitation popup Before Login</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.chatbotfreeaccessBefore" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.chatbotfreeaccessBefore"></span>
+            </div>
+        </div>
+
+         @***** Chat Bot After Login  ******@
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatBotnumberofquestions">Number of questions After Login</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <nop-editor asp-for="StoreInformationSettings.ChatBotnumberofquestions" />
+                <span asp-validation-for="StoreInformationSettings.ChatBotnumberofquestions"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_chatbotfreeaccesss">Question limitation popup After Login</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.chatbotfreeaccess" asp-template="RichEditor" />
+                <span asp-validation-for="StoreInformationSettings.chatbotfreeaccess"></span>
+            </div>
+        </div><div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_Chatbotistyping">Chat Bot is typing Loader</label>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="StoreInformationSettings.Chatbotistyping" />
+                <span asp-validation-for="StoreInformationSettings.Chatbotistyping"></span>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="StoreInformationSettings_ChatBotprompt">chatbot Prompt</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <nop-editor asp-for="StoreInformationSettings.ChatBotprompt" />
+                <span asp-validation-for="StoreInformationSettings.ChatBotprompt"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@simonwep/pickr/dist/themes/classic.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@@simonwep/pickr"></script>
+<script>
+    const pickr = Pickr.create({
+        el: '#color-picker',
+        theme: 'classic', // or 'monolith', 'nano'
+
+        default: '@Model.StoreInformationSettings.ChatbotLabelColor',
+
+        components: {
+            preview: true,
+            opacity: true,
+            hue: true,
+
+            interaction: {
+                hex: true,
+                rgba: true,
+                input: true,
+                save: true
+            }
+        }
+    });
+
+    pickr.on('save', (color, instance) => {
+        const hex = color.toHEXA().toString();
+        document.getElementById('colorValue').value = hex;
+        pickr.hide(); // <-- Close the color picker
+    });
+</script>
+
+<script>
+    function rebuildEmbeddings() {
+        $.ajax({
+            url: '/MedicalChat/RebuildEmbeddings',
+            method: 'get',
+            success: function (data) {
+                alert(data); // show success message
+            },
+            error: function (err) {
+                alert("Error rebuilding embeddings");
+            }
+        });
+    }
+</script>
+<script>
+    $("#ImageFile").on("change", function () {
+        var formData = new FormData();
+        var file = this.files[0];
+
+        if (file) {
+            formData.append("BannerImage", file);
+
+            $.ajax({
+                url: '/Admin/Setting/Saveimage',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    // Refresh or show success message
+                    window.location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error("Upload failed:", error);
+                }
+            });
+        }
+    });
+
+
+    $('#ChatBotAccessButtonCHECKBOX').change(function () {
+        var val = $("#ChatBotAccessButtonCHECKBOX").prop("checked");
+        if (val == true) {
+
+            $("#ChatBotAccessform").css("display", "block");
+        }
+        else {
+
+            $("#ChatBotAccessform").css("display", "none");;
+        }
+        var val1 = $("#StoreInformationSettings_ChatBotAccessButton").val();
+
+        var postData = {
+            ChatBotButtoncheckbox: val,
+            ChatBotButtoninput: val1
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("ChatBotButton", "Setting"))",
+            data: postData,
+            success: function (data) {
+                if (val == true)
+                    $("#showrangemsg").text("Chat Bot  are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#showrangemsg").text("Chat Bot  are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    })
+    $(document).ready(function () {
+
+        $("#ChatBotAccessbutton").click(function (event) {
+            var val = $("#ChatBotAccessButtonCHECKBOX").prop("checked");
+            var val1 = $("#StoreInformationSettings_ChatBotAccessButton").val();
+            var postData = {
+                ChatBotButtoncheckbox: val,
+                ChatBotButtoninput: val1
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                url: '/Admin/Setting/ChatBotButton',
+                type: 'POST',
+                data: postData, // send as standard form data
+                success: function (response) {
+                    window.location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.log("Error:", xhr.responseText);
+                }
+            });
+        });
+    });
+</script>

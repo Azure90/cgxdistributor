@@ -1,0 +1,193 @@
+﻿@model ProductDetailsModel.ProductPriceModel
+
+@using Nop.Core
+@using Nop.Core.Domain.Tax
+@using Nop.Services.Configuration
+@using Nop.Services.Customers;
+@using Nop.Services.Orders
+@using Nop.Web.Infrastructure
+
+@inject IWorkContext workContext
+@inject ICustomerService _customerService   
+@inject ISettingService settingService;
+@inject IShoppingCartService shoppingCartService;
+
+@{
+
+    bool isSpecialPrice = false;
+    bool isDiscountedPrice = false;
+    var ProductPrice = string.IsNullOrEmpty(@Model.Price) ? "0" : @Model.Price;
+    var customerroleid = 0;
+    var checkprice = "";
+    var maxTierPrice = string.Empty;
+    bool hasDiscountApplied = false;
+
+    // Check for mega menu custom item is enabled or not
+    var setting = await settingService.GetSettingAsync("CustomPromotion.IsEnabledCustomMegaMenuItem");
+    bool.TryParse(setting?.Value?.Trim('"'), out bool isCustomMegaMenuItemEnabled);
+
+    var customer = workContext.GetCurrentCustomerAsync().Result;
+    var GetallRoles = _customerService.GetCustomerRolesAsync(customer).Result.Where(d => d.Name == "CAD B2C"
+                || d.Name == "USD B2C"
+                || d.Name == "USD B2B INTL"
+                || d.Name == "CAD B2C HS"
+                || d.Name == "USD B2B ST"
+                || d.Name == "USD B2B DS"
+                || d.Name == "CAD B2B ST"
+                || d.Name == "CAD B2B DS"
+                ).FirstOrDefault();
+
+    PriceChange obj = new PriceChange();
+    var startingfrom = @T("ShoppingCart.Startingfrom").Text;
+    if (isCustomMegaMenuItemEnabled)
+    {
+        // special price count
+        var specialCount = obj.CheckSpecialPriceDisocunt(Model.ProductId, customer.Id);
+        if (specialCount > 0)
+        {
+            isSpecialPrice = true;
+            //ProductPrice = checkprice;
+            maxTierPrice = await shoppingCartService.CheckMaxTierPriceForProductAsync(Model.ProductId, ProductPrice);
+        }
+        else
+        {
+            if (!ProductPrice.Contains(startingfrom))
+            {
+                //ProductPrice = checkprice;
+                isDiscountedPrice = Model.PriceWithDiscountValue.HasValue
+                        && Model.PriceWithDiscountValue > decimal.Zero;
+            }
+        }
+    }
+    else
+    {
+        if (!checkprice.Contains("$0.00") && !ProductPrice.Contains(startingfrom))
+            ProductPrice = checkprice;
+    }
+
+    //Model.Price = ProductPrice;
+    hasDiscountApplied = await shoppingCartService.CheckExclusiveDiscountsForCustomerAsync(Model.ProductId);
+
+}
+
+@if (!Model.CustomerEntersPrice)
+{
+    if (!string.IsNullOrEmpty(workContext.GetCurrentCustomerAsync().Result.Email))
+    {
+    <div class="prices">
+        @if (Model.CallForPrice)
+        {
+            <div class="product-price call-for-price">
+                <span>@T("Products.CallForPrice")</span>
+            </div>
+        }
+        else
+        {
+            @if (isCustomMegaMenuItemEnabled && isSpecialPrice)
+                {                    
+                    <div class="product-price discounted-price">
+                        <label for="price-value-@(Model.ProductId)">@T("Products.Price.WithDiscount"):</label>
+                        <span class="price-value-@(Model.ProductId)">
+                            @Html.Raw(Model.Price)
+                        </span>
+                    </div>
+
+                    // Commented by tpss sh 
+                    // var oldPrice = shoppingCartService.ParsePrice(maxTierPrice);
+                    // var modelPrice = shoppingCartService.ParsePrice(Model.Price);
+
+                    // bool validOldPrice = oldPrice > modelPrice;
+                    // if (!string.IsNullOrWhiteSpace(maxTierPrice) && !maxTierPrice.Contains("$0.00") && validOldPrice)
+                    // {
+                    //     <div class="non-discounted-price">
+                    //         <label for="price-value-@(Model.ProductId)">Price:</label>
+                    //         <span>
+                    //             <span>@maxTierPrice</span>
+                    //         </span>
+                    //     </div>
+                    // }
+            }
+            else
+            {
+                    if (Model.IsRental)
+                    {
+                        <div class="rental-price">
+                            <label>@T("Products.Price.RentalPrice"):</label>
+                            <span>@Model.RentalPrice</span>
+                        </div>
+                    }
+                    if (!string.IsNullOrWhiteSpace(Model.PriceWithDiscount))
+                    {
+                        <div class="product-price discounted-price">
+
+                            <label>@T("Products.Price.WithDiscount"):</label>
+                            @* <label class="@(isCustomMegaMenuItemEnabled && isDiscountedPrice && hasDiscountApplied ? "has-discount" : null)">@T("Products.Price.WithDiscount"):</label> *@
+                            <span class="price-value-@(Model.ProductId)">
+                                @Html.Raw(Model.PriceWithDiscount)
+                            </span>
+                        </div>
+                    }
+                    <div class="@if (string.IsNullOrWhiteSpace(Model.PriceWithDiscount))
+                                {
+                                    <text>product-price</text>
+                                }
+                                else
+                                {
+                                    <text>non-discounted-price</text>
+                                }">
+                        @if (!string.IsNullOrWhiteSpace(Model.OldPrice) || !string.IsNullOrWhiteSpace(Model.PriceWithDiscount))
+                        {
+                            <label for="price-value-@(Model.ProductId)">@T("Products.Price"):</label>
+                        }
+                        <span @if (string.IsNullOrWhiteSpace(Model.PriceWithDiscount)) { <text> id="price-value-@(Model.ProductId)" class="price-value-@(Model.ProductId)" </text> }>
+                            @Html.Raw(Model.Price)
+                        </span>
+                    </div>
+                    if (!string.IsNullOrWhiteSpace(Model.OldPrice))
+                    {
+                        <div class="old-product-price">
+                            <label>@T("Products.Price.OldPrice"):</label>
+                            <span>@Model.OldPrice</span>
+                        </div>
+                    }
+                    if (!string.IsNullOrEmpty(Model.BasePricePAngV))
+                    {
+                        <div class="base-price-pangv" id="base-price-pangv-@Model.ProductId">
+                            @Model.BasePricePAngV
+                        </div>
+                    }
+                    if (Model.DisplayTaxShippingInfo)
+                    {
+                        var inclTax = await workContext.GetTaxDisplayTypeAsync() == TaxDisplayType.IncludingTax;
+                        //tax info is already included in the price (incl/excl tax). that's why we display only shipping info here
+                        //of course, you can modify appropriate locales to include VAT info there
+                        <div class="tax-shipping-info">
+                            @T(inclTax ? "Products.Price.TaxShipping.InclTax" : "Products.Price.TaxShipping.ExclTax", Url.RouteTopicUrl("shippinginfo"))
+                        </div>
+                    }
+             }            
+        }
+    </div>
+    }
+    else
+    {
+        <div class="prices">
+            <div class="product-price">
+                <span id="price-value-@(Model.ProductId)" class="price-value-@(Model.ProductId)">
+                    @if (GetallRoles.Name != "USD B2B INTL")
+                    {
+                        <span class="price actual-price">
+                            <a>[Login for Price]</a>
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="price actual-price">
+                            <a href="/contactus">Contact for Price</a>
+                        </span>
+                    }
+                </span>
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,264 @@
+﻿@using Nop.Web.Models.DistributorPortal;
+@model ProductDetails
+<div class="product-details-top">
+    @await Html.PartialAsync("~/Views/Product/_ProductBreadcrumb.cshtml", Model.ProductBreadcrumb)
+
+</div>
+<script>
+    $("#btnedit").attr('href', '/Admin/Product/Edit/' + '@Model.Id').css("display", "inline-block");
+</script>
+<section class="product_info_main_section">
+    <input type="hidden" value="@Model.Id" />
+    <input type="hidden" value="@Model.IsSample" /> <input type="hidden" value="@Model.ModuleName" />
+    <div class="product_main_row">
+        <div class="product_main_img">
+            <img src="@Model.Image" />
+        </div>
+        <div class="product_info_main">
+            <h2>@Model.Name</h2>
+            <p>
+                @if (Model.ShortDescription != null)
+                {
+                    @if (Model.ShortDescription.Contains("$$"))
+                    {
+                        @Html.Raw(Model.ShortDescription.Split("$$")[0])
+                    }
+                    else
+                    {
+                        @Html.Raw(Model.ShortDescription)
+                    }
+                }
+            </p>
+            @*  <p>
+            <a href="https://citagenix.com/raptosgr-h">
+            https://citagenix.com/raptosgr-h
+            </a>
+            </p> *@
+            @if (ViewBag.griddata != null)
+            {
+                @if (ViewBag.griddata.Count > 0)
+                {
+                    <div class="tableStripped">
+
+                        <table border="1" cellpadding="8" cellspacing="0" class="table ">
+                            <thead>
+
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Product Combinations</th>
+                                    <th>Sku</th>
+                                    <th>Part Number</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                @foreach (var item in ViewBag.griddata)
+                                {
+
+                                    <tr>
+                                        <td>@item.Name)</td>
+                                        <td>@Html.Raw(item.AttributesXml)</td>
+                                        <td>@item.Sku</td>
+                                        <td>@item.AdminComment</td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+            }
+            @if (Model.Sku == "Training Courses")
+            {
+                <a type="button" class="add-to-cart-button btneducation" href="@Model.UrlSlug"><span>Access the Course</span></a>
+            }
+        </div>
+        <div class="product-page-grids side-grids">
+            @await Component.InvokeAsync(typeof(RelatedProductsViewComponent), new { productId = Model.Id })
+        </div>
+    </div>
+</section>
+@if (Model.PictureModels.Count() > 0)
+{
+    <section class="product_info_section">
+
+        <h3><img src="/images/images.svg" /> Images <button class="download_all_btn " id="downloadAllBtnimg">Download All @Model.PictureModels.Count()<img src="/images/download.svg"></button> </h3>
+        <div class="product_info_row">
+            @foreach (var i in Model.PictureModels)
+            {
+
+                var replaeimage = @i.ThumbImageUrl.Replace("_100", "_550");
+
+                <div>
+                    <img src="@replaeimage" />
+                    <button class="downloadImage">
+                        <img src="/images/download.svg">
+                    </button>
+                </div>
+            }
+        </div>
+    </section>
+}
+@if (!string.IsNullOrEmpty(Model.DocumentModels))
+{
+    <section class="product_info_section">
+        <h3><img src="/images/documentsIcon.svg" /> Documents</h3>
+
+
+        <iframe style="width:1840px;height:600px" src="@Model.DocumentModels" seamless="seamless" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen=""></iframe>
+
+
+
+    </section>
+}
+@if (Model.VideoModels.Count() > 0)
+{
+    <section class="product_info_section">        
+        @foreach (var i in Model.VideoModels)
+        {
+
+
+            <iframe class="thumb-item" src="@i.VideoUrl" width="100%" height="1000px" frameborder="0" allow="fullscreen"></iframe>
+        }
+
+
+
+    </section>
+}
+
+    @if (Model.ProductList.Where(x => !x.Image.Contains("vimeo")).Count() > 0)
+    {
+        <section class="product_info_section pro_info_sec_new">
+        <h3><img src="/images/images.svg" /> Social media Images <button class="download_all_btn " id="downloadAllBtnSocialimg">Download All @Model.ProductList.Where(x => !x.Image.Contains("vimeo")).Count()<img src="/images/download.svg"></button></h3>
+            <div class="product_info_row_socialmedia">
+
+                @foreach (var i in Model.ProductList.Where(x => !x.Image.Contains("vimeo")))
+                {
+
+
+                    var replaeimage = @i.Image.Replace("_100", "_550");
+
+                    <div>
+                        <img src="@replaeimage" />
+                        <div class="title__bar">
+                            <h3>@i.Name</h3>
+                            <button class="downloadImage">
+                                <img src="/images/download.svg">
+                            </button>
+                        </div>
+                    </div>
+
+                }
+            </div>
+    </section>
+    }
+    @if (Model.ProductList.Where(x => x.Image.Contains("vimeo")).Count() > 0)
+    {
+        <section class="product_info_section pro_info_sec_new">
+        <h3><img src="/images/images.svg" /> Social media Videos <button class="download_all_btn " id="downloadAllBtnsocialvideo">Download All @Model.ProductList.Where(x => x.Image.Contains("vimeo")).Count()<img src="/images/download.svg"></button> </h3>
+            <div class="product_info_row">
+                @foreach (var i in Model.ProductList.Where(x => x.Image.Contains("vimeo")))
+                {
+                    <div>
+                        <iframe src="@i.Image"
+                        width="640" height="360"
+                        frameborder="0"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowfullscreen>
+                        </iframe>
+                        <div class="title__bar">
+                            <h3>@i.Name</h3>
+                        <button class="go-to-url" data-url="@i.UrlSlug">
+                            <img src="/images/download.svg" alt="Download">
+                        </button>
+                        </div>
+
+
+
+                    </div>
+                }
+
+        </div>
+    </section>
+    }
+<script>
+    $(document).ready(function () {
+        // Individual video download
+        $('.go-to-url').on('click', function () {
+            var url = $(this).data('url');
+            window.location.href = url;
+        });
+
+        // "Download All" functionality
+        $('#downloadAllBtnsocialvideo').on('click', function () {
+            $('.go-to-url').each(function () {
+                var url = $(this).data('url');
+                if (url) {
+                    window.open(url, '_blank'); // Open each URL in a new tab
+                }
+            });
+        });
+        $('#downloadAllBtnSocialimg').on('click', function () {
+
+            var imageUrls = [];
+
+            $('.product_info_row_socialmedia img').each(function () {
+                var src = $(this).attr('src');
+                if (src && src.includes('https://hansamed.blob.core.windows.net')) {
+                    imageUrls.push(src);
+                    const encodedUrl = encodeURIComponent(imageUrls);
+
+                        // Redirect to server-side proxy endpoint
+                        window.location.href = `/download-image?url=${encodedUrl}`;
+                }
+            });
+        });
+        $('#downloadAllBtnimg').on('click', function () {
+
+            debugger
+            var imageUrls = [];
+
+            $('.product_info_row img').each(function () {
+                var src = $(this).attr('src');
+                if (src && src.includes('https://hansamed.blob.core.windows.net')) {
+                    imageUrls.push(src);
+                    const encodedUrl = encodeURIComponent(imageUrls);
+
+                    // Redirect to server-side proxy endpoint
+                    window.location.href = `/download-image?url=${encodedUrl}`;
+                }
+            });
+        });
+
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('.go-to-url').on('click', function () {
+            var url = $(this).data('url');
+            window.location.href = url;
+        });
+    });
+
+    // var uri = window.location.href.toString();
+    // if (uri.indexOf("?") > 0) {
+    //     var clean_uri = uri.substring(0, uri.indexOf("?"));
+    //     window.history.replaceState({}, document.title, clean_uri);
+    // }
+    $(".downloadImage").on("click", function () {
+        var imageUrls = [];
+        var imageUrl = $(this).siblings("img").attr("src");
+        if(imageUrl==undefined){
+             imageUrl = $(this).closest('div').parent().find('img').attr("src");
+        }
+        imageUrls.push(imageUrl)
+        // URL encode the image URL
+        const encodedUrl = encodeURIComponent(imageUrls);
+
+        // Redirect to server-side proxy endpoint
+        window.location.href = `/download-image?url=${encodedUrl}`;
+    });
+
+</script>

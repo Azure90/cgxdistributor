@@ -1,0 +1,295 @@
+﻿@using Nop.Web.Areas.Admin.Models.CustomPage
+@model CustomDocumentSearchModel;
+
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Contentmanagement.customdocuments.MydocumentsList").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("My documents");
+}
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Admin.Contentmanagement.customdocuments.MydocumentsList")
+    </h1>    
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+            <div class="cards-group">
+                <style>
+                    #my-document-grid .wrap-text {
+                        white-space: normal !important;
+                        word-break: break-word;
+                        overflow-wrap: anywhere;
+                    } 
+                </style>
+
+                @********* Active Inactive Card *********@
+                <div class="card card-default card-search">
+                    <div class="card-body">
+                        <div class="search-body">
+                            <div class="col-md-5"> 
+                                <span class="errorSettingsMessage" style="display: none; font-weight: 400;"></span>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="form-group row">
+                                    <div class="col-md-3">
+                                        <div class="label-wrapper">
+                                            <label class="col-form-label" for="ActiveAccountsMenu">Active Menu Bar</label>
+                                            <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the menu active in my account.">
+                                                <i class="fas fa-question-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <nop-editor asp-for="ActiveAccountMenu" />
+                                        <span asp-validation-for="ActiveAccountMenu"></span>
+                                    </div>
+                                </div>
+                                <nop-nested-setting asp-for="ActiveAccountMenu">
+                                    <div class="form-group row">
+                                        <div class="col-md-3">
+                                            <div class="label-wrapper">
+                                                <label class="col-form-label" for="MegaMenuEnable">Mega Menu Enabled</label>
+                                                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the menu active in mega menu bar.">
+                                                    <i class="fas fa-question-circle"></i>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <nop-editor asp-for="ActiveMegaMenu" />
+                                            <span asp-validation-for="ActiveMegaMenu"></span>
+                                        </div>
+                                    </div>
+                                    <nop-nested-setting asp-for="ActiveMegaMenu">
+                                        <div class="form-group row">
+                                            <div class="col-md-3">
+                                                <div class="label-wrapper">
+                                                    <label class="col-form-label" for="MenuLabeltext">Menga Menu Label</label>
+                                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The label text for the mega menu bar.">
+                                                        <i class="fas fa-question-circle"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-9">
+                                                <nop-editor asp-for="@Model.MegaMenuLabel" asp-required="true" />
+                                                <span asp-validation-for="@Model.MegaMenuLabel"></span>
+                                            </div>
+                                        </div>
+                                    </nop-nested-setting>
+                                </nop-nested-setting>
+                                <div class="form-group row">
+                                    <div class="col-md-9 offset-md-3">
+                                        <button id="btnSaveDocumentSettings" type="button" name="save" class="btn btn-primary"> <i class="far fa-save"></i> Save </button>                                       
+                                    </div>
+                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                @************ Import Export Card *********@
+                <div class="card card-default card-search">
+                    <div class="card-body">                        
+                        <div class="search-body">                           
+                            <div class="row">
+                                <div class="col-md-9">
+                                    <div class="clearfix divfileupload">
+                                        <h4> Upload Excel file. </h4>
+                                        <label>Please choose a <i style="color:blue;text-decoration:underline;">(.xlsx)</i> File.</label> <br />
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <input type="file" id="File" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+                                            </div>
+                                            <div>
+                                                <button type="button" onclick="ImportExcelDocumentFile()" class="btn bg-olive">
+                                                    <i class="fa fa-upload"></i>
+                                                    Upload Excel
+                                                </button>
+                                                <a class="btn btn-primary" href="@Url.Action("DownloadExcelDocument", "CustomDocuments")">Download Excel</a>
+                                                <span class="errorExcelMessage" style="display: none; font-weight: 400;"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-default">
+                    <div class="card-body">                      
+
+                        @await Html.PartialAsync("Table", new DataTablesModel
+                        {
+                           Name = "my-document-grid",
+                           UrlRead = new DataUrl("CustomDocumentsList", "CustomDocuments", null),
+                           UrlDelete = new DataUrl("DeleteCustomDocument", "CustomDocuments", null),
+                           Processing = false,
+                           Length = Model.PageSize,
+                           LengthMenu = Model.AvailablePageSizes,
+                           RefreshButton = true,
+                           Dom = "f<'row'<'col-md-12't>>" +
+                            "<'row margin-t-5'" +
+                            "<'col-lg-5 col-xs-12'<'float-lg-left'p>>" +
+                            "<'col-lg-3 col-xs-12'<'text-center'l>>" +
+                            "<'col-lg-3 col-xs-12'<'float-lg-right text-center'i>>" +
+                            "<'col-lg-1 col-xs-12'<'float-lg-right text-center data-tables-refresh'B>>" +
+                            ">",
+
+                             ColumnCollection = new List<ColumnProperty>
+                             {
+                                  new ColumnProperty(nameof(CustomDocumentsModel.MainCategory))
+                                  {
+                                      Title = T("Admin.ContentManagement.CustomDocument.Fields.MainCategory").Text,
+                                      Width = "150"
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.SubCategory))
+                                  {
+                                      Title = T("Admin.ContentManagement.CustomDocument.Fields.SubCategory").Text,
+                                      Width = "150",
+                                      Searchable = true
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.FileName))
+                                  {
+                                      Title = T("Admin.ContentManagement.CustomDocument.Fields.FileName").Text,
+                                      Width = "200"
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.DownloadLink))
+                                  {
+                                      Title = T("Admin.ContentManagement.CustomDocument.Fields.DownloadLink").Text,
+                                      ClassName = "wrap-text",
+                                      Width = "350"
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.VideoLink))
+                                  {
+                                      Title = T("Admin.ContentManagement.CustomDocument.Fields.VideoLink").Text,
+                                      ClassName = "wrap-text",
+                                      Width = "350",
+                                      Render = new RenderCustom("renderVideoLink")
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.BPCode))
+                                  {
+                                      Title = T("Admin.Customers.Customers.Fields.BPCode").Text,
+                                      Width = "150"
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.DisplayOrder))
+                                      {
+                                      Title = T("Admin.ContentManagement.Topics.Fields.DisplayOrder").Text,
+                                      Width = "100"
+                                  },
+                                  new ColumnProperty(nameof(CustomDocumentsModel.Id))
+                                  {
+                                      Title = T("Admin.Common.Edit").Text,
+                                      Width = "100",
+                                      ClassName =  NopColumnClassDefaults.Button,
+                                      Render = new RenderButtonEdit(new DataUrl("EditCustomDocument"))
+                                  }, 
+                                  new ColumnProperty(nameof(CustomDocumentsModel.Id))
+                                  {
+                                      Title = T("Admin.Common.Delete").Text,
+                                      Width = "100",
+                                      Render = new RenderButtonRemove(T("Admin.Common.Delete").Text),
+                                      ClassName = NopColumnClassDefaults.Button
+                                  }
+                             }
+                        })
+
+                        <script>
+                            $(document).ready(function () {
+                                $("#btnSaveDocumentSettings").on("click", function () {
+                                    saveDocumentSettings();
+                                });
+                            });
+
+                            function renderVideoLink(data, type, row, meta) {
+                                return data && data.trim() !== "" ? data : "-";
+                            }
+
+                            function saveDocumentSettings() {
+
+                                var postData = {
+                                    activeBar: $("#@Html.IdFor(m => m.ActiveAccountMenu)").is(":checked"),
+                                    menuBar: $("#@Html.IdFor(m => m.ActiveMegaMenu)").is(":checked"),
+                                    menuLabelText: $("#@Html.IdFor(m => m.MegaMenuLabel)").val()
+                                };
+
+                                $.ajax({
+                                    url: '@Url.Action("AddOrUpdateDocumentSettings", "CustomDocuments", new { area = "Admin" })',
+                                    type: 'POST',
+                                    data: postData,
+                                    success: function (result) {
+                                        var $message = $('.errorSettingsMessage');
+
+                                        if (result.success) {
+                                            $message
+                                                .removeClass('text-danger').addClass('text-success')
+                                                .text(result.message).css('display', 'inline-block')
+                                                .fadeOut(5000);
+                                        }
+                                        else {
+                                            $message
+                                                .removeClass('text-success').addClass('text-danger')
+                                                .text("An error occurred while saving the settings.").css('display', 'inline-block')
+                                                .fadeOut(5000);
+                                        }
+                                    },
+                                    error: function (xhr) {
+                                        $('.errorSettingsMessage').removeClass('text-success')
+                                            .addClass('text-danger').text(xhr.responseText || "An error occurred while saving the settings.")
+                                            .css('display', 'inline-block').fadeOut(5000);
+                                    }
+                                });
+                            }
+
+                            function ImportExcelDocumentFile() {
+
+                                var status = false;
+                                var formData = new FormData();
+                                var file = $('#File')[0].files[0];
+
+                                status = file != "" && file != null ? true : false;
+                                formData.append('file', file);
+
+                                if (status) {
+                                    $.ajax({
+                                        url: '@Url.Action("ImportExcelDocument", "CustomDocuments", new { area = "Admin" })',
+                                        type: 'POST',
+                                        data: formData,
+                                        processData: false,
+                                        contentType: false,
+                                        cache: false,
+                                        success: function (result) {
+                                            $('.errorExcelMessage').removeClass('text-danger')
+                                                .addClass('text-success').text(result)
+                                                .css('display', 'inline-block').fadeOut(5000);
+
+                                            $('#File').val("");
+
+                                            window.location.reload();
+                                        },
+                                        error: function (xhr) {
+                                            $('.errorExcelMessage')
+                                                .removeClass('text-success').addClass('text-danger')
+                                                .text(xhr.responseText || "An error occurred while uploading the file.")
+                                                .css('display', 'inline-block').fadeOut(5000);
+                                        }
+                                    });
+                                }
+                                else {
+                                    $('.errorExcelMessage')
+                                        .removeClass('text-success').addClass('text-danger')
+                                        .text("Please choose a file.").css('display', 'inline-block')
+                                        .fadeOut(3000);
+                                }
+                            }
+                        </script>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

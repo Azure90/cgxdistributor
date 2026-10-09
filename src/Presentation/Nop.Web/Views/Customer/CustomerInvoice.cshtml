@@ -1,0 +1,115 @@
+﻿@* <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> *@
+
+<!-- Include DataTables CSS and JS -->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css"/>
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+@section left
+{
+@await Component.InvokeAsync(typeof(CustomerNavigationViewComponent), new { selectedTabId = CustomerNavigationEnum.CustomerInvoice })
+}
+<style>
+    .customerTopBar {
+        margin: 0 0 20px;
+    }
+
+    .customerTopBar label{
+        margin: 0 0 20px;
+        font-size: 16px;
+        color: #000000;
+        font-weight: 600;
+    }
+
+    table.dataTable {
+        padding: 10px 0 0;
+    }
+
+    table.dataTable tbody td, table.dataTable thead th {
+        text-align: center;
+        color:#111111;
+    }
+
+    .commonData--table .dataTables_wrapper {
+        padding: 20px 0px 0;
+    }
+
+    .commonData--table .dataTable.no-footer {
+        padding-top: 0;
+        border: 1px solid #e1e1e1;
+        margin-top: 50px;
+    }
+
+
+    .commonData--table #invoice_length {
+        padding-left: 20px;
+    }
+
+    .commonData--table #invoice_filter {
+        padding-right: 20px;
+    }
+
+    .commonData--table .dataTable thead th, .commonData--table table.dataTable thead td {
+        color: #222222;
+    }
+
+    .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+        padding: 20px 20px 20px;
+    }
+    </style>
+@if (Model.Count > 0) {
+    <div class="customerTopBar">
+        <label for="username">CustomerNo: @Model[0].ItemArray[3]</label>
+        
+        <br>
+       
+        <label for="username">Currency: @Model[0].ItemArray[5]</label>
+    </div>
+   
+<body>
+        <div class="panel panel-default commonData--table">
+            <div class="panel-body">
+                <table id="invoice" class="display table table-bordered table-hover table-striped dataTable" style="text-align: center;">
+                    <thead>
+                        <tr>
+                            <th>ProductName</th>
+                            @* <th>DocEntry</th> *@
+                            <th>DocumentNumber</th>
+                            <th>DocStatus</th>                      
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            @* <th>TransactionId</th> *@
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model)
+                        {
+
+                            <tr>
+                                <td>@item.ItemArray[0]</td>
+                                <td>@item.ItemArray[1]</td>
+                                <td>@item.ItemArray[2]</td>
+                                                         
+                                <td>@item.ItemArray[6]</td>
+                                <td>@item.ItemArray[7]</td>
+                                @* <td>@item.ItemArray[9]</td> *@
+                            </tr>
+
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </body>
+}
+<script>
+    jQuery.noConflict();
+    $(document).ready(function () {
+        $('#invoice').DataTable({
+            responsive: true, "ordering": false,
+            "lengthMenu": [[25, 75, 100], [25, 75, 100]],
+        });
+    });    
+    </script>

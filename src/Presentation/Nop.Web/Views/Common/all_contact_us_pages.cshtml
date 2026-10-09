@@ -1,0 +1,114 @@
+﻿@model ContactUsModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.ContactUs").Text);
+    //page class
+    NopHtml.AppendPageCssClassParts("All Contact US");
+}
+
+
+<div class="page contact-page custom-contact ">
+    <div class="page-title">
+        <h1>@T("PageTitle.ContactUs")</h1>
+    </div>
+    <div @*class="page-body"*@>
+        @await Component.InvokeAsync("TopicBlock", new { systemName = "All Contact US" })
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContactUsTop })
+        @if (ViewBag.successmessage == "Success")
+        {
+
+            <span style=" font-weight: 700; margin: 25px; margin: 86px 452px;padding: 13px 57px; border-radius: -27px 20px 12px 17px; width: 640px; color: #270; background-color: #DFF2BF;">
+                Mail Sent Successfully!!
+            </span>
+
+        }
+        else
+        {
+
+            <form asp-route="ContactUs" method="post">
+                <div asp-validation-summary="ModelOnly" class="message-error"></div> 
+                <div class="fieldset">
+                    <div class="form-fields">
+                        <div class="inputs">
+                            <label asp-for="FullName" asp-postfix=":"></label>
+                            <input asp-for="FullName" data_spnid="spnFullName" placeholder="@T("ContactUs.FullName.Hint")" class="fullname validation" />
+                            <nop-required />
+                            <span id="spnFullName" class="custom-validation"></span>
+                        </div>
+                        <div class="inputs">
+                            <label asp-for="Email" asp-postfix=":"></label>
+                            <input asp-for="Email" data_spnid="spnEmail" placeholder="@T("ContactUs.Email.Hint")" class="email validation" />
+                            <nop-required />
+                            <span asp-validation-for="Email"></span>
+                            <span id="spnEmail" class="custom-validation"></span>
+                        </div>
+                        @if (Model.SubjectEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Subject" asp-postfix=":"></label>
+                                <input asp-for="Subject" data_spnid="spnsubject" placeholder="@T("ContactUs.Subject.Hint")" class="subject validation" />
+                                <nop-required />
+                                <span id="spnsubject" class="custom-validation"></span>
+                            </div>
+                        }
+                        <div class="inputs">
+                            <label asp-for="Enquiry" asp-postfix=":"></label>
+                            <textarea asp-for="Enquiry" data_spnid="spnEnquiry" placeholder="@T("ContactUs.Enquiry.Hint")" class="enquiry validation"></textarea>
+                            <nop-required />
+                            <span id="spnEnquiry" class="custom-validation"></span>
+                        </div>
+                        @if (Model.DisplayCaptcha)
+                        {
+                            <nop-captcha />
+                        }
+                    </div>
+                </div>
+                <span id="allfield"></span>
+                <div class="buttons">
+                    <input type="submit" name="send-email" onclick="return save()" class="button-1 contact-us-button" value="submit" @*value="@T("ContactUs.Button")"*@ />
+                </div>
+            </form>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContactUsBottom })
+    </div>
+</div>
+
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> *@
+<script>
+    function save() {
+
+        debugger
+        $(".validation").each(function(index) {
+            debugger
+            if ($(this).val() == "" || $(this).val() == null || $(this).val() == "Select") {
+                // $('.btnuser').attr('disabled', true)
+                $(this).css({ 'border': '1px solid red' });
+                $("#allfield").text("Please complete all required fields.").css("color", "red");
+                status = false;
+            }
+            else {
+                // $('.btnuser').attr('disabled', false)
+                $(this).css({ 'border': '1px solid black' });
+            }
+        });
+    }
+
+    $(".validation").blur(function() {
+
+        var spnid = $(this).attr("data_spnid");
+        if ($(this).val() == "" || $(this).val() == null || $(this).val() == 0 || $(this).val() == "Select") {
+            $(this).css({ 'border': '1px solid red' });
+            debugger
+            $("#" + spnid).text("Please complete this required field.").css("color", "red")
+
+        }
+        else {
+
+            $(this).css({ 'border': '1px solid black' });
+            $("#" + spnid).text("").css("color", "red")
+        }
+    })
+</script>
+

@@ -1,0 +1,60 @@
+﻿@*@model Nop.Web.Models.PaymentInvoice.PaymentReponse*@
+@model Nop.Core.Domain.Invoices.PaymentReponse
+
+@using Nop.Core
+@using Microsoft.AspNetCore.Http
+@inject IWebHelper webHelper
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    NopHtml.AddTitleParts("Invoice Payment Complete");
+    //page class
+    NopHtml.AppendPageCssClassParts("html-checkout-page");
+
+}
+
+<div class="page checkout-page">
+    <div class="page-title">
+        @if (Context.Session.GetString("PaymentAmountError") == "" || Context.Session.GetString("PaymentAmountError") == null)
+        {
+            <h1>Payment Completed Successfully</h1>
+            <br />
+            <div class="section-order-complete">
+                @if (Convert.ToDecimal(Context.Session.GetString("PaymentAmount")) > 0)
+                {
+                    <div><span style="display: inline-block; width: 175px;"><strong>Amount: </strong></span>$@Context.Session.GetString("PaymentAmount")</div>
+                }
+                else
+                {
+                    <div><span style="display: inline-block; width: 175px;"><strong>INVOICE PAID AMOUNT: </strong></span>$@TempData["InvoicePaidAmount"]</div><br />
+                    <div><span style="display: inline-block; width: 175px;"><strong>CREDIT REMAINING: </strong></span>$@Context.Session.GetString("PaymentAmount")</div>
+                }
+                <br />
+                <div><span style="display: inline-block; width: 175px;"><strong>TRANSACTION ID: </strong></span>@Context.Session.GetString("PaymentTranId")</div>
+            </div>
+        }
+        else
+        {
+            <Div class="field-validation-error" style="font-size:20px;font-weight:bold;">Payment Completed UnSuccessfully</Div>
+            <br />
+            <div class="field-validation-error"><span style="display: inline-block; width: 175px;"><strong>PAYMENT ERROR: </strong></span>$@Context.Session.GetString("PaymentAmountError")</div>
+        }
+
+    </div>
+
+    @*<div class="section-order-complete">
+        @if (Convert.ToDecimal(Context.Session.GetString("PaymentAmount")) > 0)
+        {
+            <div><span style="display: inline-block; width: 175px;"><strong>Amount: </strong></span>$@Context.Session.GetString("PaymentAmount")</div>
+        }
+        else
+        {
+            <div><span style="display: inline-block; width: 175px;"><strong>INVOICE PAID AMOUNT: </strong></span>$@TempData["InvoicePaidAmount"]</div><br />
+            <div><span style="display: inline-block; width: 175px;"><strong>CREDIT REMAINING: </strong></span>$@Context.Session.GetString("PaymentAmount")</div>
+        }
+        <br />
+        <div><span style="display: inline-block; width: 175px;"><strong>TRANSACTION ID: </strong></span>@Context.Session.GetString("PaymentTranId")</div>
+    </div>*@
+</div>
+

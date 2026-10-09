@@ -1,0 +1,105 @@
+﻿@* @using Nop.Web.Models.KnowledgeBase;
+@model KnowledgeBaseModel *@
+@using Nop.Web.Models.KnowledgeBaseArticle;
+@model KnowledgeBaseArticleModel
+
+<link href="~/css/custompage/knowledgebase/knowledgebasemainpage.css" rel="stylesheet" />
+
+<div class="slideshow-container">
+    @* @foreach (var item in Model.ModelList)
+    {
+    <div class="mySlides fade">
+
+    <img src="~/Uploads/@Model.PagenameBanner" style="width:100%">
+    </div>
+    } *@
+
+    <div class="category-search__Outer-wrap">
+        @if (Model.ModelList.Count > 0)
+        {
+            @T("knowledge.help.hint")
+        }
+        <div class="category-search__Outer">
+            <svg class="kb-search__mag" width="15" height="15" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.02 12.672l-3.64-3.64a5.687 5.687 0 0 0 1.06-3.312A5.726 5.726 0 0 0 5.72 0 5.726 5.726 0 0 0 0 5.72a5.726 5.726 0 0 0 5.72 5.72 5.687 5.687 0 0 0 3.311-1.06l3.641 3.64a.95.95 0 0 0 1.348 0 .953.953 0 0 0 0-1.348zm-8.3-3.139a3.813 3.813 0 1 1 0-7.626 3.813 3.813 0 0 1 0 7.626z" fill="#4A4A4A" fill-rule="evenodd"></path>
+            </svg>
+
+            @await Html.PartialAsync("_search")
+        </div>
+    </div>
+</div>
+<br>
+
+<div style="text-align:center">
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+</div>
+
+<div class="category-Outer__wrap">
+    <div class="container">
+        <div class="kb-index kb-index--cards row ">
+            @{
+                string[] Colorname = { "#44bbbc", "#ff8c00", "#ef3d5a", "#2a55a0", "#6d73a7" };
+                int colorid = 0;
+            }
+            @foreach (var item in Model.ModelList)
+            {
+                if (colorid == 5)
+                {
+                    colorid = 0;
+                }
+
+                @* <a id="kb-index__category" href="@Url.Action("Index", "KnowledgeBase" , new {PageNameID = item.Id})" class="kb-index__category-flex kb-index__category--3col">
+            <div class="kb-index__category-color" style="background-color:@Colorname[colorid]"></div>
+            <div class="kb-index__category" data-preview-id="kb-index__category-27329177273">
+            <h3>@item.Pagename</h3>
+            <h6 class="kb-index__category-description">
+            @item.PagenameDescription
+            </h6>
+            <span class="kb-index__see-all-link kb__text-link-small">See all articles</span>
+            </div>
+            </a> *@
+                <a id="kb-index__category" href="@Url.Action("Index", "KnowledgeBase" , new {PageNameID = item.Category})" class="kb-index__category-flex kb-index__category--3col">
+                    <div class="boxIcon" style="background-color:@item.ColorCode">
+                        @* <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path class="cls-1" d="M16,28.72a3,3,0,0,1-2.13-.88L3.57,17.54a8.72,8.72,0,0,1-2.52-6.25,8.06,8.06,0,0,1,8.14-8A8.06,8.06,0,0,1,15,5.68l1,1,.82-.82h0a8.39,8.39,0,0,1,11-.89,8.25,8.25,0,0,1,.81,12.36L18.13,27.84A3,3,0,0,1,16,28.72ZM9.15,5.28A6.12,6.12,0,0,0,4.89,7a6,6,0,0,0-1.84,4.33A6.72,6.72,0,0,0,5,16.13l10.3,10.3a1,1,0,0,0,1.42,0L27.23,15.91A6.25,6.25,0,0,0,29,11.11a6.18,6.18,0,0,0-2.43-4.55,6.37,6.37,0,0,0-8.37.71L16.71,8.8a1,1,0,0,1-1.42,0l-1.7-1.7a6.28,6.28,0,0,0-4.4-1.82Z"></path></svg> *@
+                        <img src="@item.CategoryIcon">
+                    </div>
+                    @* <div class="kb-index__category-color" style="background-color:@Colorname[colorid]"></div> *@
+                    <div class="kb-index__category-color" style="background-color:@item.ColorCode"></div>
+                    <div class="kb-index__category" data-preview-id="kb-index__category-27329177273">
+                        <h3>@item.Category</h3>
+                        <h6 class="kb-index__category-description">
+                            @item.CategoryDescription
+                        </h6>
+                        <span class="kb-index__see-all-link kb__text-link-small">See all FAQ's</span>
+                    </div>
+                </a>
+                colorid++;
+
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    let slideIndex = 0;
+    showSlides();
+
+    function showSlides() {
+        let i;
+        let slides = document.getElementsByClassName("mySlides");
+        let dots = document.getElementsByClassName("dot");
+        for (i = 0; i < slides.length; i++) {
+            slides[i].style.display = "none";
+        }
+        slideIndex++;
+        if (slideIndex > slides.length) { slideIndex = 1 }
+        for (i = 0; i < dots.length; i++) {
+            dots[i].className = dots[i].className.replace(" active", "");
+        }
+        slides[slideIndex - 1].style.display = "block";
+        dots[slideIndex - 1].className += " active";
+        setTimeout(showSlides, 5000); // Change image every 5 seconds
+    }
+</script>

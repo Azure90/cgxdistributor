@@ -1,0 +1,144 @@
+﻿@model Nop.Web.Areas.Admin.Models.InvoicePayment.InvoicePaymentModel
+@{
+    //page title
+    ViewBag.PageTitle = "Invoice Payment Option";
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Invoice Payment Option");
+}
+<style>
+
+    .content-wrapper {
+        background-color: #ffffff;
+    }
+
+    .panel-body {
+        background: #fff;
+        padding: 20px;
+    }
+
+    #discountForm {
+        display: grid;
+        gap: 20px
+    }
+</style>
+<div class="content-header clearfix">
+    <h2 class="pull-left">
+        @if (Model.Id == 0)
+        {
+            <span>Create Discount Promotion</span>
+        }
+        else
+        {
+            <span>Edit Discount Promotion</span>
+        }
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="InvoicePaymentOptionView">@T("Admin.ContentManagement.Topics.BackToList")</a>
+        </small>
+    </h2>
+</div>
+<div class="panel-body">
+    <form enctype="multipart/form-data" asp-action="editInvoicePaymentOption" id="discountForm">
+        <input asp-for="Id" type="hidden" />
+        <div class="margin-bottom row ">
+            <div class="col-md-3">
+                <nop-label asp-for="PaymentTittle" />
+            </div>
+            <div class="col-md-5" data_spnid="spnQuestion">
+                <nop-editor asp-for="PaymentTittle" asp-template="RichEditor" />
+                <span asp-validation-for="PaymentTittle"></span>
+            </div>
+            <span id="spntext"></span>
+        </div>
+        <div class="margin-bottom row divnewcustomer">
+            <div class="col-md-3">
+
+                <nop-label asp-for="paymentOption" />
+            </div>
+            <div class="col-md-5" data_spnid="spnQuestion">
+                <nop-editor asp-for="paymentOption" asp-template="RichEditor" />
+                <span asp-validation-for="paymentOption"></span>
+                <span></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <nop-label asp-for="CustomerRole" />
+            </div>
+
+            <div class="col-md-9">
+                <div class="input-group-append input-group-required">
+                    <div class="input-group">
+                        <nop-select asp-for="CustomerRole" asp-items="Model.AvailableCustomerRoles" asp-multiple="true" />
+                    </div>
+                    <input type="hidden" id="hdncustomerrole" />
+                    <div class="input-group-btn">
+                        <nop-required />
+                    </div>
+                </div>
+                <script>
+                    $(document).ready(function () {
+                        var customerRoleIdsInput = $('#@Html.IdFor(model => model.CustomerRole)').data("kendoMultiSelect");
+                        customerRoleIdsInput.setOptions({
+                            customerRoleIdsInput: false,
+                            filter: "contains"
+                        });
+
+                    @if (Model.AvailableCustomerRoles.Count == 0)
+                    {
+                        <text>
+                                customerRoleIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: '@T("Admin.Customers.Customers.Fields.CustomerRoles.NoRoles")'
+                                });
+                            customerRoleIdsInput._placeholder();
+                            customerRoleIdsInput._enable();
+                        </text>
+                    }
+                                                                                                                                                                                                                                                                            });
+                </script>
+            </div>
+        </div>
+
+       
+
+        
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="PaynowButton" />
+            </div>
+            <div class="col-md-5">
+                <nop-editor asp-for="PaynowButton" />
+                <span asp-validation-for="PaynowButton"></span>
+            </div>
+        </div>
+
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <div class="label-wrapper"><label class="col-form-label" for="Paynowtoption">Is Payment option</label></div>
+            </div>
+            <div class="col-md-5">
+                <nop-editor asp-for="Paynowtoption" />
+                <span asp-validation-for="Paynowtoption"></span>
+            </div>
+        </div>
+
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Active" />
+            </div>
+            <div class="col-md-5">
+                <nop-editor asp-for="Active" />
+                <span asp-validation-for="Active"></span>
+            </div>
+        </div>
+        
+        <div>
+
+            <button type="submit" class="btn btn-primary" id="saveButton" >Save</button>
+        </div>
+    </form>
+
+</div>
+

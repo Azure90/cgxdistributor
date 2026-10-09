@@ -1,0 +1,446 @@
+﻿@model List<Nop.Core.Domain.ChatBotHistory.chatbothistory>
+@using Nop.Services.Localization;
+@inject ILocalizationService _localizationService;
+@{
+    var colorcode = Convert.ToString(_localizationService.GetResourceAsync("Chatbot.ChatbotLabelColor").Result);
+}
+
+<style>
+    /* Floating button */
+    .html-widget, .scroll-back-button {
+        display: none !important
+    }
+
+    #chat-toggle {
+        position: fixed;
+        top: 50%;
+        right: -44px;
+        transform: translateY(-50%) rotate(-90deg);
+        background: @colorcode;
+        color: #fff;
+        border: none;
+        border-radius: 10px 10px 0 0;
+        width: 130px;
+        height: 40px;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        font-size: 19px;
+        z-index: 1000;
+        transition: background 0.3s;
+    }
+
+        #chat-toggle:hover {
+            background: @colorcode;
+        }
+
+    /* Chat panel (hidden by default) */
+    #chat-container {
+        position: fixed;
+        top: 0;
+        right: -400px; /* hidden */
+        width: 400px;
+        height: 100%;
+        background: #fff;
+        box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        transition: right 0.4s ease;
+        z-index: 999999;
+    }
+
+        #chat-container.open {
+            right: 0; /* slide in */
+        }
+
+    #chat-header {
+        background: @colorcode;
+        color: #fff;
+        padding: 12px;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    #chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 10px;
+        background: #f9f9f9;
+    }
+
+    .msg {
+        margin: 8px 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .msg.you {
+            align-items: flex-end;
+        }
+
+        .msg.bot {
+            align-items: flex-start;
+        }
+
+    .bubble {
+        padding: 10px 14px;
+        border-radius: 18px;
+        max-width: 75%;
+        word-wrap: break-word;
+        display: inline-block;
+    }
+
+    .msg.you .bubble {
+        background: @colorcode;
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .msg.bot .bubble {
+        background: #e9ecef;
+        color: #000;
+        border-bottom-left-radius: 4px;
+    }
+
+    .time {
+        font-size: 10px;
+        color: #888;
+        margin-top: 2px;
+    }
+
+    #chat-form {
+        padding: 10px;
+        border-top: 1px solid #ddd;
+        display: grid;
+        gap: 5px;
+    }
+
+        #chat-form select,
+        #chat-form input {
+            flex: 1;
+            padding: 6px;
+        }
+
+        #chat-form button {
+            padding: 6px 12px;
+            background: @colorcode;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+            #chat-form button:hover {
+                background: @colorcode;
+            }
+
+    .chat-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+        .chat-options input[type="radio"] {
+            display: none; /* hide the default radio */
+        }
+
+    .chat-label {
+        padding: 8px 12px;
+        border: 1px solid @colorcode;
+        border-radius: 4px;
+        color: #88a900;
+        cursor: pointer;
+        user-select: none;
+        transition: all 0.2s;
+        font-size: 16px;
+        text-align: center
+    }
+
+    .chat-options input[type="radio"]:checked + p .chat-label {
+        background: @colorcode;
+        color: white;
+    }
+
+    .chatInput {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 5px
+    }
+
+    .ui-menu {
+        z-index: 99999999999999 !important;
+        max-height: 200px;
+        overflow-y: auto;
+        max-width: 328px
+    }
+
+        .ui-menu .ui-menu-item {
+            padding: 6px 12px;
+            cursor: pointer
+        }
+
+    body.no-scroll {
+        overflow-y: hidden
+    }
+
+    .chat-label {
+        color: #444 !important;
+    }
+
+    #chat-form button {
+        background: @colorcode;
+    }
+
+    .msg.you .bubble {
+        background: @colorcode;
+    }
+
+    .chat-options input[type="radio"]:checked + p .chat-label {
+        background: @colorcode;
+    }
+</style>
+@* <button id="chat-toggle">Ask me</button> *@
+@T("Chatbot.Tooglebutton")
+
+<div id="chat-container">
+    @T("Chatbot.Chatbotheader")
+
+    <div id="chat-messages">
+        @foreach (var msg in Model)
+        {
+            <div class="msg you"> <span class="bubble">@Html.Raw(msg.question)</span></div>
+            <div class="msg bot"><img src="/Uploads/@ViewBag.chatbotimage" alt="bot image" style="max-width:50px; margin-right:10px;" /> <span class="bubble">@Html.Raw(msg.answer)</span></div>
+            @*  <small class="time">@msg.Timestamp.ToString("g")</small> *@
+        }
+    </div>
+    <div id="freelimit" style="border-top: 3px solid red; text-align: center; margin: 20px 0; padding: 15px;  @(ViewBag.chatbotlimit == "Over" ? "display:block" : "display:none")">
+        @Html.Raw(@ViewBag.chatbotwarning)
+        @* @T("Chatbot.chatbotfreeaccess") *@
+        @* <span style="background: #ffe6e6; color: red; padding: 8px 16px; font-weight: bold; font-size: 16px; border: 2px solid red; border-radius: 8px;">
+        ⚠ Your free question limit has been crossed ⚠
+        </span> *@
+    </div>
+    <form id="chat-form" style="@(ViewBag.chatbotlimit == "Over" ? "pointer-events: none; opacity: 0.6;":"pointer-events: unset; opacity:unset;")">
+        <div class="chat-options">
+            @if (ViewBag.ChatBotButtoncheckbox == "true")
+            {
+                <div id="divoption1" style="@(ViewBag.chatbotlimit == "Over" ? "pointer-events: none; background: #e9e9e9;" : "pointer-events: unset")">
+                    <input type="radio" name="chatOption" id="option1" value="1" @(ViewBag.chatbotlimit == "Over" ? "" : "checked")>
+                    @T("Chatbot.Productinfotab")
+                </div>
+                @* <label for="option1" class="chat-label">Product Info</label>
+            <span>product  and category details</span> *@
+
+
+                <input type="radio" name="chatOption" id="option2" value="2" @(ViewBag.ChatBotButtoncheckbox == "false" || ViewBag.chatbotlimit == "Over" ? "checked" : "")>
+                @T("Chatbot.Otherinfotab")
+            }
+            @*  <label for="option2" class="chat-label">Other Info</label> *@
+        </div>
+        @* <select style="max-width: 120px; line-height: normal;" id="chatbotdropdown">
+        <option value="1">@T("chatbot.ProductInfo")</option>
+        <option value="2">@T("chatbot.OtherInfo")</option>
+        </select> *@
+        <div class="chatInput">
+
+            <textarea style="border-radius: 4px;min-height:50px; padding-block: 10px; height: 50px;overflow:hidden;resize:none;max-height:150px;" type="text" id="userInput" placeholder="Ask something..." required></textarea>
+
+            <div style="@(ViewBag.chatbotlimit == "Over" ? "pointer-events: none; background: #e9e9e9;" : "pointer-events: unset")">
+                @T("Chatbot.ChatbotAskbutton")
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#chat-toggle").click(function () {
+            $.ajax({
+                url: '/MedicalChat/chatbottimeout', // replace with your actual endpoint
+                type: 'GET', // or POST if needed
+                success: function (response) {
+                    if (response == 1) {
+                        location.reload();
+
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error("Ajax error:", error);
+                }
+            });
+        });
+
+        setInterval(function () {
+            if ($(".open").length > 0) {
+                if (("#chat-messages").children().length > 0) {
+                    $.ajax({
+                        url: '/MedicalChat/chatbottimeout', // replace with your actual endpoint
+                        type: 'GET', // or POST if needed
+                        success: function (response) {
+                            if (response == 1) {
+                                location.reload();
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Ajax error:", error);
+                        }
+                    });
+                }
+            }
+        }, 60000); // 60000 ms = 1 minute
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+        const chatToggle = document.getElementById('chat-toggle');
+        const chatContainer = document.getElementById('chat-container');
+        const chatClose = document.getElementById('chat-close');
+
+        if (chatToggle && chatContainer) {
+            chatToggle.addEventListener('click', () => {
+                chatContainer.classList.add('open');
+                // document.documentElement.style.overflowY = "hidden";
+            });
+        }
+
+        if (chatClose && chatContainer) {
+            chatClose.addEventListener('click', () => {
+                chatContainer.classList.remove('open');
+                // document.documentElement.style.overflowY = "auto";
+
+            });
+        }
+    });
+
+    const textarea = document.getElementById("userInput");
+
+    function autoResize(el) {
+        el.style.height = "auto"; // reset
+        let newHeight = el.scrollHeight;
+
+        // enforce min 40px and max 150px
+        if (newHeight < 40) newHeight = 40;
+        if (newHeight > 150) {
+            newHeight = 150;
+            el.style.overflowY = "auto"; // show scrollbar when limit hit
+        } else {
+            el.style.overflowY = "hidden";
+        }
+
+        el.style.height = newHeight + "px";
+    }
+
+    textarea.addEventListener("input", function () {
+        autoResize(this);
+    });
+
+    // run once in case of preloaded value
+    autoResize(textarea);
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $("#chatbtn").click(function () {
+            var $input = $("#userInput");
+            var question = $input.val().trim();
+            //if (!question) return;
+            if (question != null && question != "") 
+            {
+                $input.val(''); // clear input
+
+                 // disable the form
+                $('#chat-form').css({ 'pointer-events': 'none', 'opacity': '0.6' });
+
+                // Show user message immediately
+                var $chatMessages = $("#chat-messages");
+                $chatMessages.append(
+                    '<div class="msg you"><span class="bubble">' + question + '</span></div>'
+                );
+                $chatMessages.scrollTop($chatMessages[0].scrollHeight);
+
+                var loaderHtml = '<div id="bot-loader" class="msg bot"><span class="bubble">'
+                    + '@T("chatbot.istyping")' +
+                    '</span></div>';
+                $chatMessages.append(loaderHtml);
+                $chatMessages.scrollTop($chatMessages[0].scrollHeight);
+                // Send AJAX POST to controller
+                $.ajax({
+                    url: '/MedicalChat/Ask',
+                    method: 'post',
+                    data: {
+                        request: question,
+                        info: $("input[name='chatOption']:checked").val(),
+                        id: $("#hdnchatbot").val()
+                    },
+                    success: function (data) {
+
+                        if (data.planlimit == "over") {
+                            $("#freelimit").css("display", "block");
+                            $('#chat-form').css({ 'pointer-events': 'none', 'opacity': '0.6' });
+                            $("#divoption1").css("pointer-events", "none").css("background", "#e9e9e9");
+                            $("#option1").prop("checked", "false");
+                            $("#option2").prop("checked", "true");
+
+                        } 
+                        else {
+                            $('#chat-form').css({ 'pointer-events': 'unset', 'opacity': 'unset' });
+                        }
+
+                        $chatMessages.append(
+                            '<div class="msg bot">' +
+                            '<img src="/Uploads/' + data.image + '" alt="bot image" style="max-width:50px; margin-right:10px;" />' +
+                            '<span class="bubble">' + data.answer + '</span>' +
+                            '</div>'
+                        );
+
+                        $chatMessages.scrollTop($chatMessages[0].scrollHeight);
+                    },
+                    error: function () {
+                        $chatMessages.append(
+                            '<div class="msg bot"><span class="bubble">Error processing request.</span></div>'
+                        );
+                        $chatMessages.scrollTop($chatMessages[0].scrollHeight);
+                    },
+                    complete: function () {
+                        // This runs after success or error
+                        $("#bot-loader").remove(); // Remove the loader
+                    }
+                });
+            }
+        });
+    });
+</script>
+<script>
+
+
+    // $("#userInput").autocomplete({
+
+    //     source: function (request, response) {
+    //         if ($("input[name='chatOption']:checked").val() == "2") {
+    //             $("#hdnchatbot").val(" ");
+    //             var customer = [];
+    //             $.ajax({
+    //                 async: false,
+    //                 cache: false,
+    //                 type: "POST",
+    //                 url: "@(Url.Action("Getthecustomanswer", "MedicalChat"))",
+    //                 data: { request: request.term },
+    //                 success: function (data) {
+    //                     for (var i = 0; i < data.length; i++) {
+    //                         customer[i] = { label: data[i].Value, id: data[i].Key };
+    //                     }
+    //                 }
+    //             });
+    //             response(customer);
+    //         }
+    //     },
+    //     position: {
+    //         my: "left bottom",  // position of the dropdown
+    //         at: "left top"      // relative to the input
+    //     },
+    //     select: function (event, ui) {
+    //         var Contentid = ui.item.id;
+    //         $("#hdnchatbot").val(Contentid);
+    //     }
+    // });
+
+
+</script>

@@ -1,0 +1,381 @@
+﻿@model List<Nop.Web.Controllers.CustomerController.Graph>
+@using Nop.Core
+@using Nop.Services.Customers;
+@using Nop.Services.InvoicePaymentOptions;
+@using Nop.Services.Configuration;
+@inject ISettingService _settingService
+@inject IWorkContext _workContext
+@inject ICustomerService _customerService
+@inject IInvoicePaymentOption _InvoicePaymentOptionService
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.Account").Text);
+    //page class
+    NopHtml.AppendPageCssClassParts("html-account-page");
+    NopHtml.AppendPageCssClassParts("html-offlinetransactions-list-page");
+}
+@{
+    var customer = _workContext.GetCurrentCustomerAsync().Result;
+    var GetallRoles = _customerService.GetCustomerRolesAsync(customer).Result.Where(d => d.Name == "CAD B2C"
+                || d.Name == "USD B2C"
+                || d.Name == "USD B2B INTL"
+                || d.Name == "CAD B2C HS"
+                || d.Name == "USD B2B ST"
+                || d.Name == "USD B2B DS"
+                || d.Name == "CAD B2B ST"
+                || d.Name == "CAD B2B DS"
+                ).FirstOrDefault();
+    var invoicepayments = _InvoicePaymentOptionService
+     .GetAllInvoicePaymentOption()
+     .Where(x => x.Active == true && x.CustomerRole.Split(',').Select(id => id.Trim()).Contains(GetallRoles.Id.ToString()))
+     .Select(x => new
+     {
+         PaymentOption = x.paymentOption,
+         PaynowButton = x.PaynowButton,
+         PaynowOption = x.Paynowtoption
+     })
+     .ToList();
+    var customerEmail = _workContext.GetCurrentCustomerAsync().Result.Email;
+    // var PayNowButton = _InvoicePaymentOptionService.GetAllInvoicePaymentOption().Where(x => x.Active==true && x.CustomerRole.Split(',').Select(id => id.Trim()).Contains(GetallRoles.Id.ToString())).Select(x => x.PaynowButton).FirstOrDefault();
+    // var PayNowOption = _InvoicePaymentOptionService.GetAllInvoicePaymentOption().Where(x => x.CustomerRole.Split(',').Select(id => id.Trim()).Contains(GetallRoles.Id.ToString())).Select(x => x.Paynowtoption).FirstOrDefault();
+}
+@section left
+{
+    @*Remove for UI/UX by Riz*@
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.Custosmerordergraph })
+}
+<div class="page-title">
+    <h1 style="font-weight:bold;">My Dashboard</h1>
+</div>
+
+<div class="outstanding_box border_card">
+
+    <div>
+
+        <div style="font-weight:bold;font-size:17px;margin-bottom:10px;">
+            Outstanding Account Balance: @ViewBag.TotalOutstandingPayment.ToString("C")
+        </div>
+
+        <div style="font-size:14px;">
+            Outstanding Invoices: @ViewBag.OutstandingInvoices.ToString("C")
+        </div>
+
+        <div style="font-size:14px;margin-bottom:5px;">
+            Account Credit: -@ViewBag.AccountCredits.ToString("C")
+        </div>
+        @if (@ViewBag.TotalOutstandingPayment > 0)
+        {
+
+
+
+            @if (invoicepayments.FirstOrDefault()?.PaynowButton == true)
+            {
+                var bpCode = ViewBag.customerBpcode;
+                <div>
+                    @T("offlinetransaction.GraphWithPayButton")
+                </div>
+                <div style="font-size:14px; margin-top: 10px">
+                    <div>@T("offlinetransaction.textforpaybutton")</div>
+                    <div>Bpcode: @bpCode</div>
+                </div>
+                <br />
+                <input type="button" class="button-1 paynowbutton" onclick="location.href='https://hansamed.net/paymentinvoice?bpCode=@bpCode&site=Citagenix'" value="@T("OfflineTransaction.PayNow")" />
+            }
+            
+        }
+        else
+        {
+
+            <div>@T("offlinetransaction.GraphWithoutPayButton")</div>
+        }
+    </div>
+    <div>
+        @if (invoicepayments.FirstOrDefault()?.PaynowOption == true)
+        {
+            @Html.Raw(invoicepayments.FirstOrDefault().PaymentOption)
+        }
+    </div>
+
+
+</div>
+
+@* <div class="outstanding_box border_card">
+    <h2>Reward Points</h2>
+
+    <div><strong>@T("RewardPoints.CurrentBalance", ViewBag.RewardPointsBalance, ViewBag.RewardPointsAmount) <a style="text-decoration: underline;" href="/rewardpoints/history">Click here for more details</a></strong></div>
+</div> *@
+
+<div class="graphouter">
+    @foreach (var i in Model)
+    {
+        @await Html.PartialAsync("_CustomerOrdersGraph1", i)
+    }
+    @* @await Html.PartialAsync("~/areas/admin/views/home/_latestorders.cshtml") *@
+
+</div>
+<div class="tableouter">
+    @await Html.PartialAsync("_Latestorderwithrefund")
+    @await Html.PartialAsync("_BestsellerByQuantity")
+    <div id="targetDiv"></div>
+    <div id="Compareproducts"></div>
+
+</div>
+
+<style>
+    .paynowbutton {
+        width: 120px;
+        margin-top: 5px
+    }
+
+    .graphouter .card,
+    .border_card {
+        border-radius: 6px;
+        border-top: 4px solid #a3da40;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, .15);
+    }
+
+    .graphouter .card-header .btn-info.bg-light-blue {
+        background-color: #a3da40;
+    }
+
+    .paynowbutton {
+        padding: 15px;
+        border: 0;
+        /* width: 6%; */
+        background: #a3da40;
+        /* text-transform: uppercase; */
+        font-weight: bold;
+        font-size: 14px;
+        color: #fff;
+    }
+
+    .graphouter {
+        display: grid;
+        gap: 20px;
+    }
+
+    .outstanding_box {
+        /* background-color: #f6f6f6; */
+        padding: 15px;
+        margin-bottom: 20px;
+        display: grid;
+        gap: 10px
+    }
+
+    .graphouter .card {
+        /* background-color: #f6f6f6; */
+        padding: 10px 0;
+    }
+
+        .graphouter .card:last-child {
+            flex-basis: 100%;
+            max-width: 100%;
+        }
+
+    .graphouter .card-header {
+        display: flex;
+        justify-content: space-between;
+        flex-flow: wrap;
+        padding: 10px 16px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 10px;
+        text-transform: capitalize;
+    }
+
+        .graphouter .card-header .btn-info {
+            background: #add408;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 3px;
+            border: none;
+        }
+
+    .graphouter .card-body {
+        padding: 0px 16px;
+    }
+
+    .master-wrapper-page {
+        overflow-x: auto;
+    }
+
+    .tableouter > div {
+        margin-top: 20px;
+        /* background: #f6f6f6; */
+    }
+
+    .tableouter table {
+        border-bottom: none !important;
+        margin-bottom: 15px;
+    }
+
+    .tableouter th {
+        background: #fff;
+    }
+
+    .tableouter tr.even td {
+        background: #fff;
+    }
+
+    .tableouter table tbody th, .tableouter table tbody td {
+        padding: 12px 10px;
+        border: none !important;
+    }
+
+    .tableouter .btn {
+        background: #a3da40;
+        color: #fff;
+        padding: 5px 10px;
+        font-size: 14px;
+        border-radius: 3px;
+        border: none;
+        margin: 0 3px;
+    }
+
+    .tableouter .paginate_button {
+        border: none !important;
+    }
+
+    .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button.current, .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover,
+    .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button:active,
+    .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+        background: #a3da40 !important;
+        box-shadow: none;
+        color: #fff !important;
+    }
+
+    .border_card .card-header {
+        padding: 18px;
+        border-bottom: 1px solid #ddd;
+        margin-bottom: 10px;
+    }
+
+    .border_card .card-body {
+        padding-inline: 20px;
+        padding-bottom: 20px
+    }
+
+    #Compareproducts .compare-products-table td {
+        background-color: #fff !important;
+        vertical-align: top;
+    }
+
+    #Compareproducts .compare-products-table tre td:first-child,
+    #Compareproducts .compare-products-table tr td:last-child {
+        border-right: 0 !important
+    }
+
+    #Compareproducts .compare-products-table tr td {
+        border-right: 1px solid #e5e5e5 !important;
+    }
+
+    #Compareproducts .compare-products-table a.picture::before {
+        display: none;
+    }
+
+    #Compareproducts .compare-products-table a img {
+        position: static;
+        transform: unset;
+        width: 300px;
+        height: 300px;
+        object-fit: contain;
+    }
+
+    #Compareproducts .short-description td,
+    #Compareproducts .short-description td p {
+        line-height: 20px;
+    }
+
+    #Compareproducts .compare-products-page .table-wrapper {
+        padding: 0 !important
+    }
+
+    #Compareproducts .compare-products-table {
+        margin-bottom: 0
+    }
+
+    #Compareproducts .compare-products-page .clear-list {
+        position: absolute;
+        top: 19px;
+        right: 15px;
+    }
+
+    .wishlistBox .wishlist-content .table-wrapper {
+        padding: 0 !important;
+    }
+
+    .wishlistBox table {
+        margin-bottom: 0 !important;
+        border-collapse: collapse;
+    }
+
+    .tableouter .wishlistBox table td,
+    .tableouter .wishlistBox table th {
+        border: 1px solid #ddd !important;
+        color: #000 !important
+    }
+
+    .wishlistBox .wishlist-content .buttons {
+        background-color: transparent !important
+    }
+
+    #Compareproducts .compare-products-table td:first-child {
+        color: #000 !important;
+        font-weight: 700;
+    }
+
+    @@media (max-width: 767px) {
+        .tableouter .wishlistBox table td, .tableouter .wishlistBox table th {
+            border: none !important
+        }
+
+        tableouter th {
+            min-width: 150px
+        }
+
+        .tableouter .dataTables_wrapper {
+            max-width: 100%;
+            overflow-x: auto;
+        }
+    }
+    .outstanding_box{
+grid-template-columns: repeat(2, 1fr);
+}
+@@media(max-width:767px){
+.outstanding_box{
+grid-template-columns: repeat(1, 1fr);
+}
+}
+</style>
+<script>
+    $(document).ready(function () {
+        const requestData = { data: "partial" };
+        $.ajax({
+            url: '/ShoppingCart/Wishlist', // Controller and Action URL
+            type: 'GET',
+            data: requestData,
+            success: function (data) {
+                // Append the returned HTML to the target div
+                $("#targetDiv").html(data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error occurred: " + error);
+            }
+        });
+        $.ajax({
+            url: '/Product/CompareProducts', // Controller and Action URL
+            type: 'GET',
+            data: requestData,
+            success: function (data) {
+                // Append the returned HTML to the target div
+                $("#Compareproducts").html(data);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error occurred: " + error);
+            }
+        });
+
+    });
+</script>

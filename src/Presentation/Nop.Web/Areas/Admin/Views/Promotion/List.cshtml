@@ -1,0 +1,180 @@
+﻿@{
+    //page title
+    ViewBag.Title = T("Admin.Custom.Promotion").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Promotions");
+
+    var defaultGridPageSize = EngineContext.Current.Resolve<Nop.Core.Domain.Common.AdminAreaSettings>().DefaultGridPageSize;
+    var gridPageSizes = EngineContext.Current.Resolve<Nop.Core.Domain.Common.AdminAreaSettings>().GridPageSizes;
+}
+<style>
+    .margin-t-5 {
+        display: none;
+    }
+</style>
+@Html.AntiForgeryToken()
+<div class="content-header clearfix">
+    <h1 class="pull-left">
+        @T("Admin.Custom.Promotion")
+    </h1>
+    <div class="pull-right">
+        <a href="@Url.Action("Create")" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+
+<div class="content">
+    <div class="form-horizontal">
+        <div class="panel-group">
+            <div class="panel panel-default panel-search">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <label class="control-label" for="ActiveInactive" title="">
+                                        Price Range(Active / InActive)
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="checkbox" id="activeInactive" checked="@ViewBag.AllPriceRanges">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8 col-md-offset-4">
+                                    <span id="showrangemsg"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card card-default">
+                <div class="card-body">
+                    <nop-doc-reference asp-string-resource="@T("Admin.Documentation.Reference.Customers", Docs.Customers + Utm.OnAdmin)" />
+
+                    @{
+                        var aa = Model;
+                        var gridModel = new DataTablesModel
+            {
+                Name = "Promotion-grid",
+                UrlRead = new DataUrl("PromotionList", "Promotion", null),
+                SearchButtonId = "search-Promotions",
+                Length = 6,
+                LengthMenu = "6",
+                Filters = new List<FilterParameter>
+                    {
+                    new FilterParameter(nameof(Model.Price)),
+                    new FilterParameter(nameof(Model.SelectedOption)),
+                    new FilterParameter(nameof(Model.FromRange)),
+                    new FilterParameter(nameof(Model.ToRange)),
+                    new FilterParameter(nameof(Model.IsActive)),
+                    new FilterParameter(nameof(Model.PromotionDateFrom)),
+                    new FilterParameter(nameof(Model.PromotionDateTo)),
+                    new FilterParameter(nameof(Model.CatDesName)),
+                    new FilterParameter(nameof(Model.DDlValue)),
+
+                    }
+            };
+
+                        //             gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.Price))
+                        // {
+                        //     IsMasterCheckBox = true,
+                        //     Render = new RenderCheckBox("checkbox_customers"),
+                        //     ClassName = NopColumnClassDefaults.CenterAll,
+                        //     Width = "30"
+                        // });
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.ProductName))
+            {
+                Title = "ProductName"
+            });
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.Price))
+            {
+                Title = "Price"
+            });
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.SelectedOption))
+            {
+                Title = "Type"
+            });
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.FromRange))
+            {
+                Title = "FromRange/Quantity"
+            });
+
+                        ////if (Model.AvatarEnabled)
+                        {
+                            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.ToRange))
+                {
+                    Title = "ToRange"
+                });
+                        }
+                        //if (Model.UsernamesEnabled)
+                        {
+                            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.IsActive))
+                {
+                    Title = "Active"
+                });
+                            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.PromotionDateFrom))
+                {
+                    Title = "PromotionDateFrom"
+                });
+                            gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.PromotionDateTo))
+                {
+                    Title = "PromotionDateTo"
+                });
+                        }
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.CatDesName))
+            {
+                    
+                Title = "Category/Brand"
+            });
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.DDlValue))
+            {
+                Title = "Product Type"
+            });
+                        gridModel.ColumnCollection.Add(new ColumnProperty(nameof(CustomPromotionModel.Id))
+            {
+                Title = T("Admin.Common.Edit").Text,
+                Width = "80",
+                ClassName = NopColumnClassDefaults.Button,
+                Render = new RenderButtonEdit(new DataUrl("Edit"))
+            });
+                    }
+                    @await Html.PartialAsync("Table", gridModel)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<script>
+    $('#activeInactive').change(function () {
+        var val = $(this).prop("checked");
+
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("SetActiveInactivePriceRange", "Promotion"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#showrangemsg").text("All Price Ranges are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#showrangemsg").text("All Price Ranges are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>
+

@@ -1,0 +1,44 @@
+.topbar {
+  background: rgb(0, 91, 86);
+  padding: 8px;
+  position: relative;
+  transition: all .5s;
+}
+
+.topbarContent {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+  .topbarContent > p {
+    font-size: 15px;
+    color: #ffffff;
+    font-weight: bold;
+    font-style: italic;
+    margin-bottom: 0;
+  }
+
+.subscribe-btn {
+  border: none;
+  padding: 6px 10px;
+  background: #fff;
+  font-size: 11px;
+  color: #005b56c9;
+  line-height: normal;
+  border-radius: 4px;
+  font-family: 'Open Sans';
+}
+
+.topbar .close-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  fill: #fff;
+  cursor: pointer;
+  transition: all .5s;
+}

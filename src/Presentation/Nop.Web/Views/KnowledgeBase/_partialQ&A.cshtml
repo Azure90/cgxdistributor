@@ -1,0 +1,75 @@
+﻿@* @using Nop.Web.Models.KnowledgeBase;
+@model KnowledgeBaseModel *@
+@using System.Text.RegularExpressions;
+@using Nop.Web.Models.KnowledgeBaseArticle;
+@model KnowledgeBaseArticleModel
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+@* <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> *@
+
+
+@* <link href="~/css/custompage/knowledgebase/knowledgebasemainpage.css" rel="stylesheet" /> *@
+<link href="~/css/custompage/knowledgebase/index.css" rel="stylesheet" />
+<div class="kb-content">
+    <div class="kb-categories">
+        <h1 id="bone-grafts">@Model.Pagename</h1>
+        <p class="kb-categories__category-description">@Model.PagenameDescription</p>
+        @foreach (var x in Model.subcategoryModelList.Where(d => Convert.ToString(d.Category) == Model.Pagename).GroupBy(k => k.subcategory).ToList())
+        {
+            <div id="@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" class="kb-categories__item" style="@(Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.SubCategoryPagename.Replace(" ", ""), "[^a-zA-Z0-9]", "") || Model.SubCategoryPagename == null ? "display:block" : "display:none")">
+
+                <h4>@x.Key</h4>
+
+                @foreach (var pro in x.GroupBy(k => k.product))
+                {
+                    <div id="@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" class="kb-categories__item" style="@(Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.ProductPagename.Replace(" ", ""), "[^a-zA-Z0-9]", "") || Model.ProductPagename == null ? "display:block" : "display:none")">
+                        <div class="accordion cus_accordion" id="accordionExample">
+
+                            <div class="accordion-item">
+
+                                <h2 class="accordion-header" id="headingOne_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")">
+                                    <button class="accordion-button  Question_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" type="button" data-bs-toggle="collapse" aria-expanded="true" data-target="@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" data-bs-target="#collapse_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")"
+                                            aria-controls="collapse_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")">
+                                        @pro.Key
+                                    </button>
+                                </h2>
+                                <div id="collapse_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" class="accordion-collapse collapse" aria-labelledby="headingOne_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" data-bs-parent="#accordionExample" data-id="@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" style="display: none">
+                                    <div class="accordion-body">
+                                        <div class="accordion subAccordion" id="sub-accordionExample">
+                                            @foreach (var item in pro.Where(d => d.subcategory == Convert.ToString(x.Key)))
+                                            {
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header">
+                                                        <button class="accordion-button collapsed Question_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")" type="button">
+                                                            @Html.Raw(item.Question)
+                                                        </button>
+                                                    </h2>
+                                                    <div id="sub-collapseOne_@Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")@Regex.Replace(pro.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "")">
+                                                        <div class="accordion-body">
+                                                            @Html.Raw(@item.Answer)
+                                                        </div>
+                                                    </div>
+                                                  
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
+    </div>
+</div>

@@ -1,0 +1,296 @@
+﻿@using Nop.Web.Models.KnowledgeBaseArticle;
+@model KnowledgeBaseArticleModel
+@{  
+    ViewBag.PageTitle = "Knowledge Base Article";
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Knowledge Base Article");
+}
+
+<section class="content pt-3">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="clearfix divfileupload">
+                            <h5> Upload Excel file. </h5>
+                            <label>Please choose a <i style="color:blue;text-decoration:underline;">(.xlsx)</i> File.</label> <br />
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <input type="file" id="File" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+                                </div>
+                                <div>
+                                    <button type="button" onclick="ImportExcelFile()" class="btn bg-olive">
+                                        <i class="fa fa-upload"></i>
+                                        Upload Excel
+                                    </button>
+                                    <a class="btn btn-primary" href="@Url.Action("DownloadVDBfile", "KnowledgeBaseArticle")">Download Excel</a>
+                                    <span class="excelMessage" style="display: none; color: red; font-weight: 400;"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5> Upload Banner Image.</h5>
+                        <form id="bannerForm">
+                            <label>Banner Image</label>
+                            <div class="d-flex align-items-center">
+                                    <nop-editor asp-for="BannerImage" />
+                                    <span asp-validation-for="BannerImage"></span>
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    
+                                </div>
+                            </div>
+                        </form>
+                        <p class="mt-3"><img src="~/Uploads/@Model.PagenameBanner" height="200px" width="200px" style="object-fit:cover"></img></p>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-md-4">
+                            <label class="control-label" for="ActiveInactive" title="">
+                                Knowledge Base Header(Active / InActive)
+                            </label>
+                        </div>
+                        <div class="col-md-8">
+                            <input type="checkbox" id="activeInactiveKNowldgeBase" checked="@ViewBag.KnowledgePointActive">
+                        </div>
+                    </div>
+                    <div>
+                    <div class="form-group">
+                        <div class="col-md-8 col-md-offset-4">
+                            <span id="showrangemsg"></span>
+                        </div>
+                    </div>
+                        
+                    <form id="KnowledgeBaseBannerForm" asp-action="KnowledgeBaseBanner" style="display:none">
+                        <label>Banner Image</label>
+                        <div class="">
+                            <nop-editor asp-for="KnowledgeBaseBannerImage" />
+                            <span asp-validation-for="KnowledgeBaseBannerImage"></span>
+                            <div class="margin-bottom row">
+                                <div class="col-md-12">
+                                    <nop-label asp-for="KnowledgeBaseLabel" />
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="KnowledgeBaseLabel" />
+                                    <span asp-validation-for="KnowledgeBaseLabel"></span>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                            </div>
+                        </div>
+                        <p class="mt-3"><img src="~/Uploads/@ViewBag.KnowledgeBasePagenameBanner" height="200px" width="200px" style="object-fit:cover"></img></p>
+                    </form>
+                    </div>
+            </div>
+        </div>
+
+        <div class="form-horizontal">
+            <div class="cards-group">
+
+                <div class="card card-default">
+                    <div class="card-body">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <table id="SpecialPriceList" class="table table-bordered" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Category</th>
+                                            <th>Category Description</th>
+                                            <th>SubCategory</th>
+                                            <th>SubCategory Description</th>
+                                            <th>Brand</th>
+                                            <th>Product</th>
+                                            <th>Article Title</th>
+                                            <th>Article Body</th>
+                                            <th>Active</th>
+                                            <th>Customer Roles</th>
+                                            <th>Category Icon</th>
+                                            <th>Color Code</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @foreach (var item in Model.ModelList)
+                                        {
+                                            <tr>
+                                                <td>@item.Category</td> 
+                                                <td>@item.CategoryDescription</td>
+                                                <td>@item.SubCategory</td>
+                                                <td>@item.SubCategoryDescription</td>
+                                                <td>@item.Brand</td>
+                                                <td>@item.Product</td>
+                                                <td>@item.ArticleTitle</td>
+                                                <td>@item.ArticleBody</td>
+                                                <td>@item.Active</td>
+                                                <td>@item.CustomerRoles</td>
+                                                <td>@item.CategoryIcon</td>
+                                                <td>@item.ColorCode</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("editKnowledgeBaseArticle","KnowledgeBaseArticle", new { @item.Id })'">Edit</button>
+                                                    @*<button type="button" onclick="location.href='@Url.Action("Delete","CustomPage", new { @item.ID })'" >Delete</button>*@
+                                                    <button type="button" class="btn btn-danger" id="dltcontent" onclick="Delete(@item.Id)">Delete</button>
+
+                                                </td>
+                                            </tr>
+                                        }
+
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    $("#SpecialPriceList").dataTable();
+    function ImportExcelFile() {
+        debugger
+        var status = false;
+        var form = $('#__AjaxAntiForgeryForm');
+        var token = $('input[name="__RequestVerificationToken"]', form).val();
+        var formData = new FormData();
+        var file = $('#File')[0].files[0];
+        console.log(file);
+        status = file != "" && file != null ? true : false;
+
+        formData.append('file', file);
+        // var postData = {
+        //     file: file,
+        //     __RequestVerificationToken:token
+        // };
+        // addAntiForgeryToken(postData);
+        if (status) {
+            $.ajax({
+                url: 'KnowledgeBaseArticle/ImportExcelFile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    $('.excelMessage').text(result).css('display', 'inline-block').fadeOut(5000);
+                    $('#File').val("");
+                    window.location.reload();
+                }
+            });
+        }
+        else {
+            $('.excelMessage').text("Please choose a file.").css('display', 'inline-block').fadeOut(3000);
+        }
+    }
+    function Delete(id) {
+        if (confirm("Are you sure you want to delete this entry? Any related content will also be lost.Warning: This action cannot be undone.") == true) {
+
+            var postData = {
+                id: id
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                type: 'Post',
+                url: '/Admin/KnowledgeBaseArticle/Delete',
+                data: postData,
+                success: function (data) {
+                    window.location.reload();
+
+                }
+            })
+            return true;
+        } else {
+
+            return false;
+        }
+
+
+    }
+</script>
+<script>
+    $(document).ready(function () {
+        debugger
+        if ('@ViewBag.KnowledgePointActive' == 'True') {
+            $("#KnowledgeBaseBannerForm").css("display", "block");
+        }
+        $("#bannerForm").submit(function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/Admin/KnowledgeBaseArticle/BannerImage',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    window.location.reload();
+                },
+                error: function (xhr, status, error) {
+
+                }
+            });
+        });
+        $("#KnowledgeBaseBannerForm").submit(function (event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            var formData = new FormData(this);
+
+            $.ajax({
+                url: '/Admin/KnowledgeBaseArticle/KnowledgeBaseBanner',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    window.location.reload();
+                },
+                error: function (xhr, status, error) {
+
+                }
+            });
+        });
+    });
+</script>
+<script>
+    $('#activeInactiveKNowldgeBase').change(function () {
+        var val = $(this).prop("checked");
+        if (val == true) {
+            $("#KnowledgeBaseBannerForm").css("display", "block");
+        }
+        else{
+            $("#KnowledgeBaseBannerForm").css("display", "none");
+        }
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("SetActiveInactivePriceRange", "KnowledgeBaseArticle"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#showrangemsg").text("All Custom Reward Points are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#showrangemsg").text("All Custom Reward Points are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+
+
+  
+</script>

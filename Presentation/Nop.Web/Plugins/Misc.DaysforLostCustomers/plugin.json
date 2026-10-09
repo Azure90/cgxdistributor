@@ -1,0 +1,11 @@
+{
+  "Group": "Misc",
+  "FriendlyName": "Days for Lost Customers",
+  "SystemName": "Misc.DaysforLostCustomers",
+  "Version": "1.50",
+  "SupportedVersions": [ "4.60" ],
+  "Author": "Tech Prastish Team.",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Misc.DaysforLostCustomers.dll",
+  "Description": "This plugin use to send the email for the customers regarding discount Promotion."
+}

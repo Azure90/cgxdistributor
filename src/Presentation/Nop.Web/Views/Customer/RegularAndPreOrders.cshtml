@@ -1,0 +1,619 @@
+﻿@using System.Text.Json;
+@model ProductDetailsModel
+
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.Account").Text);
+
+    //page class
+    NopHtml.AppendPageCssClassParts("html-account-page");
+}
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+
+@section left
+{
+    @await Component.InvokeAsync(typeof(CustomerNavigationViewComponent), new { selectedTabId = CustomerNavigationEnum.PreOrder })
+}
+
+
+@{
+    var scheduledTitle = T("Account.PreOrders.PreOrder.Title").Text;
+
+    var datePickerFormat = Html.GetJQueryDateFormat();//java-script format
+}
+
+<div class="page account-page document-list-page">
+
+    <style>
+        .border_card_preorders {
+            border-radius: 6px;
+            border-top: 4px solid #a3da40;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, .15);
+            margin-bottom: 20px;
+        }
+
+            .border_card_preorders .card-header {
+                padding: 18px;
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 10px;
+            }
+
+            .border_card_preorders .card-body {
+                padding-inline: 20px;
+                padding-bottom: 20px
+            }
+
+            .border_card_preorders .card-title {
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .border_card_preorders h4 {
+                color: #88a900;
+                font-size: 12px;
+                margin: 3px;
+                display: flex;
+                justify-content: flex-start;
+            }
+
+
+        /* dialog css */
+        #contactus-order-popup {
+            padding: 25px;
+            font-size: 14px;
+        }
+
+        .popup-description {
+            margin: 0 0 25px;
+            color: #666;
+            text-align: center;
+        }
+
+        .popup-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+            .popup-row label {
+                width: 180px;
+                font-size: 15px;
+                font-weight: 600;
+                color: #333;
+            }
+
+        .popup-field {
+            flex: 1;
+        }
+
+            .popup-field input {
+                width: 100%;
+                height: 46px;
+                padding: 0 45px 0 15px;
+                border: 1px solid #ddd;
+                background: #f8f8f8;
+                box-sizing: border-box;
+            }
+
+            .popup-field .datepicker {
+                background-image: url('/Themes/Pacific/Content/img/date.svg');
+                background-repeat: no-repeat;
+                background-position: right 14px center;
+            }
+
+        .popup-info {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 3px solid #9cc31c;
+            background: #fcfcf8;
+            color: #666;
+        }
+
+        .popup-footer {
+            margin-top: 30px;
+            text-align: center;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .primary-btn {
+            width: 180px;
+            height: 48px;
+            background: #9cc31c;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+            .primary-btn:hover {
+                background: #84aa15;
+            }
+
+        .popup-cancel {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 25px;
+            padding: 5px 12px;
+            border: 1px solid #e6e6e6;
+            background: #fafafa;
+        }
+
+        .cancel-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cancel-order-btn {
+            width: 180px;
+            height: 48px;
+            background: #9cc31c;
+            border: 0;
+            color: #fff;
+            cursor: pointer;
+        }
+
+            .cancel-order-btn:hover {
+                background: #d9534f;
+                color: #fff;
+            }
+
+        .preorder-contactus-dialog .ui-dialog-titlebar {
+            padding: 20px 40px !important
+        }
+
+        .preorder-contactus-dialog .ui-dialog-content button {
+            margin: 5px 0 0 !important;
+        }
+
+        .tableouter > div {
+            margin-top: 20px;
+            /* background: #f6f6f6; */
+        }
+
+        .tableouter table {
+            border-bottom: none !important;
+            margin-bottom: 15px;
+        }
+
+        .tableouter th {
+            background: #fff;
+        }
+
+        .tableouter tr.even td {
+            background: #fff;
+        }
+
+        .tableouter table tbody th, .tableouter table tbody td {
+            padding: 12px 10px;
+            border: none !important;
+        }
+
+        .tableouter .btn {
+            background: #a3da40;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 14px;
+            border-radius: 3px;
+            border: none;
+            margin: 0 3px;
+        }
+
+        .tableouter .paginate_button {
+            border: none !important;
+        }
+
+        .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button.current, .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover,
+        .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button:active,
+        .tableouter .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #a3da40 !important;
+            box-shadow: none;
+            color: #fff !important;
+        }  
+
+        #contactus-order-popup {
+            width: 650px !important;
+            max-width: 100%;
+            padding: 25px 10px;
+        }
+
+            #contactus-order-popup .popup-row {
+                display: flex;
+                align-items: flex-start;
+            }
+
+            #contactus-order-popup label {
+                width: 120px;
+                padding-top: 12px;
+                font-weight: 600;
+                color: #333;
+                font-size: 15px;
+            }
+
+            #contactus-order-popup .popup-field {
+                flex: 1;
+            }
+
+            #contactus-order-popup input,
+            #contactus-order-popup textarea {
+                width: 100%;
+                box-sizing: border-box;
+                border: 1px solid #d7d7d7;
+                background: #fff;
+                padding: 12px 14px;
+                font-size: 14px;
+                transition: border-color .2s, box-shadow .2s;
+            }
+
+            #contactus-order-popup input {
+                height: 46px;
+            }
+
+            #contactus-order-popup textarea {
+                height: 220px;
+                resize: vertical;
+                line-height: 1.5;
+            }
+
+            #contactus-order-popup .popup-footer {
+                text-align: center;
+                margin-top: 35px;
+            }
+
+            #contactus-order-popup .primary-btn {
+                min-width: 180px;
+                height: 46px;
+                border: 0;
+                background: #89b400;
+                color: #fff;
+                font-size: 15px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: .2s;
+                text-transform:uppercase;
+            }
+
+                #contactus-order-popup .primary-btn:hover {
+                    opacity: .92;
+                }
+
+            #contactus-order-popup .required {
+                color: #d22;
+            }
+
+            #contactus-order-popup .field-validation-error {
+                display: block;
+                margin-top: 6px;
+                color: #d22;
+                font-size: 13px;
+            }
+
+
+        @@media (max-width: 767px) {
+            tableouter th {
+                min-width: 150px
+            }
+
+            .tableouter .dataTables_wrapper {
+                max-width: 100%;
+                overflow-x: auto;
+            }
+        }
+    </style>
+
+    <div class="page-title">
+        <h1>@T("Account.MyAccount") - @scheduledTitle</h1>
+    </div>
+
+    <div class="tableouter">
+        <div class="page-body">
+
+            <div class="border_card_preorders">
+
+                <div class="card-header with-border">
+                    <h3 class="card-title">
+                        @scheduledTitle
+                    </h3>
+
+                    <h4>
+                        @T("Account.PreOrders.HeaderText").Text
+                    </h4>
+                </div>
+
+                <div class="card-body">
+                    <table id="preorder-plus-dt" class="display">
+                        <thead>
+                            <tr>
+                                <th>Custom OrderNumber</th>
+                                <th>Order Status</th>
+                                <th>Customer Email</th>
+                                <th>CreatedOn</th>
+                                <th>Preferred Delivery Date</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-body">
+            <div class="border_card_preorders">
+
+                <div class="card-header with-border">
+                    <h3 class="card-title">
+                        @T("Account.PreOrders.RegularOrder.Title")
+                    </h3>
+                </div>
+
+                <div class="card-body">
+                    <table id="regular-orders-dt" class="display">
+                        <thead>
+                            <tr>
+                                <th>Custom OrderNumber</th>
+                                <th>Order Status</th>
+                                <th>Customer Email</th>
+                                <th>CreatedOn</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @******** Edit details dialog *********@
+    <div id="contactus-order-popup" style="display:none;">
+        <div class="popup-row">
+            <label for="PreOdrSubject">
+                Subject
+                <span class="required">*</span>
+            </label>
+
+            <div class="popup-field">
+                <input id="PreOdrSubject"
+                       name="PreOdrSubject"
+                       type="text"
+                       placeholder="Enter subject" />
+
+                <span id="subjectError" class="field-validation-error"></span>
+            </div>
+        </div>
+
+        <div class="popup-row">
+            <label for="preorder-message">
+                Message
+                <span class="required">*</span>
+            </label>
+
+            <div class="popup-field">
+                <textarea id="preorder-message"
+                          name="preorder-message"
+                          placeholder="Enter your enquiry..."></textarea>
+
+                <span id="messageError" class="field-validation-error"></span>
+            </div>
+        </div>
+
+        <div class="popup-footer">
+            <button type="button"
+                    id="btnSaveChanges"
+                    class="primary-btn">
+                Submit
+            </button>
+        </div>
+    </div>
+
+    <div id="cancel-order-popup" style="display:none;">
+        <h4 class="popup-description">
+            Are you sure you want to cancel this @scheduledTitle ?
+        </h4>
+        <p class="popup-info">
+           <svg fill="#88A900" height="14px" width="14px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 512 512" xml:space="preserve" stroke="#88A900">
+                <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                <g id="SVGRepo_iconCarrier"><g><g><path d="M256,0C114.84,0,0,114.84,0,256s114.84,256,256,256s256-114.84,256-256S397.16,0,256,0z M256,480 C132.488,480,32,379.512,32,256S132.48,32,256,32c123.512,0,224,100.488,224,224S379.512,480,256,480z"></path></g></g>
+                <g><g><path d="M280.792,127.52c-5.8-5.896-12.888-8.848-21.288-8.848c-8.288,0-15.352,2.952-21.208,8.848 c-5.848,5.896-8.784,12.976-8.784,21.232c0,8.144,2.952,15.16,8.864,21.056c5.912,5.896,12.968,8.848,21.128,8.848 c8.272,0,15.344-2.912,21.2-8.76c5.856-5.832,8.784-12.88,8.784-21.144S286.592,133.416,280.792,127.52z"></path></g></g>
+                <g><g><polygon points="286.296,330.216 286.296,198 205.376,198 205.376,237.568 231.464,237.568 231.464,330.216 205.376,330.216 205.376,369.784 311.848,369.784 311.848,330.216 "></polygon></g></g></g>
+           </svg>
+
+            This action cannot be undone. Your @scheduledTitle will be cancelled,
+            your preferred delivery date will be released,
+            and you'll need to place a new @scheduledTitle if you wish to order again.
+        </p>
+
+        <div class="popup-footer">
+            <button type="button" id="btnConfirmCancel" class="primary-btn">
+                Yes, Cancel Order
+            </button>
+
+            <button type="button" id="btnKeepOrder" class="secondary-btn">
+                Keep Order
+            </button>
+        </div>
+    </div>
+    
+    <script asp-asp-location="footer">
+        function loadOrders(tableId, url, isPreOrder) {
+
+            var columns = [
+                { data: 'CustomOrderNumber' },
+                { data: 'OrderStatus' },
+                { data: 'CustomerEmail' },
+                { data: 'CreatedOn' }
+            ];
+
+            if (isPreOrder) {
+                columns.push({
+                    data: 'PreferredDeliveryDate'
+                });
+            }
+
+            columns.push({
+                data: 'Id',
+                orderable: false,
+                searchable: false,
+                render: function (data, type, row) {
+
+                    let buttons = '';
+
+                    if (isPreOrder) {
+                        buttons += `
+                        <a class="btn btn-default" href="javascript:void(0);" onclick="openContactUsPopup(${row.Id}, '${row.CustomerEmail}')">
+                            <i class="far fa-edit"></i> Contact Us
+                        </a>`;
+                    }
+
+                    buttons += `
+                        <a class="btn btn-default" onclick="setLocation('/orderdetails/${data}')">
+                            <i class="far fa-eye"></i> View Order
+                        </a>
+                        <a class="btn btn-default" onclick="setLocation('/reorder/${data}')">
+                            <i class="fas fa-sync-alt"></i> Reorder
+                        </a>`;
+
+                    return buttons;
+                }
+            });
+
+            $(tableId).DataTable({
+                serverSide: true,
+                processing: true,
+                pageLength: 5,
+                lengthChange: false,
+                searching: false,
+                language: {
+                    emptyTable: "No data available in table.",
+                    zeroRecords: "No matching records found."
+                },
+                ajax: {
+                    url: url,
+                    type: 'GET'
+                },
+                columns: columns
+            });
+        }
+
+        function openContactUsPopup(orderId, email) {
+
+            $("#contactus-order-popup")
+                .data("orderId", orderId)
+                .dialog("open");
+
+            const $date = $("#OdrPreferredDeliveryDate");
+            $date.val("");
+
+            
+        }
+
+        $(function () {
+            loadOrders('#preorder-plus-dt', '/Customer/RegularAndPreOrdersList?isPreOrder=true', true);
+            loadOrders('#regular-orders-dt', '/Customer/RegularAndPreOrdersList?isPreOrder=false', false);
+
+            // get the schedule title
+            var scheduleTitle = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(scheduledTitle));
+
+            // initialize edit popup
+            $("#contactus-order-popup").dialog({
+                title: "Contact us for More Details",
+                width: 900,
+                modal: false,
+                dialogClass: "preorder-contactus-dialog",
+                resizable: false,
+                autoOpen: false,
+
+                open: function () {
+                    $(this).parent().attr("tabindex", "-1").focus();
+
+                    // clear error messages
+                    $("#preferredDateError").text("");
+                    $("#quantityError").text("");
+                },
+
+                close: clearEditPopup
+            });
+
+            // initialize cancel order popup
+            $("#cancel-order-popup").dialog({
+                title: "Cancel" + scheduleTitle,
+                autoOpen: false,
+                modal: true,
+                width: 450,
+                minWidth: 450,
+                resizable: false
+            });
+        });
+
+
+
+        function clearEditPopup() {
+
+            document.activeElement.blur();
+
+            $("#PreOdrSubject, #preorder-message").val("");
+            $("#subjectError, #messageError").text("");
+        }
+
+        $("#btnSaveChanges").on("click", function () {
+
+            if (!validateContactUsPopup())
+                return;
+
+            $.ajax({
+                url: "/Customer/SendPreOrderEnquiry",
+                type: "POST",
+                data: {
+                    Subject: $("#PreOdrSubject").val(),
+                    Message: $("#preorder-message").val()
+                },
+                success: function (response) {
+                    if (response.success) {
+                        alert(response.message);
+                        clearEditPopup();
+                        $("#contactus-order-popup").dialog("close");
+                    }
+                    else {
+                        alert(response.message);
+                    }
+                },
+                error: function () {
+                    alert("An unexpected error occurred.");
+                }
+            });
+        });
+
+        function validateContactUsPopup() {
+
+            var isValid = true;
+
+            var subject = $.trim($("#PreOdrSubject").val() || "");
+            var message = $.trim($("#preorder-message").val() || "");
+
+            // Clear previous errors
+            $("#subjectError").text("");
+            $("#messageError").text("");
+
+            // Subject
+            if (!subject) {
+                $("#subjectError").text("Please enter a subject.");
+                isValid = false;
+            }
+
+            // Message
+            if (!message) {
+                $("#messageError").text("Please enter your message.");
+                isValid = false;
+            }
+
+            return isValid;
+        }       
+    </script>
+</div>

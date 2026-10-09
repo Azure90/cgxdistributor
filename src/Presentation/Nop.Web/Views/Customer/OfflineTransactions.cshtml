@@ -1,0 +1,335 @@
+﻿@using Nop.Web.Framework.UI
+@using Nop.Core
+@using Nop.Services.Customers;
+@model Nop.Web.Models.OfflineTransaction.OfflineTransactionModel
+@using Nop.Services.InvoicePaymentOptions;
+@using Nop.Services.Configuration;
+@inject ISettingService _settingService
+@inject ICustomerService _customerService
+@inject IWorkContext _workContext
+@inject Nop.Core.IWebHelper webHelper
+@inject IInvoicePaymentOption _InvoicePaymentOptionService
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.Account").Text);
+    //page class
+    NopHtml.AppendPageCssClassParts("html-account-page");
+    NopHtml.AppendPageCssClassParts("html-offlinetransactions-list-page");
+
+    var customerEmail = _workContext.GetCurrentCustomerAsync().Result.Email;
+    var Bpcode = "0";
+    if (_workContext.GetCurrentCustomerAsync().Result.BPCode != null)
+    {
+        Bpcode = _workContext.GetCurrentCustomerAsync().Result.BPCode;
+    }
+}
+@{
+    var customer = _workContext.GetCurrentCustomerAsync().Result;
+    var GetallRoles = _customerService.GetCustomerRolesAsync(customer).Result.Where(d => d.Name == "CAD B2C"
+                || d.Name == "USD B2C"
+                || d.Name == "USD B2B INTL"
+                || d.Name == "CAD B2C HS"
+                || d.Name == "USD B2B ST"
+                || d.Name == "USD B2B DS"
+                || d.Name == "CAD B2B ST"
+                || d.Name == "CAD B2B DS"
+                ).FirstOrDefault();
+    var invoicepayments = _InvoicePaymentOptionService
+     .GetAllInvoicePaymentOption()
+     .Where(x => x.Active == true && x.CustomerRole.Split(',').Select(id => id.Trim()).Contains(GetallRoles.Id.ToString()))
+     .Select(x => new
+     {
+         PaymentOption = x.paymentOption,
+         PaynowButton = x.PaynowButton,
+         PaynowOption = x.Paynowtoption
+     })
+     .ToList();
+}
+@section left
+{
+    @*Remove for UI/UX by Riz*@
+    @await Component.InvokeAsync("CustomerNavigation", new { selectedTabId = CustomerNavigationEnum.OffLineTransactions })
+}
+<style>
+    .center-2 {
+        width: 100%;
+    }
+
+    .commonData--table .dataTables_wrapper {
+        padding: 20px 0px 0;
+    }
+
+    .commonData--table .dataTable.no-footer {
+        padding-top: 0;
+        border: 1px solid #e1e1e1;
+        margin-top: 50px;
+    }
+
+
+    .commonData--table #invoice_length {
+        padding-left: 20px;
+    }
+
+    .commonData--table #invoice_filter {
+        padding-right: 20px;
+    }
+
+    .commonData--table .dataTable thead th, .commonData--table table.dataTable thead td {
+        color: #222222;
+    }
+
+    .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_paginate {
+        padding: 20px 20px 20px;
+    }
+
+
+/* 
+    .master-wrapper-content {
+        padding: 70px 0 0;
+    } */
+
+    .side-2 {
+        width: 100%;
+        margin: 0 0 40px;
+    }
+
+    select.form-control {
+        display: inline;
+        width: 200px;
+        margin-left: 25px;
+        font-weight: 600;
+    }
+
+    #divcategoryFilter, #divYearFilter {
+        margin: 8px;
+        display: inline;
+    }
+
+    #invoice_wrapper label {
+        font-weight: 700;
+    }
+
+    #invoice_info{
+        display:none;
+    }
+
+    .outstanding_box {
+        /* background-color: #f6f6f6; */
+        padding: 15px;
+        margin-bottom: 20px;
+        display: grid;
+        gap: 10px
+    }
+    .outstanding_box {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @@media(max-width:767px) {
+        .outstanding_box {
+            grid-template-columns: repeat(1, 1fr);
+        }
+    }
+
+</style>
+<div class="page account-page offlinetransactions-list-page">
+    <div class="page-title">
+        <h1>@T("Account.MyAccount") - @T("Account.OfflineTransactions")</h1>
+    </div>
+    <div class="page-body" style="width:auto">
+        <nop-antiforgery-token />
+
+        @if (Model.Invoices.Count > 0)
+        {
+            <div class="outstanding_box border_card">
+                <div>
+                <div style="font-weight:bold;font-size:14px;margin-bottom:10px;">
+                    Outstanding Account Balance: @Model.TotalOutstandingPayment.ToString("C")
+                </div>
+
+                <div style="font-size:14px;">
+                    Outstanding Invoices: @Model.OutstandingInvoices.ToString("C")
+                </div>
+
+                <div style="font-size:14px;margin-bottom:5px;">
+                    Account Credit: -@Model.AccountCredits.ToString("C")
+                </div>
+                <br />
+                @if (@Model.TotalOutstandingPayment > 0)
+                {
+
+                        @if (invoicepayments.FirstOrDefault()?.PaynowButton == true)
+                        {
+                            <div>@T("offlinetransaction.clickpayNowButtonMsg")</div>
+                            <div style="font-size:14px; margin-top: 10px">
+                                <div>@T("offlinetransaction.textforpaybutton")</div>
+                                <div>Bpcode: @ViewBag.customerBpcode</div>
+                            </div>
+                            <br />
+
+                            <input type="button" class="button-1 paynowbutton" onclick="location.href='https://hansamed.net//paymentinvoice?bpcode=@Bpcode&site=Citagenix'" value="@T("OfflineTransaction.PayNow")" />
+
+                            @* <input type="button" class="button-1" onclick="location.href='@(Url.RouteUrl("OfflineTransactionPayNow", new { emailAddress = customerEmail }))'" value="@T("OfflineTransaction.PayNow")" /> *@
+                            <br />
+                            <br />
+                        }
+                }
+                </div>
+                <div>
+                    @if (invoicepayments.FirstOrDefault()?.PaynowOption == true)
+                    {
+                        @Html.Raw(invoicepayments.FirstOrDefault().PaymentOption)
+                    }
+                </div>
+            </div>
+            <div class="address-list border_card">
+                <input type="hidden" id="hdncustomerEmail" value="@customerEmail" />
+                <input type="hidden" id="hdncustomerBpcode" value="@Bpcode" />
+
+                <div >
+
+                    @*  @if (item.InvoiceType == "Invoice Number")
+                { *@
+
+                    @*   <div style="font-weight:bold;font-size:14px;margin-bottom:20px;">
+                @item.InvoiceType: @item.Invoice
+                </div>
+                <div style="font-size:14px;">
+                @if (item.OrderId != "")
+                {
+                @T("Account.OfflineTransactionModel.Orderid") @item.OrderId
+                }
+                else{
+                @T("Account.OfflineTransactionModel.Orderid")  @T("Account.OfflineTransactionModel.IsNullOrder")
+                }
+                </div>
+                <div style="font-size:14px;">
+                Invoice Status: @item.InvoiceStatus
+                </div>
+                <div style="font-size:14px;">
+                Invoice Date: @item.InvoiceDate
+                </div>
+                <div style="font-size:14px;">
+                Invoice Total: @item.InvoiceTotal
+                </div>
+                <div style="font-size:14px;">
+                Invoice Balance: @item.Balance
+                </div> *@
+
+                    <div id="divcategoryFilter" class="category-filter">
+                        <label>Filter by :</label>
+                        <select id="categoryFilter" class="form-control ddlchangeevent">
+                            <option value="Invoice Number"> Invoice</option>
+                            <option value="Credit Memo">Credit Memo</option>
+
+                        </select>
+                    </div>
+
+                    <div id="divYearFilter" class="year-filter">
+                        <label>Filter by year:</label>
+                        <select id="yearFilter" class="form-control ddlchangeevent">
+                            @{
+                                var CurrentYear = DateTime.UtcNow.Year.ToString();
+                                var previousYear = DateTime.UtcNow.AddYears(-1).Year.ToString();
+                            }
+                            <option value="@CurrentYear">@CurrentYear</option>
+                            <option value="@previousYear">@previousYear</option>
+                        </select>
+                    </div>
+
+
+                    <div class="panel panel-default commonData--table">
+                        <div class="panel-body">
+                            <table id="invoice" class="display table table-bordered table-hover table-striped dataTable" style="text-align: center;">
+                                <thead>
+                                    <tr>
+                                        <th>Invoice/Credit Memo</th>
+                                        <th> Credit/Invoice Type </th>
+                                        <th> Order ID</th>
+                                        <th> Order By</th>
+                                        <th> Credit/Invoice Status </th>
+                                        <th> Credit/Invoice Date</th>
+                                        <th>Credit/Invoice Total</th>
+                                        <th> Credit/Invoice Balance</th>
+                                        <th>Download Invoice/Credit Memo</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyaccountbalance">
+                                    @await Html.PartialAsync("Partial_offlineTransaction", Model)
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                </div>
+
+            </div>
+
+        }
+        else
+        {
+            <div class="no-data">
+                @T("Account.OfflineTransactionModel.NoInvoices")
+            </div>
+        }
+    </div>
+</div>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.css" />
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script>
+    function getinvoice(invoiceid, invType) {
+        alert(invoiceid, invType);
+        // Additional JavaScript code can be added here
+    }
+
+</script>
+
+
+<script type="text/javascript">
+    //
+    $(document).ready(function () {
+
+        $.noConflict();
+        $("#invoice").DataTable(
+            {
+                "searching": true,
+                "responsive": true,
+                "ordering": false,
+                //"paging": false,
+                "lengthMenu": [[100, 200, 300, 400, 500], [100, 200, 300, 400, 500]],
+            }
+        );
+        //Get a reference to the new datatable
+        // var table = $('#invoice').DataTable();
+        //Take the category filter drop down and append it to the datatables_filter div.
+        //You can use this same idea to move the filter anywhere withing the datatable that you want.
+        $("#invoice_filter.dataTables_filter").append($("#divcategoryFilter"));
+        //You can use this same idea to move the filter anywhere withing the datatable that you want.
+        $("#invoice_filter.dataTables_filter").append($("#divYearFilter"));
+    });
+    $(".ddlchangeevent").change(function () {
+        var year = $("#yearFilter").val();
+        var customerEmail = $("#hdncustomerEmail").val();
+        var Bpcode = $("#hdncustomerBpcode").val();
+        var type = $("#categoryFilter").val()
+        $.ajax({
+            type: "Get",
+            caches: false,
+            url: '@Url.Action("GetAllTransactionInvoicesYear", "Customer")',
+            data: {
+                Bpcode: Bpcode, email: customerEmail, Selectedyear: year, type: type
+            },
+            success: function (data) {
+
+                $("#tbodyaccountbalance").html("");
+                $("#tbodyaccountbalance").html(data.innerhtml);
+
+            },
+        });
+    });
+</script> 

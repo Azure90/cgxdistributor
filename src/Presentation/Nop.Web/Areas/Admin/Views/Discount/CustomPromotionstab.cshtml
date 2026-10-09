@@ -1,0 +1,671 @@
+﻿@model CustomPromotionModel
+
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Custom.Promotion.CustomPromotionTab").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Custom Promotions tab");
+}
+  
+<div class="container-fluid">
+    <style>
+        .card-discount {
+            margin-bottom: 10px;
+            border-top: 3px solid #00c0ef;
+            border-left: 0;
+            border-right: 0;
+            border-bottom: 0;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $("#@Html.IdFor(model => model.IsEnabledCustomMegaMenu)").change(toggleMegaMenuDiscountType);
+            $("#@Html.IdFor(model => model.IsDisabledCartItems)").click(toggleCartDisableButton);
+
+            toggleMegaMenuDiscountType();
+            toggleCartDisableButton();           
+        });
+
+        function toggleMegaMenuDiscountType() {
+            var $checkbox = $('#@Html.IdFor(model => model.IsEnabledCustomMegaMenu)');
+
+            // Find the parent-setting div
+            var $parentSetting = $checkbox.closest('.parent-menu-box');
+
+            if ($checkbox.is(':checked')) {
+                $parentSetting.addClass('parent-setting opened');
+            } else {
+                $parentSetting.addClass('parent-setting opened');
+            }
+        }
+
+        function toggleCartDisableButton() {
+            var $checkbox = $('#@Html.IdFor(model => model.IsDisabledCartItems)');
+
+            // Find the parent-setting div
+            var $parentSetting = $checkbox.closest('.parent-cart-box');
+
+            if ($checkbox.is(':checked')) {
+                $parentSetting.addClass('parent-setting opened');
+            } else {
+                $parentSetting.addClass('parent-setting opened');
+            }
+        }
+    </script>
+
+    <div class="form-horizontal">
+        <form asp-controller="Discount" asp-action="CustomPromotionstab" method="post">
+            <div class="content-header clearfix">
+                <h2 class="float-left">
+                    Mega Menu Promotion Tab For Discounts
+                </h2>
+                <div class="float-right">
+                    <button type="submit" name="save" class="btn btn-primary">
+                        <i class="far fa-save"></i>
+                        @T("Admin.Common.Save")
+                    </button>
+                </div>
+            </div>
+
+            @* Discount And Exclusive Price Tab *@
+            <div class="card card-outline card-discount" id="custom-discount-info">
+                <div class="card-header with-border clearfix">
+                    <div class="card-title">
+                        <i class="fas fa-info"></i>Discount and exclusive price info
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group row parent-menu-box">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="col-form-label" for="IsEnabledCustomMegaMenu">Mega Menu Item (Active/Inactive)</label>
+                                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Disable the custom (discount/special) price feature for Mega Menu item.">
+                                    <i class="fas fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="IsEnabledCustomMegaMenu" />
+                            <span asp-validation-for="IsEnabledCustomMegaMenu"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="IsEnabledCustomMegaMenu" disable-auto-generation="true">
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="CustomerRoleid">Select Discounts</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select discounts for mega menu promotion tab.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group-append input-group-required">
+                                    <input type="hidden" id="hdncustomerrole" />
+                                    <div class="input-group">
+                                        <nop-select asp-for="CustomerRoleid" asp-items="Model.AvailableCustomerRoles" asp-multiple="true" />
+                                    </div>
+                                </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        var customerRoleIdsInput = $('#@Html.IdFor(model => model.CustomerRoleid)').data("kendoMultiSelect");
+
+                                        // Set filter options
+                                        customerRoleIdsInput.setOptions({
+                                            autoBind: false,
+                                            filter: "contains"
+                                        });
+
+                                        @if (Model.AvailableCustomerRoles.Count == 0)
+                                            {
+                                            <text>
+                                            customerRoleIdsInput.setOptions({
+                                                enable: false,
+                                                placeholder: '@T("Admin.Customers.Customers.Fields.CustomerRoles.NoRoles")'
+                                            });
+                                        customerRoleIdsInput._placeholder();
+                                        customerRoleIdsInput._enable();
+                                        </text>
+                                        }
+                                    });
+                                </script>
+                            </div>
+                        </div>
+                        <div class="form-group row advanced-setting">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="MainMenu">Main Menu/Header Menu Name</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The name for the (main menu/header menu) item in promotion tab.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="MainMenu" />
+                                <span asp-validation-for="MainMenu"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row advanced-setting">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="DiscountPriceMenu">Discount Price Menu Name</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The name for the discount price menu item in promotion tab.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="DiscountPriceMenu" />
+                                <span asp-validation-for="DiscountPriceMenu"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="SpecialPriceMenu">Special Price Menu Name</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The name for the special price menu item in promotion tab.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="SpecialPriceMenu" />
+                                <span asp-validation-for="SpecialPriceMenu"></span>
+                            </div>
+                        </div> 
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="SpecialPriceHeaderText">Special Price Header Text</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The header text for the special price menu item in mega menu tab.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-textarea asp-for="SpecialPriceHeaderText" class="rich-editor" />
+                                <span asp-validation-for="SpecialPriceHeaderText"></span>
+                            </div>
+                        </div>
+                        <div class="card-body-container">
+                            <div id="discountRoleContainer">
+                                @if (Model.DiscountRoleItemModel != null && Model.DiscountRoleItemModel.Count > 0)
+                                {
+                                    for (int i = 0; i < Model.DiscountRoleItemModel.Count; i++)
+                                    {
+                                        var selectedIdsJson = System.Text.Json.JsonSerializer.Serialize(Model.DiscountRoleItemModel[i].DiscountCustomerRoleId);
+
+                                        <div class="multilabels-row discount-role-row_@i" data-index="@i">
+                                            <div class="form-group row">
+                                                <div class="col-md-3 role-label-col">
+                                                    <div class="label-wrapper">
+                                                        <label class="col-form-label" for="DiscountCustomerRoleId">Customer roles</label>
+                                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select customer role..">
+                                                            <i class="fas fa-question-circle"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8 role-select-col">
+                                                    <nop-select asp-for="DiscountRoleItemModel[i].DiscountCustomerRoleId"
+                                                                asp-items="Model.DiscountCustomerRoles"
+                                                                asp-multiple="true" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-md-3 role-label-col">
+                                                    <div class="label-wrapper">
+                                                        <label class="col-form-label" for="DiscountCustomerRoleId">Discount Header Text</label>
+                                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select discount header text for selected customer roles..">
+                                                            <i class="fas fa-question-circle"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-8 role-editor-col">
+                                                    <nop-textarea asp-for="DiscountRoleItemModel[i].DiscountLabelText" class="rich-editor" />
+                                                </div>
+
+                                                <div class="role-action-col col-md-1">
+                                                    @if (i > 0)
+                                                    {
+                                                        <button type="button" class="btn btn-danger btn-sm remove-discount-role">
+                                                            <i class="fas fa-trash-alt"></i>
+                                                        </button>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <script>
+                                                $(document).ready(function () {
+                                                    var ms = $("select[name='DiscountRoleItemModel[@i].DiscountCustomerRoleId']").data("kendoMultiSelect");
+                                                    if (ms) {
+                                                        ms.value(@selectedIdsJson);
+                                                        ms.trigger("change");
+                                                    }
+                                                });
+                                            </script>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    // No saved data → show one empty default row
+                                    <div class="multilabels-row discount-role-row_0" data-index="0">
+                                        <div class="form-group row">
+                                            <div class="col-md-3 role-label-col">
+                                                <div class="label-wrapper">
+                                                    <label class="col-form-label">Customer roles</label>
+                                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select customer role..">
+                                                        <i class="fas fa-question-circle"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8 role-select-col">
+                                                <nop-select asp-for="DiscountRoleItemModel[0].DiscountCustomerRoleId"
+                                                            asp-items="Model.DiscountCustomerRoles"
+                                                            asp-multiple="true" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group row">
+                                            <div class="col-md-3 role-label-col">
+                                                <div class="label-wrapper">
+                                                    <label class="col-form-label" for="DiscountCustomerRoleId">Label Text</label>
+                                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select label text for customer role..">
+                                                        <i class="fas fa-question-circle"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-8 role-editor-col">
+                                                <nop-textarea asp-for="DiscountRoleItemModel[0].DiscountLabelText" class="rich-editor" />
+                                            </div>
+                                            <div class="role-action-col col-md-1"></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Add button -->
+                            <div class="form-group row">
+                                <div class="col-md-9 offset-md-3">
+                                    <button type="button" id="addDiscountRoles" class="btn btn-primary">
+                                        @T("Admin.Common.AddNewRecord")
+                                    </button>
+                                </div>
+                            </div>
+                            <script>
+                                $(document).ready(function () {
+
+                                    // Add new Row click
+                                    $('#addDiscountRoles').click(function () {
+                                        addNewDiscountRow();
+                                    });
+
+                                    // Remove row
+                                    $(document).on('click', '.remove-discount-role', function () {
+                                        $(this).closest('.multilabels-row').remove();
+                                        reindexDiscountRows();
+                                    });
+
+                                    function addNewDiscountRow() {
+                                        const index = getNextIndex() || 0;
+
+                                        // Clone the first row as a base
+                                        const $firstRow = $('.discount-role-row_0').first();
+                                        if (!$firstRow.length) {
+                                            console.error('Base row not found.');
+                                            return;
+                                        }
+
+                                        const $newRow = $firstRow.clone();
+
+                                        // Find the original multi-select safely
+                                        const $originalSelect = $firstRow.find('select[multiple]').first();
+                                        let optionsHtml = '';
+                                        if ($originalSelect.length) {
+                                            optionsHtml = $originalSelect.html();
+                                        }
+
+                                        // Remove any existing Kendo markup
+                                        $newRow.find('.k-widget.k-multiselect').remove();
+
+                                        // Create a select with correct ID and name
+                                        const selectId = `DiscountRoleItemModel_${index}__DiscountCustomerRoleId`;
+                                        const selectName = `DiscountRoleItemModel[${index}].DiscountCustomerRoleId`;
+                                        const $newSelect = $('<select multiple="multiple"></select>')
+                                            .attr('id', selectId)
+                                            .attr('name', selectName)
+                                            .addClass('discount-customer-role')
+                                            .html(optionsHtml);
+
+                                        // Insert new select into correct column
+                                        $newRow.find('.role-select-col').empty().append($newSelect);
+
+                                        // Initialize the label textarea for new row
+                                        let $labeltextarea = $newRow.find('.rich-editor').first();
+                                        if ($labeltextarea.length === 0) {
+                                            console.warn("No rich-editor textarea found in cloned row.");
+                                            return;
+                                        }
+
+                                        // Remove old Trumbowyg
+                                        $newRow.find('.trumbowyg-box').remove();
+
+                                        // Put textarea back into editor container
+                                        $newRow.find('.role-editor-col').append($labeltextarea);
+
+                                        // Rename + reset and reinitialize
+                                        $labeltextarea
+                                            .attr({
+                                                id: `DiscountRoleItemModel_${index}__DiscountLabelText`,
+                                                name: `DiscountRoleItemModel[${index}].DiscountLabelText`
+                                            })
+                                            .val('');
+
+                                        // Initialize safely (only if Trumbowyg is loaded)
+                                        if (typeof $labeltextarea.trumbowyg === "function") {
+                                            $labeltextarea.trumbowyg();
+                                        } else {
+                                            console.error("Trumbowyg library not loaded.");
+                                        }
+
+                                        // Add or replace the remove button
+                                        const $removeButton = $('<button type="button" class="btn btn-danger btn-sm remove-discount-role"><i class="fas fa-trash-alt"></i></button>');
+                                        const $actionCol = $newRow.find('.role-action-col');
+
+                                        if ($actionCol.length) {
+                                            $actionCol.empty().append($removeButton);
+                                        } else {
+                                            $newRow.append($('<div class="role-action-col col-md-1"></div>').append($removeButton));
+                                        }
+
+                                        // Update class and data-index
+                                        $newRow
+                                            .removeClass(function (i, c) {
+                                                return (c.match(/discount-role-row_\d+/g) || []).join(' ');
+                                            })
+                                            .addClass(`discount-role-row_${index}`)
+                                            .attr('data-index', index);
+
+                                        // Append the new row to the container
+                                        $('#discountRoleContainer').append($newRow);
+
+                                        // Reinitialize tooltip for new icons
+                                        $('[data-toggle="tooltip"]').tooltip({
+                                            placement: 'bottom'
+                                        });
+
+                                        // Initialize Kendo MultiSelect for the new select
+                                        $newSelect.kendoMultiSelect({
+                                            filter: "contains"
+                                        });
+                                    }
+
+                                    function getNextIndex() {
+                                        const $lastRow = $('#discountRoleContainer .multilabels-row').last();
+                                        let index = 0;
+
+                                        if ($lastRow.length) {
+                                            index = parseInt($lastRow.attr('data-index'), 10);
+                                            if (!Number.isInteger(index)) index = 0;
+                                            index++;
+                                        }
+
+                                        return index;
+                                    }
+
+                                    // Reindex rows after deletion
+                                    function reindexDiscountRows() {
+                                        $('#discountRoleContainer .multilabels-row').each(function (i) {
+                                            $(this)
+                                                .attr('data-index', i)
+                                                .removeClass(function (idx, c) {
+                                                    return (c.match(/discount-role-row_\d+/g) || []).join(' ');
+                                                })
+                                                .addClass(`discount-role-row_${i}`);
+
+                                            const $select = $(this).find('select[multiple]');
+
+                                            // Only target your actual text area
+                                            const $textarea = $(this).find('textarea.form-control[name*="DiscountLabelText"]');
+
+                                            $select.attr({
+                                                id: `DiscountRoleItemModel_${i}__DiscountCustomerRoleId`,
+                                                name: `DiscountRoleItemModel[${i}].DiscountCustomerRoleId`
+                                            });
+
+                                            $textarea.attr({
+                                                id: `DiscountRoleItemModel_${i}__DiscountLabelText`,
+                                                name: `DiscountRoleItemModel[${i}].DiscountLabelText`
+                                            });
+                                        });
+                                    }
+                                });
+                            </script>
+                        </div>
+                    </nop-nested-setting>
+                </div>
+            </div>                     
+
+            @********* Disable Menu Items Tab *********@
+            <div class="card card-outline card-disabledcart card-discount" id="custom-disabledcart-info">
+                <div class="card-header with-border clearfix">
+                    <div class="card-title">
+                        <i class="fas fa-cart-arrow-down"></i>Disable Menu/Cart items info
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group row parent-cart-box">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="col-form-label" for="IsDisabledCartItems">Disabled Menu Items (Active/Inactive)</label>
+                                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Disable the custom cart and menu items in the public store as per customer role.">
+                                    <i class="fas fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <nop-editor asp-for="IsDisabledCartItems" />
+                            <span asp-validation-for="IsDisabledCartItems"></span>
+                        </div>
+                    </div>
+                    <nop-nested-setting asp-for="IsDisabledCartItems" disable-auto-generation="true">
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="DisableCartRoleId">Disable Cart Button for Roles</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="This Disables the cart button for selected discount roles.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="input-group-append input-group-required">
+                                    <input type="hidden" id="hdnCustomerRoles" />
+                                    <div class="input-group">
+                                        <nop-select asp-for="DisableCartRoleId" asp-items="Model.DisableCartCustomerRoles" asp-multiple="true" />
+                                    </div>
+                                </div>
+                                <script>
+                                    $(document).ready(function () {
+                                        var disableRoleIdsInput = $('#@Html.IdFor(model => model.DisableCartRoleId)').data("kendoMultiSelect");
+
+                                        // Set filter options
+                                        disableRoleIdsInput.setOptions({
+                                            autoBind: false,
+                                            filter: "contains"
+                                        });
+
+                                        @if (Model.AvailableCustomerRoles.Count == 0)
+                                            {
+                                            <text>
+                                            disableRoleIdsInput.setOptions({
+                                                enable: false,
+                                                placeholder: '@T("Admin.Customers.Customers.Fields.CustomerRoles.NoRoles")'
+                                            });
+                                        disableRoleIdsInput._placeholder();
+                                        disableRoleIdsInput._enable();
+                                        </text>
+                                        }
+                                    });
+                                </script>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="PGCartButtonText">Product Grid Cart Button Text</label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The name for the cart button in products grid page.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="PGCartButtonText" />
+                                <span asp-validation-for="PGCartButtonText"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-3 role-label-col">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="CartButtonText">Product Detail Cart Button Text </label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The button (cart/wishlist) text for the selected discount roles in the product detail page.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-textarea asp-for="CartButtonText" class="rich-editor" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3 role-label-col">
+                                <div class="label-wrapper">
+                                    <label class="col-form-label" for="DiscountHeaderText">Discount Header Text For Disable Cart </label>
+                                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The header text for the selected discount roles in the product list page when the disable cart button is enabled.">
+                                        <i class="fas fa-question-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <nop-textarea asp-for="DiscountHeaderText" class="rich-editor" />
+                            </div>
+                        </div>
+                    </nop-nested-setting>                   
+                </div>
+            </div>
+
+            @****** Order Summary Text Color Tab ******@
+            <div class="card card-outline card-ordersummarytext card-discount" id="custom-ordersummarytext-info">
+                <div class="card-header with-border clearfix">
+                    <div class="card-title">
+                        <i class="fas fa-th-list"></i>Order Summary text color
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <div class="mb-3 row">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="col-form-label">
+                                    Promotion, saving and discount background color
+                                </label>
+                                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select the background color for the promotion and savings in the order cart summary.">
+                                    <i class="fas fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="pickr-container" data-target="PromotionBackgroundColor"></div>
+                            <input type="hidden" id="PromotionBackgroundColor" name="PromotionBackgroundColor" value="@Model.PromotionBackgroundColor" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <div class="col-md-3">
+                            <div class="label-wrapper">
+                                <label class="col-form-label">
+                                    Total savings background color
+                                </label>
+                                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select the background color for the total savings on order in the order cart summary.">
+                                    <i class="fas fa-question-circle"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="pickr-container" data-target="SavingAmountBackgroundColor"></div>
+                            <input type="hidden" id="SavingAmountBackgroundColor" name="SavingAmountBackgroundColor" value="@Model.SavingAmountBackgroundColor" />
+                        </div>
+                    </div>
+                </div>                
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<!-- Load Trumbowyg CSS & JS once (NOT inside loop) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trumbowyg@2.27.3/dist/ui/trumbowyg.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/trumbowyg@2.27.3/dist/trumbowyg.min.js"></script>
+
+<!-- Color Picker CDN  -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@simonwep/pickr/dist/themes/classic.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/@@simonwep/pickr"></script>
+
+<script>
+    $(document).ready(function () {
+
+        // Initialize editor for EXISTING rows
+        $('.rich-editor').each(function () {
+            $(this).trumbowyg();
+        });
+
+        // When new row added dynamically
+        $(document).on('DOMNodeInserted', '.multilabels-row', function () {
+
+            $(this).find('.rich-editor').each(function () {
+
+                // Avoid reinitializing
+                if (!$(this).hasClass('trumbowyg-textarea')) {
+                    $(this).trumbowyg();
+                }
+            });
+        });
+
+        // color picker
+        document.querySelectorAll('.pickr-container').forEach((container) => {
+            debugger;
+            const targetInputId = container.dataset.target;
+            const targetInput = document.getElementById(targetInputId);
+
+            const pickr = Pickr.create({
+                el: container,
+                theme: 'classic',
+                default: targetInput.value || '#000000',
+
+                components: {
+                    preview: true,
+                    opacity: true,
+                    hue: true,
+                    interaction: {
+                        hex: true,
+                        rgba: true,
+                        input: true,
+                        save: true
+                    }
+                }
+            });
+
+            pickr.on('save', (color) => {
+                const hex = color.toHEXA().toString();
+                targetInput.value = hex;
+
+                pickr.hide();
+            });
+        });
+    });
+</script>

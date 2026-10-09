@@ -1,0 +1,530 @@
+﻿@using Nop.Web.Models.DistributorPortal;
+@model DistributorPortalModel
+@{
+
+    int SuperParentindex = 0;
+    int Parentindex = 0;
+    int SubParentindex = 0;
+    int Childindex = 0;
+
+}
+<style>
+    #loader-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999;
+        background-color: rgba(255, 255, 255, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .loader {
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+</style>
+
+
+@* halfChecked *@
+<link href="~/css/custompage/pacificthemecss/distributorportal.css" rel="stylesheet" />
+<input type="hidden" id="hdnproduct" />
+<input type="hidden" id="hdnname" />
+<input type="hidden" id="modulename" name="modulename" />
+<div class="home-page-categories-wrapper">
+    <div class="home-page-slider">
+        @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_main_slider" })
+    </div>
+</div>
+<section class="dis_portal_main_section">
+    <div class="dis_container">
+        <div class="dis_main_row">
+            <div class="filters_part">
+                <div class="filter_card">
+                    <div class="filter_card_title">
+                        <h3>Filters (@Model.SidebarMenu.Count() results)</h3>
+                    </div>
+                    <div class="filter_outer">
+                        <ul>
+                            @foreach (var obj in Model.SidebarSubMenuName)
+                            {
+                                <li class="filter_single">
+                                    <div class="filter_title">
+
+                                        @if (@obj.Titlename == "Training Courses")
+                                        {
+                                            <h5>Training  </h5>
+                                        }
+                                        else
+                                        {
+                                            @if (@obj.Titlename == "Non-Sterile Sample")
+                                            {
+                                                <h5>Non-Sterile Samples  </h5>
+                                            }
+                                            else
+                                            {
+                                                <h5>@obj.Titlename  </h5>
+                                            }
+                                        }
+
+                                        <span class="openFilterItem" data-toopen="filterLabel_@SuperParentindex">
+                                            <img class="fil_plus" src="~/images/fil_plus.svg" />
+                                            <img class="fil_minus" src="~/images/fil_minus.svg" />
+                                        </span>
+                                    </div>
+                                    <div class="filter_body" data-name="@obj.Titlename" data-id="filterLabel_@SuperParentindex">
+                                        <ul>
+                                            @foreach (var data in Model.SubMenuListName
+                                           .Where(c => c.parentsidebarbarmenuname == obj.Titlename)
+                                           .GroupBy(x => new { x.Parentcategory, x.Parentid })
+                                           .Select(g => g.First())
+                                           .OrderBy(z => z.Parentcategory))
+
+                                            {
+                                                <li>
+                                                    <div class="fil_inner_collapse">
+                                                        <div class="fil_radio">
+                                                            <input id="lavelOne_@Parentindex" class="checkboxparentvalue datatoaction parentcheckbox box_@SuperParentindex Courses_@Parentindex" data-category="@data.Parentcategory" data-parentcheckbox="@SuperParentindex"
+                                                                   data-name="@data.parentsidebarbarmenuname" type="checkbox" data-trainigid="@Parentindex" data-id="@data.Parentid" name="labelOne" />
+
+                                                            @if (@data.Parentcategory == "Online Course(Firmwater)")
+                                                            {
+                                                                <label for="lavelOne_@Parentindex">
+                                                                    Online Courses
+                                                                </label>
+
+                                                            }
+                                                            else
+                                                            {
+                                                                <label for="lavelOne_@Parentindex">
+                                                                    @data.Parentcategory
+                                                                </label>
+                                                            }
+
+                                                        </div>
+                                                        @if (data.Parentcategory != "Virtual Training Request")
+                                                        {
+
+
+                                                            <span data-toopen="filterLabelTwo_@Parentindex" class="openFilterInnerItem">
+                                                                <img class="fil_plus" src="~/images/fil_arw.svg" />
+                                                            </span>
+                                                        }
+                                                    </div>
+
+                                                    <div data-id="filterLabelTwo_@Parentindex" class="fil_inner_list" style="display: none">
+                                                        <ul>
+                                                            @foreach (var result in Model.SubMenuListName
+                                                           .Where(x => x.Parentcategory == data.Parentcategory && x.parentsidebarbarmenuname == obj.Titlename)
+                                                           .GroupBy(y => new { y.Subcategory, y.ParentSubid })
+                                                           .Select(g => g.First()))
+
+                                                            {
+                                                                <li>
+                                                                    <div class="fil_inner_collapse">
+                                                                        <div class="fil_radio">
+                                                                            <input id="lavelTwo_@SubParentindex" class="checkboxsubchildvalue datatoaction parentcheckbox box_@SuperParentindex Courses_@Parentindex" data-trainigid="@Parentindex" data-parentcheckbox="@SuperParentindex" data-name="@result.parentsidebarbarmenuname" data-category="@result.Subcategory" type="checkbox" data-id="@result.ParentSubid" name="labelTwo" />
+                                                                            <label for="lavelTwo_@SubParentindex">@result.Subcategory</label>
+                                                                        </div>
+                                                                        @if (!string.IsNullOrEmpty(data.Childcategory))
+                                                                        {
+                                                                            <span data-toopen="filterLabelThree_@SubParentindex" class="openFilterInnerSubItem">
+                                                                                <img class="fil_plus" src="~/images/fil_arw.svg" />
+                                                                            </span>
+                                                                        }
+                                                                    </div>
+                                                                    @if (!string.IsNullOrEmpty(data.Childcategory))
+                                                                    {
+                                                                        <div data-id="filterLabelThree_@SubParentindex" class="fil_inner_list" style="display: none">
+                                                                            <ul>
+                                                                                @foreach (var child in Model.SubMenuListName
+                                                                               .Where(x => x.Subcategory == result.Subcategory && x.parentsidebarbarmenuname == obj.Titlename)
+                                                                               .GroupBy(z => new { z.Childcategory, z.Childid })
+                                                                               .Select(g => g.First()))
+                                                                                {
+                                                                                    <li>
+                                                                                        <div class="fil_radio">
+                                                                                            <input id="lavelThree_@Childindex" class="checkboxvalue datatoaction parentcheckbox box_@SuperParentindex Courses_@Parentindex" data-trainigid="@Parentindex" data-parentcheckbox="@SuperParentindex" data-name="@child.parentsidebarbarmenuname" type="checkbox" data-id="@child.Childid" name="labelThree" />
+                                                                                            <label for="lavelThree_@Childindex">@child.Childcategory</label>
+                                                                                        </div>
+                                                                                    </li>
+                                                                                    Childindex++;
+                                                                                }
+                                                                            </ul>
+                                                                        </div>
+                                                                    }
+                                                                </li>
+                                                                SubParentindex++;
+                                                            }
+                                                        </ul>
+                                                    </div>
+
+                                                </li>
+                                                Parentindex++;
+                                            }
+                                        </ul>
+                                    </div>
+                                </li>
+                                SuperParentindex++;
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="display:none;" id="divvirtualtraining"> @Html.Raw(Model.virtualtraining)</div>
+            <div class="pro_part" id="partialContainer">
+
+                @await Html.PartialAsync("_PartialProductDistributor", Model)
+
+
+
+            </div>
+
+            <input id="virtualinput" type="hidden" />
+        </div>
+    </div>
+    <div id="loader-overlay" style="display:none;">
+        <div class="loader"></div>
+    </div>
+</section>
+
+<script>
+    $(".openFilterInnerItem, .openFilterItem, .openFilterInnerSubItem").click(function () {
+        const toOpen = $(this).data("toopen");
+        $(this).toggleClass("open")
+        $(`[data-id='${toOpen}']`).slideToggle()
+    })
+
+    $(document).on('change', '.checkboxparentvalue,.checkboxsubchildvalue,.checkboxvalue', function () {
+        debugger;
+        let checkedIds = [];
+
+        let checkedSubchildIds = $('.checkboxsubchildvalue:checked').map(function () {
+            return $(this).data('id');
+        }).get();
+
+        var dataname = $(this).data('parentcheckbox');
+        var dataname1 = $(this).data('name');
+        var id = $(this).data('id');
+        var trainingid = $(this).data('trainigid');
+
+        $('#modulename').val(dataname1);
+
+        $("#divvirtualtraining").css("display", "none");
+        $("#partialContainer").css("display", "block");
+        $("#virtualinput").val(" ");
+        // }
+        $('input[type="checkbox"]').not('.box_' + dataname).prop('checked', false);
+        $('input[type="checkbox"]').not('.box_' + dataname).removeClass("halfChecked");
+        var dataname = $(this).data('name')
+        $("#hdnname").val(dataname);
+
+        $('input[type="checkbox"]:checked').each(function () {
+            let $checkbox = $(this);
+            let dataId = $checkbox.data('id');
+
+            if (dataId === undefined) return;
+
+
+            if ($checkbox.hasClass('checkboxvalue')) {
+
+                let subchild = $checkbox.closest('ul').closest('li').find('.checkboxsubchildvalue');
+
+                if (subchild.length && subchild.is(':checked')) {
+                    return;
+                }
+            }
+            if ($checkbox.hasClass('checkboxsubchildvalue')) {
+
+                let subchild = $checkbox.closest('ul').closest('li').find('.checkboxparentvalue');
+
+                if (subchild.length && subchild.is(':checked')) {
+                    return;
+                }
+            }
+
+            checkedIds.push(dataId);
+        });
+        $("#hdnproduct").val(checkedIds);
+        if (id == 0) {
+            var selectedAction = [];
+
+            if ($(this).attr('data-category') == "Virtual Training Request") {
+
+
+                if ($(this).is(":checked")) {
+                    selectedAction = "Virtual Training Request";
+                }
+                $("#divvirtualtraining").css("display", "block");
+                $("#hdnproduct").val(selectedAction);
+            }
+            else {
+
+                $('.checkboxsubchildvalue').each(function (index) {
+
+                    if ($(this).is(":checked")) {
+                        var selectedIds = $(this).attr('data-category');
+
+                        selectedAction.push(selectedIds);
+                        $("#hdnproduct").val(selectedAction);
+                    }
+                });
+
+            }
+
+        }
+
+        if (dataname1 == "Training Courses") {
+            $('input[type="checkbox"]').not('.Courses_' + trainingid).prop('checked', false);
+
+        }
+        if (dataname1 == "Training Courses" && $(this).attr('data-category') != "Online Course(Firmwater)") {
+
+            $("#virtualinput").val("notdisplay");
+
+        }
+        else {
+            $("#virtualinput").val(" ");
+        }
+
+        $("#loader-overlay").show();
+
+        if ($("#hdnproduct").val() != " " && $("#hdnproduct").val() != "") {
+
+            if (!$("#hdnproduct").val().includes("Virtual Training Request")) {
+
+                var postData = {
+                    value: $("#hdnproduct").val(),
+                    name: $("#hdnname").val(),
+                    pageSize: $('#products-pagesize').val()
+                };
+
+                // set params for filter
+                var params = new URLSearchParams(postData).toString();
+                history.pushState(null, "", "?" + params);
+
+                addAntiForgeryToken(postData);
+
+                $.ajax({
+                    type: 'get',
+                    url: '/DistributorPortal/DistributorPortalforproducts',
+                    data: postData,
+                    success: function (data) {
+
+                        $('#partialContainer').html(data);
+                    },
+                    complete: function () {
+                        $("#loader-overlay").hide();
+                    },
+                });
+            }
+            else {
+                $("#loader-overlay").hide();
+                $("#divvirtualtraining").show();
+                $("#partialContainer").css("display", "none");
+            }
+        }
+        else {
+            if ($("#virtualinput").val().includes("notdisplay")) {
+                $("#divvirtualtraining").css("display", "none");
+                $("#partialContainer").css("display", "block");
+                $("#loader-overlay").hide();
+            }
+            else {
+                $.ajax({
+                    type: 'get',
+                    url: '/DistributorPortal/DistributorPortal',
+                    data: { modeldata: "data" },
+                    success: function (data) {
+
+                        $('#partialContainer').html(data);
+                    },
+                    complete: function () {
+                        $("#loader-overlay").hide();
+                    },
+                })
+            }
+
+            const cleanUrl = window.location.origin + window.location.pathname;
+            history.replaceState({}, document.title, cleanUrl);
+        }
+    });
+
+    $(document).ready(function () {
+        // Handle checkbox and radio change
+        $('.filter_outer input[type="checkbox"], .filter_outer input[type="radio"]').on('change', function () {
+
+            let $input = $(this);
+            let isChecked = $input.prop('checked');
+
+            // Update all children
+            $input.closest('li').find('input[type="checkbox"], input[type="radio"]').each(function () {
+                $(this).prop('checked', isChecked);
+            });
+
+            // Update all parents
+            updateParentStates($input);
+        });
+
+        function updateParentStates($element) {
+            let $currentLi = $element.closest('li').parent().closest('li');
+
+            while ($currentLi.length) {
+                let $parentInput = $currentLi.find('> .fil_inner_collapse .fil_radio input');
+                let $childInputs = $currentLi.find('ul').first().find('input[type="checkbox"], input[type="radio"]');
+
+                let total = $childInputs.length;
+                let checked = $childInputs.filter(':checked').length;
+
+                if (checked === 0) {
+                    $parentInput.prop('checked', false).removeClass('halfChecked');
+                } else if (checked === total) {
+                    $parentInput.prop('checked', true).removeClass('halfChecked');
+                } else {
+                    $parentInput.prop('checked', false).addClass('halfChecked');
+                }
+
+                $currentLi = $currentLi.parent().closest('li');
+            }
+        }
+    });
+
+    $(document).ready(function () {
+
+        const params = new URLSearchParams(window.location.search);
+
+        let postData = {
+            value: params.get("value"),
+            name: params.get("name"),
+            pageSize: params.get("pageSize")
+        };
+
+        const navType = performance.getEntriesByType("navigation")[0]?.type;
+
+        // Clear filters only on refresh or direct visit
+        if (navType === "reload" || !postData.value) {
+
+            const url = window.location.origin + window.location.pathname;
+            history.replaceState(null, "", url);
+
+            $("#loader-overlay").hide();
+            return;
+        }
+        // Restore filter state
+        $("#hdnproduct").val(postData.value);
+        $("#hdnname").val(postData.name);
+        $("#products-pagesize").val(postData.pageSize);
+
+
+        let values = params.get("value");
+        let name = params.get("name");
+
+        if (!values || !name) return;
+
+        let container = $('.filter_body[data-name="' + decodeURIComponent(name) + '"]');
+
+        if (!container.length) return;
+
+        // Training Courses special case
+        if (decodeURIComponent(name) === "Training Courses") {
+
+            let category = decodeURIComponent(values).replace(/\+/g, " ");
+
+            let checkbox = container.find('input[data-category="' + category + '"]');
+
+            if (!checkbox.length) return;
+
+            checkbox.prop("checked", true);
+
+            // mark parent halfChecked
+            let parentLi = checkbox.closest("ul").closest("li");
+
+            while (parentLi.length) {
+
+                let parentCheckbox = parentLi.find("> .fil_inner_collapse .fil_radio input");
+
+                if (parentCheckbox.length && !parentCheckbox.prop("checked")) {
+                    parentCheckbox.addClass("halfChecked");
+                }
+
+                parentLi = parentLi.closest("ul").closest("li");
+            }
+
+            // open hierarchy
+            checkbox.parents(".fil_inner_list").show();
+            checkbox.parents(".fil_inner_list")
+                .prev()
+                .find(".openFilterInnerItem, .openFilterInnerSubItem")
+                .addClass("open");
+
+            // return;
+        }
+        else 
+        {
+
+            // Normal filters (Products, Social Media, etc.)
+            let ids = values.split(",");
+
+            ids.forEach(function (id) {
+
+                let checkbox = container.find('input[data-id="' + id + '"]');
+
+                if (!checkbox.length) return;
+
+                checkbox.prop("checked", true);
+
+                let parentLi = checkbox.closest("ul").closest("li");
+
+                while (parentLi.length) {
+
+                    let parentCheckbox = parentLi.find("> .fil_inner_collapse .fil_radio input");
+
+                    if (parentCheckbox.length && !parentCheckbox.prop("checked")) {
+                        parentCheckbox.addClass("halfChecked");
+                    }
+
+                    parentLi = parentLi.closest("ul").closest("li");
+                }
+
+                checkbox.parents(".fil_inner_list").show();
+                checkbox.parents(".fil_inner_list")
+                    .prev()
+                    .find(".openFilterInnerItem, .openFilterInnerSubItem")
+                    .addClass("open");
+
+            });
+        }
+
+
+
+        $.ajax({
+            type: "GET",
+            url: "/DistributorPortal/DistributorPortalforproducts",
+            data: postData,
+            success: function (data) {
+                $("#partialContainer").html(data);
+            },
+            complete: function () {
+                $("#loader-overlay").hide();
+            }
+        });
+    });
+
+</script>

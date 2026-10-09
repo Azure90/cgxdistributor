@@ -1,0 +1,188 @@
+﻿@model IList<CategoryModel>
+
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Services.KnowledgeBaseArticle
+@using Nop.Services.Configuration
+@using Nop.Services.Customers
+@using Nop.Core.Domain.Customers
+@inject IWorkContext workContext
+@inject ICustomerService customerService
+
+
+@inject IViewComponentSelector viewComponentSelector
+@inject IKnowledgeBaseArticleService _KnowledgeBaseArticleService
+@inject ISettingService _settingService
+
+@{
+    var KnowledgePointActive = Convert.ToBoolean(_settingService.GetSetting("KnowledgeBAseActive/Inactive").Value);
+    var PagenameBanner = _settingService.GetSetting("KnowledgeBaseBannerImagepath").Value;
+    var NAme = _settingService.GetSetting("KnowledgeBaseLabel").Value;
+
+     var DistributorRequestActive = Convert.ToBoolean(_settingService.GetSetting("DistributorRequestActive/Inactive").Value);
+    var DistributorRequeseBanner = _settingService.GetSetting("DistributorRequestBannerImagepath").Value;
+    var DistributorRequesNAme = _settingService.GetSetting("DistributorRequestBannerLabel").Value;
+}
+@{
+    var currcustomer = workContext.GetCurrentCustomerAsync().Result;
+
+
+    // var currRoles = customerService.GetCustomerRolesAsync(currcustomer).Result.Where(d => d.Name == "CAD B2C"
+    //                                         || d.Name == "USD B2C"
+    //                                         || d.Name == "USD B2B INTL"
+    //                                         || d.Name == "CAD B2C HS"
+    //                                         || d.Name == "USD B2B ST"
+    //                                         || d.Name == "USD B2B DS"
+    //                                         || d.Name == "CAD B2B ST"
+    //                                         || d.Name == "CAD B2B DS"
+    //                                         ).FirstOrDefault();
+    var currRoles1 = customerService.GetCustomerRolesAsync(currcustomer).Result.Where(d => d.Name == "CAD B2C"
+           || d.Name == "USD B2C"
+           || d.Name == "USD B2B INTL"
+           || d.Name == "CAD B2C HS"
+           || d.Name == "USD B2B ST"
+           || d.Name == "USD B2B DS"
+           || d.Name == "CAD B2B ST"
+           || d.Name == "CAD B2B DS"
+           || d.Name == "Registered"
+           ).ToList();
+    if (currRoles1 == null)
+    {
+        currRoles1 = new List<CustomerRole>();
+    }
+    var reg = currRoles1.Any(x => x.Name == "Registered") && currRoles1.Any(x => x.Name == "USD B2C");
+    var regIntl = currRoles1.Any(x => x.Name == "USD B2B INTL");    
+}
+@{
+    var gridcount = 0;
+    bool isDistributorRequest = false;
+
+    if (Model.Count > 0)
+    {
+       
+        var datavalue = Model.Count == 1 ? Model.Count + 1 : Model.Count;
+        gridcount = datavalue + 1;
+
+        @if (DistributorRequestActive == true && regIntl==true)
+        {
+            gridcount = gridcount + 1;
+            isDistributorRequest = true;
+        }
+    }
+}
+
+
+<div class="category-grid home-page-category-grid">
+    <div class="item-grid" style="grid-template-columns: repeat( @gridcount, 1fr)">
+        @if (Model.Count > 0)
+        {
+            @foreach (var item in Model)
+            {
+                @if (item.Name == "Highlight of the Month")
+                {
+                    @if (reg == true)
+                    {
+                        <div class="item-box">
+                            <div class="category-item">
+                                <div class="picture">
+                                    <a href="@(Url.RouteUrl<Category>(new { SeName = item.SeName }))" title="@item.PictureModel.Title">
+                                        @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                                        {
+                                            @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                                                                                                                                         {
+                        ("src", item.PictureModel.ImageUrl),
+                        ("alt", item.PictureModel.AlternateText),
+                        ("title", item.PictureModel.Title)
+                                                                                                                                         })
+
+                                        }
+                                        else
+                                        {
+                                            <img alt="@item.PictureModel.AlternateText" src="@item.PictureModel.ImageUrl" title="@item.PictureModel.Title" />
+                                        }
+                                    </a>
+                                </div>
+                                <div class="title">
+                                    <div class="title-content-wrapper">
+                                        <a href="@(Url.RouteUrl<Category>(new { SeName = item.SeName }))" title="@item.PictureModel.Title">
+                                            @item.Name
+                                        </a>
+                                        @await Component.InvokeAsync("Widget", new { widgetZone = "pacific_itembox_subcategories", additionalData = item.Id })
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                }
+                else
+                {
+                    <div class="item-box">
+                        <div class="category-item">
+                            <div class="picture">
+                                <a href="@(Url.RouteUrl<Category>(new { SeName = item.SeName }))" title="@item.PictureModel.Title">
+                                    @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                                    {
+                                        @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                                                 {
+                        ("src", item.PictureModel.ImageUrl),
+                        ("alt", item.PictureModel.AlternateText),
+                        ("title", item.PictureModel.Title)
+                                                 })
+
+                                    }
+                                    else
+                                    {
+                                        <img alt="@item.PictureModel.AlternateText" src="@item.PictureModel.ImageUrl" title="@item.PictureModel.Title" />
+                                    }
+                                </a>
+                            </div>
+                            <div class="title">
+                                <div class="title-content-wrapper">
+                                    <a href="@(Url.RouteUrl<Category>(new { SeName = item.SeName }))" title="@item.PictureModel.Title">
+                                        @item.Name
+                                    </a>
+                                    @await Component.InvokeAsync("Widget", new { widgetZone = "pacific_itembox_subcategories", additionalData = item.Id })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+        }
+        }
+
+        @if (KnowledgePointActive == true)
+        {
+            <div class="item-box">
+                <div class="category-item">
+                    <div class="picture">
+                        <a href="/KnowledgeBase" title="Knowledge Base">
+                            <img src="~/Uploads/@PagenameBanner" data-lazyloadsrc="~/Uploads/@PagenameBanner" alt="Knowledge Base" title="Knowledge Base" loadedimage="true">
+                        </a>
+                    </div><div class="title">
+                        <div class="title-content-wrapper">
+                            <a href="/KnowledgeBase" title="Knowledge Base"> @NAme </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (isDistributorRequest)
+        {
+            <div class="item-box">
+                <div class="category-item">
+                    <div class="picture">
+                        <a href="/new-distributor-request-form" title="Distributor Request">
+                            <img src="~/Uploads/@DistributorRequeseBanner" data-lazyloadsrc="~/Uploads/@DistributorRequeseBanner" alt="Distributor Request" title="Distributor Request" loadedimage="true">
+                        </a>
+                    </div><div class="title">
+                        <div class="title-content-wrapper">
+                            <a href="/new-distributor-request-form" title="Distributor Request"> @DistributorRequesNAme </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

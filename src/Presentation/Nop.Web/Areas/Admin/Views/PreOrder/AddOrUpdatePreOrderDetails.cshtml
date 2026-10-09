@@ -1,0 +1,407 @@
+﻿@using Nop.Core.Domain.Orders.PreOrders
+@using Nop.Web.Areas.Admin.Models.Orders.PreOrders
+
+@model PreOrderModel
+
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Catalog.PreOrders.EditDetails").Text;
+
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Pre-Orders+");
+}
+
+
+<div class="content-header clearfix">
+    <h1 class="float-left">
+        @T("Admin.Catalog.PreOrders.EditDetails")
+    </h1>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="form-horizontal">
+
+            <style>
+                .card-custom-preorders {
+                    margin-bottom: 10px;
+                    border-top: 3px solid #00c0ef;
+                    border-left: 0;
+                    border-right: 0;
+                    border-bottom: 0;
+                    box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+                }
+
+                .validation-error-resource {
+                    display: none;
+                }
+            </style>
+
+            <nop-cards id="custom-preorders-cards">
+
+                <div class="card card-outline card-custom-preorders" id="CustomPreOrders-excel-info">
+                    <div class="card-header with-border clearfix">
+                        <div class="card-title">
+                            <i class="fas fa-sliders-h"></i>Import file info
+                        </div>
+                    </div>
+                    <div class="card-body">
+
+                        @************ Import Export Card *********@
+                        <div class="card card-default card-search">
+                            <div class="card-body">
+                                <div class="search-body">
+                                    <div class="row">
+                                        <div class="col-md-9">
+                                            <div class="clearfix divfileupload">
+                                                <h4> Upload Excel file. </h4>
+                                                <label>Please choose a <i style="color:blue;text-decoration:underline;">(.xlsx)</i> File.</label> <br />
+                                                <div class="align-items-center">
+                                                    <div>
+                                                        <input type="file" id="File" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+                                                    </div>
+
+                                                    <div class ="m-2 p-2">
+                                                        <div>
+                                                             <label class="col-form-label" for="includeexculdeproducts">Include/Exclude Products : </label>
+
+                                                            <nop-editor asp-for="IncludeExcludeProducts" />
+                                                        </div>
+                                                        <em>
+                                                            Note: If the above checkbox is checked, only the products listed in the Excel file will be included in the PreOrder feature.
+                                                            Otherwise, all products except those listed in the Excel file will be included.
+                                                        </em>
+                                                    </div>
+                                                    <div>
+                                                        <button type="button" onclick="ImportExcelDocumentFile()" class="btn bg-olive">
+                                                            <i class="fa fa-upload"></i>
+                                                            Upload Excel
+                                                        </button>
+
+                                                        <a class="btn btn-primary" href="@Url.Action("DownloadExcelDocument", "PreOrder")">
+                                                            <i class="fas fa-download"></i>
+                                                            Download Excel
+                                                        </a>
+
+                                                        <span class="errorExcelMessage" style="display: none; font-weight: 400;"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nop-cards>
+
+            <nop-cards id="custom-preorders-details-cards">
+
+                <form asp-controller="PreOrder" asp-action="AddOrUpdatePreOrderDetails" method="post">
+                    <input asp-for="Id" type="hidden" />
+
+                    <div class="card card-outline card-custom-preorders" id="CustomPreOrders-info">
+                        <div class="card-header with-border clearfix">
+                            <div class="card-title">
+                                <i class="fas fa-clock"></i>Pre Order info
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="enablePreOrder">Pre Order Active/InActive</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the pre-order feature active.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="IsPreOrderEnabled" />
+                                    <span asp-validation-for="IsPreOrderEnabled"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomerRoles">Select Customer Roles</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select eligible customer roles for pre-order.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group-append input-group-required">
+                                        <div class="input-group">
+                                            <nop-select asp-for="SelectedCustomerRoleIds" asp-items="Model.AvailableCustomerRoles" asp-multiple="true" />
+                                        </div>
+                                        <div class="input-group-btn">
+                                            <nop-required />
+                                        </div>
+                                    </div>
+
+                                    <script>
+                                        $(document).ready(function () {
+                                            var categoryIdsInput = $('#@Html.IdFor(model => model.SelectedCustomerRoleIds)').data("kendoMultiSelect");
+                                            categoryIdsInput.setOptions({
+                                                autoClose: false,
+                                                filter: "contains"
+                                            });
+
+                                        @if (Model.AvailableCustomerRoles.Count == 0)
+                                        {
+                                            <text>
+                                                    categoryIdsInput.setOptions({
+                                                        enable: false,
+                                                        placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                                    });
+                                                categoryIdsInput._placeholder();
+                                                categoryIdsInput._enable();
+                                            </text>
+                                        }                                                                                                                                                                                                });
+                                    </script>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    
+                                </div>
+                                <div class="col-md-9">
+                                    <input class="form-control text-box single-line valid" id="ProductIds" name="ProductIds" type="hidden" aria-invalid="false">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomerRoles">Product Skus</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Products eligible for the pre-order.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.ProductSkus" asp-required="true" />
+                                    <span asp-validation-for="@Model.ProductSkus"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="MinimumLead">Minimum Lead Time</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Specify the minimum number of days required before a preorder can be delivered.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.MinimumLeadTime" asp-required="true" />
+                                    <span asp-validation-for="@Model.MinimumLeadTime"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row" style="display:none">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="AllowedDeliveryDay">Allowed Delivery Days</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.AllowedDeliveryDays" asp-required="true" />
+                                    <span asp-validation-for="@Model.AllowedDeliveryDays"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="DeliveryEnd">Delivery End Date</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help"
+                                             data-original-title="Specify the last available delivery date for preorders.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.DeliveryEndDate" asp-required="true" />
+                                    <span asp-validation-for="@Model.DeliveryEndDate"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="EndDateAllowed">End Date</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="This is auto calculated as the last date customers can place a preorder.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.EndDate" />
+                                    <span asp-validation-for="@Model.EndDate"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="ProductMinimumQty">Product Minimum Quantity </label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The minimum quantity allowed for products.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.ProductMinimumQuantity" asp-required="true" />
+                                    <span asp-validation-for="@Model.ProductMinimumQuantity"></span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="ProductMaximumQty">Product Maximum Quantity </label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The maximum quantity allowed for products.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="@Model.ProductMaximumQuantity" asp-required="true" />
+                                    <span asp-validation-for="@Model.ProductMaximumQuantity"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-9 offset-md-3 mt-2">
+                                    <button type="submit" name="save" class="btn btn-primary">
+                                        <i class="far fa-save"></i>
+                                        @T("Admin.Common.Save")
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <script>
+
+                    $(document).ready(function () {
+
+                        var endDatePicker = $("#EndDate").data("kendoDatePicker");
+                        var deliveryPicker = $("#DeliveryEndDate").data("kendoDatePicker");
+
+                        // Disable calculated field
+                        if (endDatePicker) {
+                            endDatePicker.enable(false);
+                        }
+
+                        // Disable dates before today
+                        if (deliveryPicker) {
+                            var today = new Date();
+                            today.setHours(0, 0, 0, 0);
+
+                            deliveryPicker.min(today);
+
+                            // Recalculate when date changes
+                            deliveryPicker.bind("change", calculateMaxAllowedDate);
+                        }
+
+                        // Recalculate when lead time changes
+                        $("#MinimumLeadTime").on("change keyup", calculateMaxAllowedDate);
+
+                        calculateMaxAllowedDate();
+                    });
+
+                    function calculateMaxAllowedDate() {
+
+                        var deliveryEndPicker = $("#DeliveryEndDate").data("kendoDatePicker");
+
+                        if (!deliveryEndPicker)
+                            return;
+
+                        var deliveryEnd = deliveryEndPicker.value();
+                        var leadTime = parseInt($("#MinimumLeadTime").val(), 10);
+
+                        if (!deliveryEnd || isNaN(leadTime)) {
+                            $("#EndDate").data("kendoDatePicker").value(null);
+                            return;
+                        }
+
+                        // Clone date
+                        var maxAllowedDate = new Date(deliveryEnd.getTime());
+
+                        // Subtract lead time
+                        maxAllowedDate.setDate(maxAllowedDate.getDate() - leadTime);
+
+                        // Set the value
+                        $("#EndDate").data("kendoDatePicker").value(maxAllowedDate);
+                    }
+
+                    function ImportExcelDocumentFile() {
+
+                        var status = false;
+                        var formData = new FormData();
+                        var file = $('#File')[0].files[0];
+
+                        status = file != "" && file != null ? true : false;
+                        formData.append('file', file);
+
+                        // Append checkbox value
+                        formData.append('includeProducts', $('#IncludeExcludeProducts').is(':checked'));
+
+                        if (status) {
+                            $.ajax({
+                                url: '@Url.Action("ImportExcelDocument", "PreOrder", new { area = "Admin" })',
+                                type: 'POST',
+                                data: formData,
+                                processData: false,
+                                contentType: false,
+                                cache: false,
+                                success: function (result) {
+                                    $('.errorExcelMessage').removeClass('text-danger')
+                                        .addClass('text-success').text(result)
+                                        .css('display', 'inline-block').fadeOut(5000);
+
+                                    $('#File').val("");
+
+                                    window.location.reload();
+                                },
+                                error: function (xhr) {
+                                    $('.errorExcelMessage')
+                                        .removeClass('text-success').addClass('text-danger')
+                                        .text(xhr.responseText || "An error occurred while uploading the file.")
+                                        .css('display', 'inline-block').fadeOut(5000);
+                                }
+                            });
+                        }
+                        else {
+                            $('.errorExcelMessage')
+                                .removeClass('text-success').addClass('text-danger')
+                                .text("Please choose a file.").css('display', 'inline-block')
+                                .fadeOut(3000);
+                        }
+                    }
+                </script>
+            </nop-cards>
+
+            <nop-cards id="custom-preorders-blackout-cards">
+
+                @await Html.PartialAsync("_CreateOrUpdateBlackOutDates", Model)
+            </nop-cards>
+
+            <nop-cards id="custom-preorders-message-cards">
+
+                @await Html.PartialAsync("_CreateOrUpdateReminderSettings", Model)
+            </nop-cards>
+
+            <nop-cards id="custom-preorders-resources-cards">
+
+                @await Html.PartialAsync("_UpdatePreOrderResources", Model)
+            </nop-cards>
+        </div>
+    </div>
+</section>

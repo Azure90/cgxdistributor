@@ -1,0 +1,162 @@
+﻿@model PollModel
+<div class="poll_outer">
+    <div class="poll" id="poll-block-@(Model.Id)">
+        <strong class="poll-display-text">@Html.Raw(Model.Name)</strong>
+        <input type="hidden" value="@Model.AlreadyVoted" id="hdnAlreadyVoted" />
+        @if (Model.AlreadyVoted)
+        {
+            @*  <ul class="poll-results">
+        @foreach (var item in Model.Answers)
+        {
+        <li class="answer">
+        @string.Format(T("Polls.VotesResultLine").Text, item.Name, item.NumberOfVotes, item.PercentOfTotalVotes.ToString("0.0"))
+        </li>
+        }
+        </ul>
+        <span class="poll-total-votes">@string.Format(T("Polls.TotalVotes").Text, Model.TotalVotes)</span> *@
+            <div class="feedbackBox">
+
+                <h3>
+                    @T("Poll.AfterReview.Feedback")
+                </h3>
+                <p>
+                    @T("Poll.AfterReview.Thanxforsubmitting")
+                </p>
+            </div>
+        }
+        else
+        {
+            <ul class="poll-options">
+                @foreach (var item in Model.Answers)
+                {
+                    <li class="answer">
+                        <input id="pollanswers-@(item.Id)" type="radio" name="pollanswers-@(Model.Id)" value="@item.Id" />
+                        <label for="pollanswers-@(item.Id)">@item.Name</label>
+                    </li>
+                }
+            </ul>
+            <div class="buttons">
+                @* <button type="button" id="vote-poll-@(Model.Id)" class="button-2 vote-poll-button">Start Survey <span><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" x="0" y="0" viewBox="0 0 24 24" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><g data-name="19"><path d="M12 19a1 1 0 0 1-.71-1.71l5.3-5.29-5.3-5.29A1 1 0 0 1 12.7 5.3l6 6a1 1 0 0 1 0 1.41l-6 6a1 1 0 0 1-.7.29z" fill="#005b55" opacity="1" data-original="#000000" class=""></path><path d="M6 19a1 1 0 0 1-.71-1.71l5.3-5.29-5.3-5.29a1 1 0 0 1 1.42-1.42l6 6a1 1 0 0 1 0 1.41l-6 6A1 1 0 0 1 6 19z" fill="#005b55" opacity="1" data-original="#000000" class=""></path></g></g></svg></span></button> *@
+                @* <button type="button"  class="button-2 vote-poll-button vote-poll-@(Model.Id)">Vote </button> *@
+                <button class="button-2 vote-poll-button vote-poll" data-model-id="@Model.Id">Vote</button>
+
+
+                <span id="poll-voting-progress-@(Model.Id)" style="display: none;" class="please-wait">@T("Common.Wait")</span>
+            </div>
+            <div class="poll-vote-error" id="block-poll-vote-error-@(Model.Id)" style="display:none">
+            </div>
+            <script asp-location="Footer">
+                $(document).on('click', '.vote-poll', function () {
+                    var modelId = $(this).data('model-id');
+                    var pollAnswerId = $(`input:radio[name=pollanswers-${modelId}]:checked`).val();
+
+                    if (typeof (pollAnswerId) == 'undefined') {
+                        alert('@Html.Raw(JavaScriptEncoder.Default.Encode(T("Polls.SelectAnswer").Text))');
+                    } else {
+                        var voteProgress = $(`#poll-voting-progress-${modelId}`);
+                        voteProgress.show();
+
+                        var postData = {
+                            "pollAnswerId": pollAnswerId
+                        };
+                        addAntiForgeryToken(postData);
+
+                        $.ajax({
+                            cache: false,
+                            type: "POST",
+                            url: "@(Url.RouteUrl("PollVote"))",
+                            data: postData,
+                            success: function (data, textStatus, jqXHR) {
+                                if (data.error) {
+                                    $(`#block-poll-vote-error-${modelId}`).html(data.error).fadeIn("slow").delay(2000).fadeOut("slow");
+                                }
+                                if (data.html) {
+                                    $(`#poll-block-${modelId}`).replaceWith(data.html);
+                                }
+                            },
+                            error: function (jqXHR, textStatus, errorThrown) {
+                                alert('Failed to vote.');
+                            },
+                            complete: function (jqXHR, textStatus) {
+                                voteProgress.hide();
+                            }
+                        });
+                    }
+                    return false;
+                });
+
+            </script>
+        }
+    </div>
+</div>
+
+<style>
+    #popupModal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+</style>
+<script>
+    $(document).ready(function () {
+        debugger
+        const bannerValue = getCookie('Pollpopup');
+
+        if (bannerValue == 'Pollpopup') {
+
+            if ($("#hdnAlreadyVoted").val() != 'value')
+            {
+
+                setTimeout(function () {
+
+                    showPopup();
+                }, 600);
+            }
+
+        }
+
+
+        function showPopup() {
+
+            $("#popupModal").fadeIn();
+            $("#popupContent").append();
+
+            var content = $(".poll_outer").html();
+            $("#popupBody").html(content);
+        }
+
+
+
+    });
+    $("#closePopup1").on("click", function () {
+
+        $("#popupModal").fadeOut();
+        deleteCookie('Pollpopup');
+    });
+    function deleteCookie(name) {
+                                var domain = window.location.hostname;
+                                var path = '/';
+
+                                // Delete cookie for the current domain
+                                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=.' + domain + ';';
+                                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=' + domain + ';';
+
+                                // If domain is a subdomain, also attempt to delete the cookie for the parent domain
+                                var parentDomain = domain.startsWith('www.') ? domain.substring(4) : domain;
+                                if (parentDomain !== domain) {
+                                    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=.' + parentDomain + ';';
+                                    document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=' + parentDomain + ';';
+                                }
+
+                                // Finally, delete the cookie without any domain specification (browser default)
+                                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + ';';
+                                location.reload();
+                            }
+</script>

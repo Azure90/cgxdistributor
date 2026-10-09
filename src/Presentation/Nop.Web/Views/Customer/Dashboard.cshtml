@@ -1,0 +1,231 @@
+﻿@model CustomerNavigationModel
+@{
+    Layout = "_ColumnsOne";
+
+ 
+    NopHtml.AppendCssFileParts("~/css/admin/styles.css");
+    NopHtml.AppendCssFileParts("~/lib/adminLTE/css/AdminLTE.min.css");
+    NopHtml.AppendCssFileParts("~/lib/bootstrap/css/bootstrap.min.css");
+
+    //font Awesome
+    NopHtml.AppendCssFileParts("~/lib/fontAwesome/css/font-awesome.css");
+
+}
+
+<style>
+    .abc {
+    color: white;
+}
+a:hover, a:active, a:focus {
+   color: white;
+}
+.box.box-info {
+        border-top-color: #a3da40;
+}
+
+</style>
+<div class="box box-info" style="background-color:#e8e8e8;">
+
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="box-header with-border clearfix" style="text-align:center;">
+                <div class="box-title">
+                    Welcome Back, <br />
+                    @Model.Username! <br />
+                    <span style="font-size:14px;">Thank your for being a loyal customer!</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="box-body">
+        <div class="row border">
+            @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.AccountNavigationBefore })
+            @foreach (var item in Model.CustomerNavigationItems)
+            {
+                @*loop through all Customer Account*@
+                <div class="col-lg-3" style="padding:0px;">
+                    <div class="col-border">
+                        <div class="info-box info-box-sm">
+                            <div class="info-box-icon" style="background-color: #323232;">
+                                @*<i class="fa fa-briefcase"></i>*@
+                                <a class="abc" href="@Url.RouteUrl(item.RouteName)">
+                                    @switch (item.RouteName)
+                                    {
+                                        case "CustomerInfo":
+                                            <i class="fa fa-user myStyle" aria-hidden="true"></i>
+                                            break;
+                                        case "CustomerAddresses":
+                                            <i class="fa fa-map-marker myStyle" aria-hidden="true"></i>
+                                            break;
+                                        case "CustomerOrders":
+                                            <i class="fa fa-gift myStyle" aria-hidden="true"></i>
+                                            break;
+                                        case "CustomerReturnRequests":
+                                            <i class="fa fa-undo myStyle" aria-hidden="true"></i>
+                                            break;
+                                        case "CustomerDownloadableProducts":
+                                            <i class="fa fa-download myStyle" aria-hidden="true"></i>
+                                            break;
+                                        @*case "CustomerBackInStockSubscriptions":
+                                            <i class="fa fa-stack-exchange myStyle" aria-hidden="true"></i>
+                                            break;*@
+                                                                    @*case "CustomerRewardPoints":
+                                            <i class="fa fa-th myStyle" aria-hidden="true"></i>
+                                            break;*@
+                                        case "CustomerChangePassword":
+                                            <i class="fa fa-key myStyle" aria-hidden="true"></i>
+                                            break;
+                                        @*case "customeravatar":
+                                            <i class="ion ion-person-add" ></i>
+                                            break;*@
+                                                                    @*case "CustomerForumSubscriptions":
+                                            <i class="ion ion-person-add"></i>
+                                            break;*@
+                                        case "CustomerProductReviews":
+                                            <i class="fa fa-product-hunt myStyle" aria-hidden="true"></i>
+                                            break;
+
+                                        @* case "CustomerInvoice":
+                                            <i class="fa-thin fa-file-invoice myStyle" aria-hidden="true"></i>
+                                            break; *@
+                                        //case "CustomerVendorInfo":
+
+                                        //    break;
+                                        //case "GdprTools":
+
+                                        //    break;
+                                        //case "CheckGiftCardBalance":
+
+                                        //    break;
+                                        case "customerOfflineTransactions":
+                                            <i class="fa fa-address-book myStyle" aria-hidden="true"></i>
+                                            break;
+
+                                        default:
+
+                                            break;
+                                    }
+                                </a>
+                             </div>
+
+                            <div class="info-box-content">
+                                <div class="info-box-text">
+                                    <a href="@Url.RouteUrl(item.RouteName)">
+                                        <p class="TitleHeading">@(item.Title)</p>
+
+                                        @switch (item.RouteName)
+                                        {
+                                            case "CustomerInfo":
+                                    <p class="TitleText">(Info, login, email, dental group and contact number)</p>
+                                                break;
+                                            case "CustomerAddresses":
+                                                <p class="TitleText">(Edit your addresses for orders)</p>
+                                                break;
+                                            case "CustomerOrders":
+                                                <p class="TitleText">(Track or return your orders)</p>
+                                                break;
+                                            case "CustomerReturnRequests":
+                                                <p class="TitleText">(Your Return Request)</p>
+                                                break;
+                                            case "CustomerDownloadableProducts":
+                                                <p class="TitleText">(downloadable product)</p>
+                                                break;
+                                            @*case "CustomerBackInStockSubscriptions":
+                                                <p class="TitleText">(BackIn Stock Subscriptions)</p>
+                                                break;*@
+                                            @*case "CustomerRewardPoints":
+                                                <p class="TitleText">(Reward Points)</p>
+                                                 break;*@
+                                            case "CustomerChangePassword":
+                                                <p class="TitleText">(Reset or update your password)</p>
+                                                break;
+                                            @*case "CustomerAvatar":
+                                                <p class="TitleText">(Avatar)</p>
+                                                break;*@
+                                            @*case "CustomerForumSubscriptions":
+                                                <p class="TitleText">(Forum Subscriptions)</p>
+                                                break;*@
+                                            case "CustomerProductReviews":
+                                                <p class="TitleText">(Rate your prefer products)</p>
+                                                break;
+                                            @*case "CustomerVendorInfo":
+                                                <p class="TitleText">(Vendor Info)</p>
+                                                break;*@
+                                            @*case "GdprTools":
+                                                <p class="TitleText">(Gdpr Tools)</p>
+                                                break;*@
+                                            @*case "CheckGiftCardBalance":
+                                                <p class="TitleText">(Gift Card Balance)</p>
+                                                break;*@
+                                            case "customerOfflineTransactions":
+                                                <p class="TitleText">(Manage payments, credits and balances)</p>
+                                                break;
+
+                                            default:
+
+                                                break;
+                                        }
+                                    </a>
+                                </div>
+                                @*<span class="info-box-number">369 records</span>*@
+                            </div>
+
+                            <div class="info-box-dropdown">
+                                <!-- Right side button for dropdown -->
+                            </div>
+                        </div>
+                
+                    </div>
+                 </div>
+            }
+            </div>
+    </div>
+    @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.AccountNavigationAfter })
+</div>
+
+
+<style>
+    .myStyle {
+        /*color: gray;*/
+        font-size: 50px;
+    }
+
+    .TitleText {
+        font-size: 12px;
+        color: #525252;
+        text-wrap:normal;
+    }
+
+    .TitleHeading {
+        font-size: 14px;
+        font-weight: bold;
+        color: #525252;
+        text-transform: uppercase;
+    }
+
+    /*there is another way to Bootstrap Column border width */
+    /*.border > div {
+        border: 1.5px solid #69bef0;
+        margin: 5px;
+    }*/
+
+    .info-box {
+        margin-bottom: 0px;
+        background-color:transparent;
+    }
+
+    .info-box-text {
+        white-space:normal;
+    }
+
+    /*this style help to make boootstrap columns border size*/
+    .col-border {
+        margin: 5px;
+        border: 1.5px solid #a3da40;
+        border-radius: 2px;
+        -moz-border-radius: 2px;
+        -webkit-border-radius: 2px;
+    }
+  </style>

@@ -1,0 +1,44 @@
+﻿@foreach (Nop.Web.Models.OfflineTransaction.InvoiceModel item in Model.Invoices)
+{
+
+    <tr style="@(item.InvoiceType == "Invoice Number" ? "background-color:#dfe2e6" : "background-color:#eceaea") ;   color: black;">
+        <td> @item.Invoice</td>
+
+        @if (item.InvoiceType == "Invoice Number")
+        {
+            <td>
+                Invoice
+            </td>
+        }
+        else
+        {
+            <td>
+                Credit Memo
+            </td>
+        }
+
+        @if (item.OrderId != "")
+        {
+
+            <td>@item.OrderId</td>
+        }
+        else
+        {
+            <td>@T("Account.OfflineTransactionModel.IsNullOrder")</td>
+        }
+        <td>@item.CustomerName</td>
+        <td>@item.InvoiceStatus</td>
+
+        <td>@item.InvoiceDate</td>
+        <td>@item.InvoiceTotal</td>
+        <td> @item.Balance</td>
+        <td>
+            <a class="getpdfinvoice" title="Download Invoice" onclick="window.location='@Url.RouteUrl("OfflineTransactionPdfInvoice", new {  invoiceid = item.Invoice, invType = item.InvoiceType })'">
+                <img src="/images/PDF-Icon.png" style="width: 50px;height: 50px;" />
+            </a>
+            @* <input type="submit" class="button-1" onclick="location.href='@(Url.RouteUrl("OfflineTransactionPdfInvoice", new {invoiceid = item.Invoice, invType= item.InvoiceType}))'" value="@item.ButtonText" /> *@
+
+        </td>
+    </tr>
+
+}

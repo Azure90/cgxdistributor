@@ -1,0 +1,73 @@
+﻿@model Nop.Web.Areas.Admin.Models.CustomPage.SubTitleModel
+
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.CustomPage.List").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Subtitle Page");
+}
+<style>
+
+    .content-wrapper {
+        background-color: #ffffff;
+    }
+
+    .panel-body {
+        background: #fff;
+        padding: 20px;
+    }
+
+</style>
+<div class="content-header clearfix">
+    <h2 class="pull-left">
+        @if (Model.ID == 0)
+        {
+            <span>Create Knowledge Subtitle Base</span>
+        }
+        else
+        {
+            <span>Edit Knowledge Subtitle Base</span>
+        }
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="SubtitleList">@T("Admin.ContentManagement.Topics.BackToList")</a>
+        </small>
+    </h2>
+</div>
+<div class="panel-body">
+    <form enctype="multipart/form-data" asp-action="SaveSubtitle">
+        <input asp-for="ID" type="hidden" />
+        @if (Model.ID != 0)
+        {
+        <input asp-for="LanguageId" type="hidden" />
+        }
+        @if (Model.ID == 0)
+        {
+        <div class="margin-bottom row">
+        <div class="col-md-3">
+        <label>Language</label>
+        </div>
+        <div class="col-md-9">
+        <select name="LanguageId" class="validation" data_spnid="spnLanguage" id="Language" value="selected" asp-for="LanguageId">
+        <option value="Select Language">Select Language</option>
+        <option value="1">English</option>
+        <option value="2">Français</option>
+
+        </select>
+        <span id="spnLanguage" class="custom-validation"></span>
+        </div>
+        </div>
+        }
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="SubTittle" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="SubTittle" />
+                <span asp-validation-for="SubTittle"></span>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary" onclick="return savesubtitle()">Save</button>
+        <span id="allfield"></span>
+    </form>
+</div>

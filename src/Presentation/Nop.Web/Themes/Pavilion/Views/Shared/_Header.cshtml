@@ -1,0 +1,856 @@
+﻿@using Microsoft.AspNetCore.Http
+@using Nop.Core
+@using Nop.Core.Infrastructure
+@using Nop.Services.Configuration
+@using Nop.Web.Controllers
+@using Nop.Web.Framework.Extensions
+@using Nop.Web.Framework.Infrastructure
+@using Nop.Web.Infrastructure
+@using Nop.Web.Components;
+@using Nop.Services.Customers;
+@inject IHttpContextAccessor Accessor
+@inject IStoreContext storeContext
+@inject ISettingService settingService
+@inject IWorkContext _workContext
+@inject ICustomerService _customerService
+
+@{
+    var controllerName = Url.ActionContext.RouteData.Values["controller"].ToString();
+    var actionName = Url.ActionContext.RouteData.Values["action"].ToString();
+    var isHomePage = controllerName.Equals("home", StringComparison.InvariantCultureIgnoreCase) &&
+                        actionName.Equals("index", StringComparison.InvariantCultureIgnoreCase);
+
+    var currentStore = await storeContext.GetCurrentStoreAsync();
+    int storeId = currentStore.Id;
+    bool isHomeSliderFullWidth = await settingService.GetSettingByKeyAsync("pavilionthemesettings.ishomepagemainsliderfullwidth", false, storeId, true);
+    bool stickyCategoryMenuFlyout = await settingService.GetSettingByKeyAsync("pavilionthemesettings.StickyCategoryMenuFlyout", true, storeId, true);
+    bool showCategoriesInSideMenu = await settingService.GetSettingByKeyAsync("pavilionthemesettings.ShowCategoriesInSideMenu", true, storeId, true);
+
+
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+@* <link href="~/css/custompage/headercustom/header.css" rel="stylesheet" /> *@
+<style>
+    /*.header-upper{
+                                                        background-color:black;
+                                                    }*/
+    .topbar {
+        background: rgb(0, 91, 86);
+        padding: 8px;
+        position: relative;
+        transition: all .5s;
+    }
+
+    .topbarContent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+    }
+
+        .topbarContent > p {
+            font-size: 15px;
+            color: #ffffff;
+            font-weight: bold;
+            font-style: italic;
+            margin-bottom: 0;
+        }
+
+    .subscribe-btn {
+        border: none;
+        padding: 6px 10px;
+        background: #fff;
+        font-size: 11px;
+        color: #005b56c9;
+        line-height: normal;
+        border-radius: 4px;
+        font-family: 'Open Sans';
+    }
+
+    .topbar .close-icon {
+        position: absolute;
+        right: 20px;
+        top: 50%;
+        width: 20px;
+        height: 20px;
+        transform: translateY(-50%);
+        fill: #fff;
+        cursor: pointer;
+        transition: all .5s;
+    }
+
+    .divroles, .AssociatedCustomer {
+        float: right;
+        width: auto;
+        height: 25px;
+        margin-top: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+        .divroles > label, .AssociatedCustomer > label {
+            white-space: nowrap;
+        }
+
+    .selectroles {
+        width: 100%;
+        height: 100%;
+        padding: 0 10px;
+        border-radius: 0;
+    }
+
+
+
+    .modal-content {
+        max-height: calc(100vh - 150px); /* maximum height of modal content */
+        overflow-y: auto; /* enable vertical scroll if content exceeds height */
+    }
+
+    /* Style for modal body */
+    .modal-body {
+        padding: 15px; /* add padding */
+    }
+
+    /* Style for modal footer */
+    .modal-footer {
+        padding: 15px; /* add padding */
+    }
+
+    .ct-Popup_outer {
+        left: 0;
+    }
+
+    #PreviousOrder {
+        float: right;
+        border: none;
+        /*  margin: 0px 0 0 30px; */
+        color: #fff;
+        /* padding: 0 17px; */
+        /* line-height: 42px; */
+        /* display: none; */
+    }
+
+    .my_itemsBtn {
+        display: flex;
+        background: #88a900;
+        width: 120px;
+        align-items: center;
+        gap: 10px;
+        padding: 4px;
+        justify-content: center;
+        transition: .4s all;
+        float: right;
+        margin-left: 30px;
+        cursor: pointer;
+    }
+
+    .itemsIcon svg {
+        width: 18px;
+        fill: #fff;
+        transform: translateY(2px);
+    }
+
+    .itemsTxt {
+        color: #fff;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+        .itemsTxt span {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 2px;
+            font-weight: 400;
+        }
+
+
+
+    @@media all and (max-width: 1024px) {
+        .header-links-wrapper, .header-selectors-wrapper {
+            margin: 0 0 0 10px;
+        }
+
+        .my_itemsBtn {
+            margin-left: 10px;
+        }
+    }
+
+    .admin-header-links a {
+        text-transform: capitalize !important;
+    }
+
+
+    .customer-active {
+        background: #d7e1b0;
+    }
+
+    .customer-inactive {
+        background: #e7b7b7;
+    }
+
+    .Associated {
+        text-transform: uppercase;
+    }
+
+    /* Style the modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Style the modal content */
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 40px; /* Increased padding for a larger modal */
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        max-width: 600px; /* Increased max-width for a larger modal */
+        width: 100%;
+        font-size: 22px;
+    }
+
+    /* Style the close button */
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        color: #555;
+        cursor: pointer;
+    }
+
+    /* Style the Open Modal button */
+    #myModalBtn {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+    }
+
+        #myModalBtn:hover {
+            background-color: #45a049;
+        }
+
+        #gt_float_wrapper {
+            left: 15px !important;
+            z-index: 999999;
+            float: right;
+            position: relative !important;
+            bottom: 0 !important;
+        }
+
+        .gt_float_switcher {
+            font-size: 16px;
+        }
+
+        .gt_float_switcher img {
+            width: 20px;
+        }
+
+        .gt_float_switcher .gt-selected .gt-current-lang span.gt-lang-code {
+            font-size: 16px;
+        }
+
+        .gt_float_switcher .gt_options {
+            position: absolute;
+            background: #fff;
+            top: calc(100% - 2px);
+            overflow-x: hidden;
+            padding-right: 20px;
+        }
+
+        .gt_float_switcher .gt-selected .gt-current-lang {
+            padding: 9px 15px;
+        }
+
+        .gt_float_switcher .gt_options a {
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        @@media(Max-width: 1024px) {
+            .gt_float_switcher .gt_options {
+                right: 0;
+                text-align: left;
+            }
+
+            .gt_float_switcher {
+                box-shadow: unset;
+            }
+
+            .gt_float_switcher .gt-selected .gt-current-lang {
+                padding: 5px 0;
+            }
+
+            .gt_float_switcher .gt-selected .gt-current-lang span.gt-lang-code {
+                font-size: 15px;
+            }
+
+            .responsive-nav-wrapper > div > span, .responsive-nav-wrapper > div > a {
+                width: 50px;
+            }
+
+            .responsive-nav-wrapper div.itemsIcon {
+                width: 50px;
+        }
+        }
+</style>
+@{
+    var customer = _workContext.GetCurrentCustomerAsync().Result;
+    var GetallRoles = _customerService.GetCustomerRolesAsync(customer).Result.Where(d => d.Name == "CAD B2C"
+                || d.Name == "USD B2C"
+                || d.Name == "USD B2B INTL"
+                || d.Name == "CAD B2C HS"
+                || d.Name == "USD B2B ST"
+                || d.Name == "USD B2B DS"
+                || d.Name == "CAD B2B ST"
+                || d.Name == "CAD B2B DS"
+                ).FirstOrDefault();
+}
+<div class="header">
+    
+    <div id="render">
+    </div>
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderBefore })
+    @{
+        var session = EngineContext.Current.Resolve<IHttpContextAccessor>().HttpContext.Request.Cookies;
+        session.TryGetValue("Banner", out string cookieLanguageCode);
+    }
+
+    @if (cookieLanguageCode != "header")
+    {
+        <div class="header-signup-banner">
+            @await Component.InvokeAsync("TopicBlock", new { systemName = "cadheaderbanner" })
+        </div>
+    }
+
+    else
+    {
+        <style>
+            .header {
+                padding-top: 0 !important;
+            }
+        </style>
+    }
+    <div class="header-upper">
+        <div id="renderrewards">
+        </div>
+        <div class="center">
+            @await Component.InvokeAsync(typeof(AdminHeaderLinksViewComponent))
+            @{
+                var taxTypeSelectorHtml = await Component.InvokeAsync(typeof(TaxTypeSelectorViewComponent));
+                var currencySelectorHtml = await Component.InvokeAsync(typeof(CurrencySelectorViewComponent));
+                var languageSelectorHtml = await Component.InvokeAsync(typeof(LanguageSelectorViewComponent));
+                var headerSelectorWidgetHtml = await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderSelectors });
+            }
+
+            @if (!String.IsNullOrEmpty(await taxTypeSelectorHtml.RenderHtmlContentAsync()) ||
+            !String.IsNullOrEmpty(await currencySelectorHtml.RenderHtmlContentAsync()) ||
+            !String.IsNullOrEmpty(await languageSelectorHtml.RenderHtmlContentAsync()) ||
+            !String.IsNullOrEmpty(await headerSelectorWidgetHtml.RenderHtmlContentAsync()))
+            {
+                @if (_workContext.GetCurrentCustomerAsync().Result.Email != null)
+                {
+                    @* <button id="PreviousOrder" onclick="return previousorder()">PreviousOrder</button> *@
+
+                    <div class="my_itemsBtn" id="PreviousOrder" onclick="return previousorder()">
+                        <div class="itemsIcon">
+                            <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path class="cls-1" d="M16,28.72a3,3,0,0,1-2.13-.88L3.57,17.54a8.72,8.72,0,0,1-2.52-6.25,8.06,8.06,0,0,1,8.14-8A8.06,8.06,0,0,1,15,5.68l1,1,.82-.82h0a8.39,8.39,0,0,1,11-.89,8.25,8.25,0,0,1,.81,12.36L18.13,27.84A3,3,0,0,1,16,28.72ZM9.15,5.28A6.12,6.12,0,0,0,4.89,7a6,6,0,0,0-1.84,4.33A6.72,6.72,0,0,0,5,16.13l10.3,10.3a1,1,0,0,0,1.42,0L27.23,15.91A6.25,6.25,0,0,0,29,11.11a6.18,6.18,0,0,0-2.43-4.55,6.37,6.37,0,0,0-8.37.71L16.71,8.8a1,1,0,0,1-1.42,0l-1.7-1.7a6.28,6.28,0,0,0-4.4-1.82Z" /></svg>
+                        </div>
+                        <div class="itemsTxt">
+                            <span>Reorder</span>
+                            My Items
+                        </div>
+                    </div>
+                }
+               @*  <div class="header-selectors-wrapper">
+                    <label>@T("SevenSpikes.Themes.Pavilion.Header.Preferences")</label>
+                    <div class="header-selectors">
+                        @taxTypeSelectorHtml
+                        @currencySelectorHtml
+                        @languageSelectorHtml
+                        @headerSelectorWidgetHtml
+                    </div>
+
+                </div> *@
+                <div>
+                    <div class="gtranslate_wrapper"></div>
+                    <script>window.gtranslateSettings = { "default_language": "en", "languages": ["en", "fr", "de", "it", "es", "pa"], "wrapper_selector": ".gtranslate_wrapper" }</script>
+                    <script src="https://cdn.gtranslate.net/widgets/latest/float.js" defer></script>
+                    <script>                        
+
+                        function detectLanguageChange() {
+                            
+                            // The GTranslate widget creates a select element, let's listen for changes on it
+                            const languageSelect = document.querySelector('.gtranslate_wrapper select');
+
+                            if (languageSelect) {
+                                languageSelect.addEventListener('change', function () {                                    
+                                    var currentLang = window.location.hash.substring(1); // Get selected language from URL hash
+                                    if (this.value === 'en') {
+                                     
+                                        deleteCookie('googtrans');
+                                        //location.reload(); 
+                                    }
+                                });
+                            } 
+                        }
+                        function deleteCookie(name) {
+                            var domain = window.location.hostname;
+                            var path = '/';
+
+                            // Delete cookie for the current domain
+                            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=.' + domain + ';';
+                            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=' + domain + ';';
+
+                            // If domain is a subdomain, also attempt to delete the cookie for the parent domain
+                            var parentDomain = domain.startsWith('www.') ? domain.substring(4) : domain;
+                            if (parentDomain !== domain) {
+                                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=.' + parentDomain + ';';
+                                document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + '; domain=' + parentDomain + ';';
+                            }
+
+                            // Finally, delete the cookie without any domain specification (browser default)
+                            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=' + path + ';';
+                            location.reload();
+                        }
+
+                        // Run the language change detection after the widget is loaded
+                        window.addEventListener('load', function () {
+                            
+                            detectLanguageChange();
+                        });
+                   
+                    </script>
+                </div>
+                
+                <div class="header-selector-widget" style="display: none;">@headerSelectorWidgetHtml</div>
+            }
+         
+            <div class="header-links-wrapper">
+                @* <label>@T("SevenSpikes.Themes.Pavilion.Header.MyAccount")</label>
+                @await Component.InvokeAsync(typeof(HeaderLinksViewComponent)) *@
+                @*code by Tp*@
+                @await Component.InvokeAsync(typeof(GetCustomerRoleViewComponent))
+                @await Component.InvokeAsync("HeaderLinks")
+            </div>
+
+
+            @if (_workContext.GetCurrentCustomerAsync().Result.Email == null)
+            {
+
+                <div class="divroles">
+                    <label> Customer Type :</label>
+                    <select class="form-select valid selectroles">
+                        <option value="cad">Canada</option>
+                        <option value="usd">United States</option>
+                        <option value="intl">International</option>
+
+                    </select>
+                </div>
+            }
+            else
+            {
+                <div class="AssociatedCustomer">
+                    @* <label> Associated Customer :</label>
+                <select class="form-control valid Associated" onchange="redirectToPage()">
+                <option value="0">Select </option>
+                </select> *@
+                </div>
+            }
+            @* <button type="button" class="btn btn-primary" id="Impersonate">Impersonate</button> *@
+            <div id="myModal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <p></p>
+                </div>
+            </div>
+            <script>
+                function setCookie(cookieName, cookieValue, daysToExpire) {
+                    const expirationDate = new Date();
+                    expirationDate.setDate(expirationDate.getDate() + daysToExpire);
+
+                    const cookieString = `${cookieName}=${encodeURIComponent(cookieValue)}; expires=${expirationDate.toUTCString()}; path=/`;
+                    document.cookie = cookieString;
+                }
+                function getCookie(cookieName) {
+                    const name = cookieName + "=";
+                    const decodedCookie = decodeURIComponent(document.cookie);
+                    const cookieArray = decodedCookie.split(';');
+
+                    for (let i = 0; i < cookieArray.length; i++) {
+                        let cookie = cookieArray[i].trim();
+                        if (cookie.indexOf(name) == 0) {
+                            return cookie.substring(name.length, cookie.length);
+                        }
+                    }
+                    return null;
+                }
+
+                $(".close").click(function () {
+                    $("#myModal").hide();
+                });
+                function redirectToPage() {
+                    if ($(".Associated").val() != 0) {
+                        var selectedvalue = $(".option_" + $(".Associated").val()).attr("data-isactive");
+                        if (selectedvalue == "True") {
+
+                            $.ajax({
+                                type: 'GET',
+                                url: '/Customer/finishImpersonate',
+                                success: function (data) {
+                                    var associateid = $(".Associated").val();
+                                    setCookie('ImpersonateCustomer', 'Impersonate');
+                                    setCookie('ImpersonateCustomerid', associateid);
+
+                                    //sessionStorage.setItem('ImpersonateCustomer', 'Impersonate');
+
+                                    window.location.href = '/Customer/Impersonate?id=' + associateid;
+                                }
+                            })
+                        }
+                        else {
+                            $("#myModal").show();
+                            $("#myModal p").text("This Customer is not Active.Please select another Customer!").css("color", "red");
+                            $(".Associated").val(0);
+
+                        }
+                    }
+                }
+
+
+
+                // document.getElementById('Associated').addEventListener('change', function () {
+                //     var associateid = $(".Associated").val();
+                //     window.location.href = '/Customer/Impersonate?id=' + associateid;
+                // });
+            </script>
+
+            <input type="hidden" id="hdnstatus" />
+            <input type="hidden" id="hdnprevoiusorder" />
+        </div>
+    </div>
+
+    <div class="header-middle">
+        <div class="center">
+
+            <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        </div>
+                        <div class="modal-body" id="modalBody">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-logo">
+                @await Component.InvokeAsync(typeof(LogoViewComponent))
+            </div>
+            <div class="header-menu-parent">
+                <div class="header-menu @if (showCategoriesInSideMenu){
+                <text>categories-in-side-panel</text>
+}">
+                    <div class="close-menu">
+                        <span>@T("SevenSpikes.Themes.Common.CloseMenu")</span>
+                    </div>
+                    @{
+                        var menuHtml = await Component.InvokeAsync("Widget", new { widgetZone = "theme_header_menu" });
+                    }
+                    @if (!String.IsNullOrEmpty(await menuHtml.RenderHtmlContentAsync()))
+                    {
+                        @menuHtml
+                    }
+                    else
+                    {
+                        @await Component.InvokeAsync(typeof(TopMenuViewComponent))
+                    }
+                </div>
+            </div>
+            @await Component.InvokeAsync(typeof(FlyoutShoppingCartViewComponent))
+        </div>
+    </div>
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.HeaderAfter })
+
+    <div class="header-lower">
+        <div class="center">
+            @if (showCategoriesInSideMenu)
+            {
+                <span class="category-navigation-title">@T("SevenSpikes.Themes.Pavilion.Header.AllCategories")</span>
+
+                if (!isHomePage || isHomeSliderFullWidth)
+                {
+                    <div class="category-navigation-list-wrapper">
+                        <ul class="category-navigation-list @if (stickyCategoryMenuFlyout){
+                <text>sticky-flyout</text>
+}"></ul>
+                    </div>
+                }
+            }
+            <div class="search-box store-search-box @if (!showCategoriesInSideMenu){
+            <text>full-width</text>
+}">
+                @await Component.InvokeAsync(typeof(SearchBoxViewComponent))
+            </div>
+        </div>
+    </div>
+    <script asp-location="Footer">
+
+        var currenturl = window.location.href;
+        var strcondiation = "about-citagenix";
+        var strpaymentinvoicecondiation = "paymentinvoice";
+        if (currenturl.indexOf(strcondiation) != -1 || currenturl.indexOf(strpaymentinvoicecondiation) != -1) {
+            $(".html-widget .ct-Popup_outer").css("display", "none")
+            $(".master-wrapper-content").css("filter", "").css("opacity", "unset").css("pointer-events", "unset");
+            $(".header").css("filter", "").css("opacity", "unset").css("pointer-events", "unset");
+            $(".topic-page-body").css("overflow", "unset")
+        }
+
+        $(".close-btn").click(function () {
+            $('body').addClass('closespace');
+            $(".topbar").remove();
+        });
+
+        $(".btnheaderbanner").click(function () {
+            $.ajax({
+                type: 'Post',
+                url: '/Customer/SetSeesionBanner',
+                success: function (data) {
+
+                }
+            })
+        })
+    </script>
+</div>
+
+@if (isHomePage)
+{
+    var homePageSliderCss = isHomeSliderFullWidth ? "slider-fullwidth" : "slider-right-column";
+
+    <div class="two-columns-area @homePageSliderCss">
+        @if (isHomeSliderFullWidth)
+        {
+            @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_main_slider" })
+            ;
+            @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_search_widget" })
+        }
+
+        <div class="center">
+            <div class="two-columns-area-left">
+                @if (showCategoriesInSideMenu && !isHomeSliderFullWidth)
+                {
+                    <div class="category-navigation-list-wrapper">
+                        <ul class="category-navigation-list @if (stickyCategoryMenuFlyout){
+                <text>sticky-flyout</text>
+}"></ul>
+                    </div>
+                }
+                @await Component.InvokeAsync("Widget", new { widgetZone = "homepage_sidebar_after" })
+            </div>
+            <div class="two-columns-area-right">
+                @if (!isHomeSliderFullWidth)
+                {
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_main_slider" })
+                    ;
+                    @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_search_widget" })
+
+                }
+                @await Component.InvokeAsync("Widget", new { widgetZone = "homepage_slider_after" })
+            </div>
+        </div>
+    </div>
+}
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> *@
+
+<script asp-location="Footer">
+
+    $(".close-btn").click(function () {
+        $('body').addClass('closespace');
+        $(".topbar").remove();
+        function setCookie(cookieName, cookieValue, daysToExpire) {
+            const expirationDate = new Date();
+            expirationDate.setDate(expirationDate.getDate() + daysToExpire);
+
+            const cookieString = `${cookieName}=${encodeURIComponent(cookieValue)}; expires=${expirationDate.toUTCString()}; path=/`;
+            document.cookie = cookieString;
+        }
+        setCookie('Banner', 'header');
+    });
+
+    $(".close-btn").click(function () {
+        $('body').addClass('closespace');
+        $(".topbar").remove();
+    });
+
+    $(".btnheaderbanner").click(function () {
+        $.ajax({
+            type: 'Post',
+            url: '/Customer/SetSeesionBanner',
+            success: function (data) {
+
+            }
+        })
+    })
+
+    $('.selectroles').change(function () {
+        if ($('.selectroles :selected').val() == "cad") {
+            window.location.href = "https://hansamed.net/about-citagenix";
+        } else {
+            $.ajax({
+                type: 'Post',
+                url: '/ProductGroup/Filter',
+                data: { id: $('.selectroles :selected').val() },
+                success: function (data) {
+                    location.reload();
+                }
+            })
+        }
+    })
+    $(document).ready(function () {    
+       
+        if (window.matchMedia("(max-width: 1024px)").matches) {
+
+            $.ajax({
+                type: 'GET',
+                url: '/Customer/Getthesubcustomerlist',
+                success: function (data) {
+                    if (data.length > 0) {
+                        var associatecustomer = "";
+                        // associatecustomer += " <label>Associated Customer:</label>";
+                        associatecustomer += "<select class= 'form - control valid Associated'  onchange = 'redirectToPage()'>";
+                        associatecustomer += " <option  value='0'> Select Associated Customer </option>";
+                        associatecustomer += "</select>";
+                        $(".AssociatedCustomer1").append(associatecustomer);
+                        for (var i = 0; i < data.length; i++) {
+                           
+                            var addclass = "option_" + data[i].Id;
+                            var associatecustomer1 = "<option data-isactive='" + data[i].Active + "' class='" + addclass + "' value='" + data[i].Id + "'>" + data[i].DisplayName + "</option>"
+
+                            $(".Associated").append(associatecustomer1);
+                        }
+                        const bannerValue = getCookie('ImpersonateCustomerid');
+                        var aa = parseInt(bannerValue);
+                        if (aa > 0) {
+                            $(".Associated").val(aa);
+                        }
+                    }
+                }
+            })
+        }
+        else {
+            $.ajax({
+                type: 'GET',
+                url: '/Customer/Getthesubcustomerlist',
+                success: function (data) {
+                    if (data.length > 0) {
+                        var associatecustomer = "";
+                        associatecustomer += " <label>Associated Customer:</label>";
+                        associatecustomer += "<select class= 'form - control valid Associated' onchange = 'redirectToPage()' style='width: 170px;'>";
+                        associatecustomer += " <option value='0'> Select </option>";
+                        associatecustomer += "</select>";
+                        $(".AssociatedCustomer").append(associatecustomer);
+                        for (var i = 0; i < data.length; i++) {
+                            
+                            //let svgIconCheck = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="20" height="20"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>';
+                            var iconClass = data[i].Active == "True" ? "customer-active" : "customer-inactive";
+                            var addclass = "option_" + data[i].Id + " " + iconClass;
+                            var associatecustomer1 = "<option data-isactive='" + data[i].Active + "' class='" + addclass + "' value='" + data[i].Id + "'>" + data[i].DisplayName + "</option>";
+
+
+
+                            $(".Associated").append(associatecustomer1);
+                        }
+                        const bannerValue = getCookie('ImpersonateCustomerid');
+                        var aa = parseInt(bannerValue);
+                        if (aa > 0) {
+                            $(".Associated").val(aa);
+                        }
+                    }
+                }
+            })
+        }
+
+
+
+        $(".close").click(function () {
+            $("#myModal").hide();
+
+        });
+        $.ajax({
+            type: 'GET',
+            url: '/Customer/CheckImprotedCustomer',
+            success: function (data) {
+                if (data != 0) {
+                    $("#myModal").show();
+                    $("#modalBody").html(data);
+                    //$("#myModal p").html(data);
+                }
+            }
+        })
+
+
+        $.ajax({
+            type: 'Post',
+            url: '/Customer/customerrole',
+
+            success: function (data) {
+                var obj = "usd";
+
+                if (data == "USD B2C") {
+                    obj = "usd"
+                }
+                else if (data == "CAD B2C") {
+                    obj = "cad"
+                }
+                else if (data == "USD B2B INTL") {
+                    obj = "intl"
+                }
+                $(".selectroles").val(obj);
+
+            }
+        })
+    });
+    function previousorder() {
+        $("#hdnprevoiusorder").val("fromheader");
+        if ($("#hdnstatus").val() == "") {
+            $.ajax({
+                url: '/Common/GetPreviousOrderProduct',
+                type: 'get',
+                success: function (data) {
+                    $("#render").html(data.innerhtml);
+
+                },
+            });
+            return false;
+        }
+        else {
+            $("#hdnstatus").val("");
+            return true;
+        }
+
+    }
+    // $.ajax({
+    //     url: '/Order/rewardheaderdetail',
+    //     type: 'get',
+    //     success: function (data) {
+    //         $("#renderrewards").text("Reward Points:" + data.rewardPointsBalance + "(" + data.PointsAmount + ")");
+
+    //     },
+    // });
+
+</script>

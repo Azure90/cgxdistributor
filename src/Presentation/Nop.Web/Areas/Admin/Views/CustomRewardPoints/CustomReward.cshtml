@@ -1,0 +1,132 @@
+﻿@model Nop.Web.Areas.Admin.Models.CustomRewardPoint.RewardsPointCustom
+
+@Html.AntiForgeryToken()
+<div class="content-header clearfix">
+    <div class="pull-right">
+        <a href="@Url.Action("addoreditRewardponts")" class="btn bg-blue">
+            <i class="fa fa-plus-square"></i>
+            @T("Admin.Common.AddNew")
+        </a>
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-4">
+        <label class="control-label" for="ActiveInactive" title="">
+            Custom Reward Points(Active / InActive)
+        </label>
+    </div>
+    <div class="col-md-8">
+        <input type="checkbox" id="activeInactive" checked="@ViewBag.RewardPointActive">
+    </div>
+</div>
+<div class="form-group">
+    <div class="col-md-8 col-md-offset-4">
+        <span id="showrangemsg"></span>
+    </div>
+</div>
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table id="CustomPageList" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>WeekDays</th>
+                    <th>RewardPoints</th>
+                    <th>Selected Type</th>
+                    <th>Category Name</th>
+                    <th>Brand Name</th>
+                    <th>Product Name</th>
+                    <th>Active</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (var item in Model.ModelList)
+                {
+                    <tr class="tr_@item.Id AlltrLanguageId">
+                        <td>@item.WeekDays</td>
+                        <td>@item.RewardPoints</td>
+
+                        @if (item.SelectedType == "Designer")
+                            {
+                            <td>Brand</td>
+                        }
+                        else
+                        {
+                            <td>@item.SelectedType</td>
+                        }
+
+                                
+                        <td>@(item.CategoryName == "0" ? "-" : item.CategoryName)</td>
+                        <td>@(item.BrandName == "0" ? "-" : item.BrandName)</td>
+                        <td>@(item.ProductName == null ? "-" : item.ProductName)</td>
+                        <td>@item.Active</td>
+                        <td>
+                            <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("addoreditRewardponts","CustomRewardPoints", new { @item.Id })'">Edit</button>
+                            @*<button type="button" onclick="location.href='@Url.Action("Delete","CustomPage", new { @item.ID })'" >Delete</button>*@
+                            <button type="button" class="btn btn-danger" id="dltcontent" onclick="Delete(@item.Id)">Delete</button>
+
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+
+
+
+    function Delete(id) {
+        if (confirm("Are you sure you want to delete this entry? Any related content will also be lost.Warning: This action cannot be undone.") == true) {
+
+            var postData = {
+                id: id
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                type: 'Post',
+                url: '/Admin/CustomRewardPoints/Delete',
+                data: postData,
+                success: function (data) {
+                    location.href = "/Admin/CustomRewardPoints/CustomReward";
+
+                }
+            })
+            return true;
+        } else {
+
+            return false;
+        }
+
+
+    }
+</script>
+
+<script>
+    $('#activeInactive').change(function () {
+        var val = $(this).prop("checked");
+
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("SetActiveInactivePriceRange", "CustomRewardPoints"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#showrangemsg").text("All Custom Reward Points are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#showrangemsg").text("All Custom Reward Points are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>

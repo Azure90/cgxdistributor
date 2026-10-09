@@ -1,0 +1,244 @@
+﻿@using Nop.Core.Domain.Orders.PreOrders
+@using Nop.Web.Areas.Admin.Models.Orders.PreOrders
+
+@model PreOrderModel
+
+<div class="card card-outline card-custom-preorders" id="CustomPreOrders-resources-info">
+    <div class="card-header with-border clearfix">
+        <div class="card-title">
+            <i class="fas fa-database"></i> PreOrder Resources
+        </div>
+    </div>
+
+    <div class="card-body">
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="RegularTitle">Regular Order Title</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.RegularOrderTitle" />
+                <span asp-validation-for="ResourcesModel.RegularOrderTitle"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="RegularShortDescription">Regular Order Short Description</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.RegularOrderShortDescription" />
+                <span asp-validation-for="ResourcesModel.RegularOrderShortDescription"></span>
+            </div>
+        </div>
+
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="PreTitle">Pre Order Title</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderTitle" />
+                <span asp-validation-for="ResourcesModel.PreOrderTitle"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="PreShortDescription">Pre Order Short Description</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderShortDescription" />
+                <span asp-validation-for="ResourcesModel.PreOrderShortDescription"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="PreDescription">Pre Order Description</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderDescription" />
+                <span asp-validation-for="ResourcesModel.PreOrderDescription"></span>
+            </div>
+        </div>      
+        
+        <div class="form-group row mt-4">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="NotAvailableMessage">Pre Order Not Available Message</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderNotAvailableMessage" />
+                <span asp-validation-for="ResourcesModel.PreOrderNotAvailableMessage"></span>
+            </div>
+        </div> 
+        
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="NoLongerAvailableMessage">No Longer Available Message</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderNoLongerAvailableMessage" />
+                <span asp-validation-for="ResourcesModel.PreOrderNoLongerAvailableMessage"></span>
+            </div>
+        </div> 
+        
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="RegularToPreOrder">Pre Order Cart Message</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.RegularToPreOrderCartMessage" />
+                <span asp-validation-for="ResourcesModel.RegularToPreOrderCartMessage"></span>
+            </div>
+        </div> 
+        
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="RegularCartMessage">Regular Cart Message</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderToRegularCartMessage" />
+                <span asp-validation-for="ResourcesModel.PreOrderToRegularCartMessage"></span>
+            </div>
+        </div>
+        
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="PreOrderPreferredDateMessage">Preferred Date Message</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ResourcesModel.PreOrderPreferredDateMessage" />
+                <span asp-validation-for="ResourcesModel.PreOrderPreferredDateMessage"></span>
+            </div>
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="col-md-9 offset-md-3">
+                <button type="button" id="addPreOrderResources" class="btn btn-primary">Update Resources</button>
+            </div>
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="col-md-9 offset-md-3">
+                <span class="validation-error-resource"></span>
+            </div>
+        </div>
+    </div>
+    <script>
+
+
+        $("#addPreOrderResources").on("click", function () {
+
+            savePreOrderResources();
+        });
+
+        function savePreOrderResources() {
+
+            var postData = {
+                RegularOrderTitle: $("#@Html.IdFor(model => model.ResourcesModel.RegularOrderTitle)").val(),
+                RegularOrderShortDescription: $("#@Html.IdFor(model => model.ResourcesModel.RegularOrderShortDescription)").val(),
+
+                PreOrderTitle: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderTitle)").val(),
+                PreOrderShortDescription: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderShortDescription)").val(),
+
+                PreOrderDescription: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderDescription)").val(),
+
+                PreOrderNotAvailableMessage: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderNotAvailableMessage)").val(),
+                PreOrderNoLongerAvailableMessage: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderNoLongerAvailableMessage)").val(),
+
+                RegularToPreOrderCartMessage: $("#@Html.IdFor(model => model.ResourcesModel.RegularToPreOrderCartMessage)").val(),
+                PreOrderToRegularCartMessage: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderToRegularCartMessage)").val(),
+                PreOrderPreferredDateMessage: $("#@Html.IdFor(model => model.ResourcesModel.PreOrderPreferredDateMessage)").val()
+            };
+
+            addAntiForgeryToken(postData);
+
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "@(Url.Action("SavePreOrderResources", "PreOrder"))",
+                data: postData,
+                success: function (response) {
+                    if (response.success) {
+                        showResourceMessage("PreOrder resources updated successfully.", true);
+                    } else {
+                        showResourceMessage(
+                            response.message || "Unable to update PreOrder resources.",
+                            false
+                        );
+                    }
+                },
+                error: function () {
+                    showResourceMessage("Unable to update PreOrder resources.", false);
+                }
+            });
+        }
+
+        function showResourceMessage(message, isSuccess) {
+
+            var $message = $(".validation-error-resource");
+
+            $message
+                .stop(true, true)
+                .removeClass("text-success text-danger")
+                .addClass(isSuccess ? "text-success" : "text-danger")
+                .text(message)
+                .show();
+
+            setTimeout(function () {
+                $message.fadeOut(300);
+            }, 3000);
+        }
+    </script>
+</div>

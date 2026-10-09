@@ -1,0 +1,231 @@
+﻿@using Nop.Core.Domain.Customers
+@using Nop.Services
+@model CustomerUserSettingsModel
+
+<div class="card-body">
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordMinLength" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordMinLength" />
+            <span asp-validation-for="CustomerSettings.PasswordMinLength"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordRequireLowercase" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordRequireLowercase" />
+            <span asp-validation-for="CustomerSettings.PasswordRequireLowercase"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordRequireUppercase" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordRequireUppercase" />
+            <span asp-validation-for="CustomerSettings.PasswordRequireUppercase"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordRequireNonAlphanumeric" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordRequireNonAlphanumeric" />
+            <span asp-validation-for="CustomerSettings.PasswordRequireNonAlphanumeric"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordRequireDigit" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordRequireDigit" />
+            <span asp-validation-for="CustomerSettings.PasswordRequireDigit"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.UnduplicatedPasswordsNumber" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.UnduplicatedPasswordsNumber" />
+            <span asp-validation-for="CustomerSettings.UnduplicatedPasswordsNumber"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.DefaultPasswordFormat" />
+        </div>
+        <div class="col-md-9">
+            <nop-select asp-for="CustomerSettings.DefaultPasswordFormat" asp-items="@await (((PasswordFormat)Model.CustomerSettings.DefaultPasswordFormat).ToSelectListAsync())" />
+            <span asp-validation-for="CustomerSettings.DefaultPasswordFormat"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordLifetime" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordLifetime" />
+            <span asp-validation-for="CustomerSettings.PasswordLifetime"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.PasswordRecoveryLinkDaysValid" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.PasswordRecoveryLinkDaysValid" />
+            <span asp-validation-for="CustomerSettings.PasswordRecoveryLinkDaysValid"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.FailedPasswordAllowedAttempts" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.FailedPasswordAllowedAttempts" />
+            <span asp-validation-for="CustomerSettings.FailedPasswordAllowedAttempts"></span>
+        </div>
+    </div>
+    <div class="form-group row" id="pnlFailedPasswordLockoutMinutes">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.FailedPasswordLockoutMinutes" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.FailedPasswordLockoutMinutes" />
+            <span asp-validation-for="CustomerSettings.FailedPasswordLockoutMinutes"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="CustomerSettings.EnteringEmailTwice" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="CustomerSettings.EnteringEmailTwice" />
+            <span asp-validation-for="CustomerSettings.EnteringEmailTwice"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="MultiFactorAuthenticationSettings.ForceMultifactorAuthentication" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="MultiFactorAuthenticationSettings.ForceMultifactorAuthentication" />
+            <span asp-validation-for="MultiFactorAuthenticationSettings.ForceMultifactorAuthentication"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="col-form-label" for="Two_Factor_Authentication_By_Mail">Two Factor Authentication By Mail</label>
+                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Two Factor Authentication By sending Mail."><i class="fas fa-question-circle"></i></div>
+            </div>
+
+        </div>
+        <div class="col-md-9">
+            <input class="check-box" data-val="true" data-val-required="Two Factor Authentication By Mail" id="Two_Factor_Authentication_By_Mail" name="Two_Factor_Authentication_By_Mail" type="checkbox" @(ViewBag.twofactorauthentication == "checked" ? "checked" : "") value="@ViewBag.twofactorauthentication">
+        </div>
+    </div>
+    @*  @if (ViewBag.twofactorauthentication == "checked") *@
+
+    <div class="form-group row authenticationtime">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="col-form-label" for="Two_Factor_Authentication_Minutes">Add Minutes</label>
+                <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Add Minutes"><i class="fas fa-question-circle"></i></div>
+            </div>
+
+        </div>
+        @* <div class='col-md-9'>
+        <input type='text' data-val='true' id='minutes' name='minutesauthoriztion' value='1' data-role='numerictextbox' role='spinbutton' class='k - input' aria-valuenow='7' aria-disabled='false' style='display: none '>
+        </div> *@
+
+        <div class="col-md-9">
+            <span class="k-widget k-numerictextbox" style="">
+                <span class="k-numeric-wrap k-state-default">
+                    <input type="text" class="k-formatted-value k-input" id="authorization_minute" title="7 " tabindex="0" role="spinbutton" autocomplete="off" aria-valuenow="7" aria-disabled="false" value="@ViewBag.twofactorauthenticationtimer" style="">
+                    <input type="text" data-val="true" data-val-required="The Password recovery link. Days valid field is required." id="authorizationminutes" name="authorizationminutes" value="7" data-role="numerictextbox" role="spinbutton" class="k-input" aria-valuenow="7" aria-disabled="false" style="display: none;">
+                    <span class="k-icon k-i-warning" style="display: none;"></span>
+                    @*  <span class="k-select">
+                    <span unselectable="on" class="k-link k-link-increase" aria-label="Increase value" title="Increase value"><span unselectable="on" class="k-icon k-i-arrow-60-up"></span></span><span unselectable="on" class="k-link k-link-decrease" aria-label="Decrease value" title="Decrease value">
+                    <span unselectable="on" class="k-icon k-i-arrow-60-down"></span>
+                    </span>
+                    </span> *@
+                </span>
+            </span>minutes <input name="__Invariant" type="hidden" value="CustomerSettings.PasswordRecoveryLinkDaysValid"><input name="__Invariant" type="hidden" value="CustomerSettings.PasswordRecoveryLinkDaysValid">
+
+            <span class="field-validation-valid" data-valmsg-for="CustomerSettings.PasswordRecoveryLinkDaysValid" data-valmsg-replace="true"></span>
+            <br />
+            <button type="button" class="btn btn-primary" id="saveauthenticationtimer">save</button>
+        </div>
+
+
+    </div>
+
+</div>
+<script>
+    // Assuming you have jQuery for AJAX and DOM manipulation
+    $(document).ready(function () {
+
+        $("#saveauthenticationtimer").click(function () {
+            $.ajax({
+                url: "@(Url.Action("Two_Factor_Authentication_By_Mail", "Setting"))",
+                type: 'GET',
+                data: { Time: $("#authorization_minute").val() },
+                success: function (response) {
+                    console.log('Data sent successfully');
+                    //location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+
+        })
+
+        if ($('#Two_Factor_Authentication_By_Mail').is(':checked') == false) {
+            $(".authenticationtime").hide();
+        }
+        else {
+            $(".authenticationtime").show();
+        }
+
+
+        $('#Two_Factor_Authentication_By_Mail').change(function () {
+            if ($('#Two_Factor_Authentication_By_Mail').is(':checked') == false) {
+                $(".authenticationtime").hide();
+            }
+            else {
+                $(".authenticationtime").show();
+            }
+
+
+
+
+            var isChecked = $(this).is(':checked');
+            if (isChecked == "False") {
+                $(".authenticationtime").hide();
+            }
+
+            $.ajax({
+                url: "@(Url.Action("Two_Factor_Authentication_By_Mail", "Setting"))",
+                type: 'GET',
+                data: { isChecked: isChecked },
+                success: function (response) {
+                    console.log('Data sent successfully');
+                    //location.reload();
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        });
+    });
+
+</script>

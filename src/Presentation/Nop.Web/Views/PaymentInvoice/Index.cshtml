@@ -1,0 +1,877 @@
+﻿@using Nop.Core
+@using Nop.Services.Customers
+@model Nop.Core.Domain.Invoices.PaymentInvoiceModel
+@using Nop.Web.Framework.Models.DataTables
+@inject ICustomerService customerService
+@inject IWorkContext _workContext
+@inject IWebHelper webHelper
+@{
+    Layout = "_ColumnsOne";
+
+    //scripts
+    NopHtml.AddScriptParts(ResourceLocation.Head, "~/js/public.accordion.js");
+    NopHtml.AddScriptParts(ResourceLocation.Head, "~/js/public.paymentinvoice.js");
+
+    //title
+    NopHtml.AddTitleParts("Pay Invoice");
+
+    //page class
+    NopHtml.AppendPageCssClassParts("html-checkout-page");
+
+}
+
+@{
+    //step numbers
+    var customerNumberStepNumber = 1;
+    var customerInfoStepNumber = 2;
+    var invoiceDetailsStepNumber = 3;
+    var paymentInfoStepNumber = 4;
+    var confirmOrderStepNumber = 5;
+}
+@{
+    var isRegisterCustomer = customerService.IsRegisteredAsync(_workContext.GetCurrentCustomerAsync().Result).Result;
+}
+<style>
+    .apologize {
+        margin-top: 20px;
+        font-weight: 600;
+        font-style: normal;
+        font-size: 17px;
+        color: #ff0000bd;
+    }
+</style>
+<script asp-location="Footer">
+
+
+    // $(document).ready(function () {
+    // @*if ("@isRegisterCustomer") {
+
+    //         alert("@isRegisterCustomer");
+    //         var emailAddress = document.getElementById('custEmail').value;
+    //         if (emailAddress != '') {
+    //         RefreshInvDetails();
+    //         }
+    //         }*@
+    //     });
+
+    // //function RefreshInvDetails() {
+    // //    // Populate Documents based on Email Address
+    // //    var emailAddress = document.getElementById('custEmail').value;
+    // //    $.ajax({
+    // //        url: "/PaymentInvoice/GetInvoicesAmount",
+    // //        type: 'GET',
+    // //        datatype: 'JSON',
+    // //        contentType: "application/json; charset=utf-8",
+    // //        data: { emailId: emailAddress },
+    // //        success: function (data) {
+    // //            if (data != "") {
+    // //                $("#dataRefresh tr").remove();
+    // //                $.each(data, function (i, item) {
+    // //                    var rows = "";
+    // //                    rows = rows + "<tr>"
+    // //                    rows = rows + "<td><input type='text' style='width:120px;' readOnly maxlength='50' class='invoicename' value=" + item.Number + "></td>"
+    // //                    // disable amount, if Credit / -ve
+    // //                    if (item.Amount < 0) {
+    // //                        rows = rows + "<td><input type='number' min='0.00' readOnly max='100000.00' class='invoicequantity' value=" + item.Amount + " onblur='getInvoiceTotal()' style='text-align:right;background-color: #F8F9F9'></td>"
+    // //                    }
+    // //                    else {
+    // //                        rows = rows + "<td><input type='number' min='0.00' max='100000.00' class='invoicequantity' value=" + item.Amount + " onblur='getInvoiceTotal()' style='text-align: right;'></td>"
+    // //                    }
+    // //                    rows = rows + "<td><input type='button' onclick='deleteInvoice(this)' value='Delete' class='button-invoice button-2' style='width: 80px; margin: 5px; height: 25px;' ></td>"
+    // //                    rows = rows + "<td style='display: none'><input type='text' class='invoicetype' value='" + item.InvoiceType + "' ></td>"
+    // //                        + "</tr>";
+    // //                    $('#dataRefresh').append(rows);
+    // //                });
+    // //                getInvoiceTotal();
+
+
+    // //            }
+    // //        }
+    // //    });
+    // //}
+
+    // function RefreshInvDetailsByCustomerNumber() {
+    //     // Populate Documents based on Customer Number
+    //     var customerNum = document.getElementById('customernumber').value;
+    //     $.ajax({
+    //         url: "/PaymentInvoice/GetInvoicesAmountByCustNumber",
+    //         type: 'GET',
+    //         datatype: 'JSON',
+    //         contentType: "application/json; charset=utf-8",
+    //         data: { custNumber: customerNum },
+    //         success: function (data) {
+    //             if (data != "") {
+    //                 $("#dataRefresh tr").remove();
+    //                 $.each(data, function (i, item) {
+    //                     var rows = "";
+    //                     rows = rows + "<tr>"
+
+    //                     rows = rows + "<td><input type='checkbox' style='width: 20px; height: 20px;' id='chkSelectInvoice' onchange='onChangeHandler(this)' class='invoiceDelete'></td>"
+    //                     rows = rows + "<td><input type='text' style='width:120px;' readOnly maxlength='50' class='invoicename' value=" + item.Number + "></td>"
+    //                     // disable amount, if Credit / -ve
+    //                     if (item.Amount < 0) {
+    //                         rows = rows + "<td><input type='number' min='0.00' readOnly max='100000.00' class='invoicequantity' value=" + item.Amount + " onblur='getInvoiceTotal()' style='text-align:right;background-color: #F8F9F9'></td>"
+    //                     }
+    //                     else {
+    //                         rows = rows + "<td><input type='number' min='0.00' max='100000.00' class='invoicequantity' value=" + item.Amount + " onblur='getInvoiceTotal()' style='text-align: right;'></td>"
+    //                     }
+    //                     //rows = rows + "<td><input type='button' onclick='deleteInvoice(this)' value='Delete' class='button-invoice button-2' style='width: 80px; margin: 5px; height: 25px;' ></td>"
+    //                     //rows = rows + "<td><input type='checkbox' checked style='width: 20px; height: 20px;' id='chkSelectInvoice' onchange='onChangeHandler(this)' class='invoiceDelete'></td>"
+    //                     rows = rows + "<td style='display: none'><input type='text' class='invoicetype' value='" + item.InvoiceType + "' ></td>"
+    //                         + "</tr>";
+    //                     $('#dataRefresh').append(rows);
+    //                 });
+    //                 getInvoiceTotal();
+    //             }
+    //         }
+    //     });
+    // }
+    // function addInvoice() {
+    //     var t = document.getElementById("invoicegrid");
+    //     var rows = t.getElementsByTagName("tr");
+    //     var r = rows[rows.length - 1];
+    //     var x = rows[1].cloneNode(true);
+    //     x.style.display = "";
+    //     r.parentNode.insertBefore(x, r);
+    //     getInvoiceTotal();
+    // }
+    // function deleteInvoice(r) {
+    //     var i = r.parentNode.parentNode.rowIndex;
+    //     document.getElementById("invoicegrid").deleteRow(i);
+    //     getInvoiceTotal();
+    // }
+    // TotalInvoice = 0;
+    // var PaymentTran = {
+    //     CustomerNumber: "",
+    //     FirstName: "",
+    //     LastName: "",
+    //     Email: "",
+    //     TotalAmount: 0,
+    //     PaymentResult: "",
+    //     InvoiceDetails: []
+    // };
+    // function getInvoiceTotal() {
+    //     var amounts = document.getElementsByClassName("invoicequantity");
+    //     var names = document.getElementsByClassName("invoicename");
+    //     var invoicetype = document.getElementsByClassName("invoicetype");
+
+    //     // Check box implemented instead Delete button
+    //     var invoiceDel = document.getElementsByClassName("invoiceDelete");
+
+    //     var invoicetotal = 0;
+
+    //     PaymentTran.InvoiceDetails = [];
+
+    //     var i;
+    //     for (i = 0; i < amounts.length; i++) {
+
+    //         if (!isNaN(amounts[i].value)) {
+
+    //             if (invoiceDel[i].checked) // If check box is checked then Total
+    //             {
+    //                 invoicetotal = invoicetotal + parseFloat(amounts[i].value);
+    //                 //PaymentTran.InvoiceDetails.push({ Number: names[i].value, Amount: amounts[i].value, InvoiceType: invoicetype[i].value });
+    //                 PaymentTran.InvoiceDetails.push({ Number: names[i].value, Amount: parseFloat(amounts[i].value).toFixed(2), InvoiceType: invoicetype[i].value });
+    //             }
+    //         }
+    //     }
+    //     PaymentTran.TotalAmount = invoicetotal.toFixed(2);
+    //     document.getElementById("PaymentTotal").value = invoicetotal.toFixed(2);
+
+    //     document.getElementById("invoicetotal").innerHTML = invoicetotal.toFixed(2);
+    // }
+    // function setTransactionInfo() {
+
+    //     // Initialize the table, here, otherwise evry time, it is duplicating the rows
+    //     //document.getElementById("suminvoice").innerHTML = "<thead><tr><th data-field='invoicenumber'>Document No</th><th data-field='invoiceamount' style='text-align:right'>Amount</th></tr></thead>";
+    //     document.getElementById("suminvoice").innerHTML = "<thead><tr><td data-field='invoicenumber' style='font-weight:bold'>Document No</td><td data-field='invoiceamount' style='text-align:right;font-weight:bold'>Amount</td></tr></thead>"
+
+    //     PaymentTran.CustomerNumber = document.getElementById('customernumber').value;
+    //     PaymentTran.FirstName = document.getElementById('firstname').value;
+    //     PaymentTran.LastName = document.getElementById('lastname').value;
+    //     PaymentTran.Email = document.getElementById('custEmail').value;
+
+    //     document.getElementById('sumcustomernumber').innerHTML = PaymentTran.CustomerNumber.toUpperCase();
+    //     document.getElementById('sumcustomername').innerHTML = PaymentTran.FirstName + ' ' + PaymentTran.LastName;
+    //     document.getElementById('sumcustomeremail').innerHTML = PaymentTran.Email;
+
+    //     // showing company Name on Confirm Payment tab
+    //     document.getElementById('sumcompanyname').innerHTML = document.getElementById('companyName').value;
+
+    //     var i = 0;
+
+    //     var details = PaymentTran.InvoiceDetails;
+    //     var suminvoicedetail = document.getElementById("suminvoice");
+
+    //     for (i = 0; i < details.length; i++) {
+    //         suminvoicedetail.insertRow().innerHTML = '<td>' + details[i].Number + '</td><td style="text-align: right;">' + details[i].Amount + '</td>';
+    //     }
+    //     suminvoicedetail.insertRow().innerHTML = '<td style="text-align: right;"><b>Total:</td><td style="text-align: right; border-top-style: solid;">' + PaymentTran.TotalAmount + '</td>';
+
+    //     document.getElementById('PaymentTranInfo').value = JSON.stringify(PaymentTran);
+    //     document.getElementById('PaymentInvoiceTag').value = document.getElementById('invoicetag').innerHTML;
+    //     document.getElementById('PaymentCustomerTag').value = document.getElementById('customertag').innerHTML;
+    //     document.getElementById('PaymentCustomerNumber').value = PaymentTran.CustomerNumber.toUpperCase();
+    //     if ($("#PatmentMonerisUSA").val() != "MonerisUSD") {
+    //         Checkout.gotoSection('confirm_order');
+    //     }
+    // }
+    // // this function SKIP the Moneris Payment Checkout
+    // // if Total = 0 or less than 0
+    // function CheckSkipPaymentInfo() {
+
+    //     // Put some validation here
+    //     // Check, atleast one checkbox should be selected by customer
+
+    //     // If customer change one of the invoice amount to 0 or less than 0 then dont allow to continue
+
+    //     $("#paymentChecked").html("");
+    //     var ChkSelected = 'No'
+    //     var IsValidInvAmount = 'Yes';
+    //     var invoiceDel = document.getElementsByClassName("invoiceDelete");
+
+    //     var amounts = document.getElementsByClassName("invoicequantity");
+    //     var invoicetype = document.getElementsByClassName("invoicetype");
+
+    //     var i;
+    //     for (i = 0; i < invoiceDel.length; i++) {
+
+    //         // Check, atleast one checkbox should be selected by customer
+    //         if (invoiceDel[i].checked) {
+    //             ChkSelected = 'Yes';
+    //         }
+
+    //         // If customer change one of the invoice amount to 0 or less than 0 then dont allow to continue
+    //         if (amounts[i].value <= 0) {
+    //             // also it is only implement on Invoice Number not Credit Memo
+    //             if (invoicetype[i].value == "Invoice Number") {
+    //                 IsValidInvAmount = 'No';
+    //             }
+    //         }
+    //     }
+
+    //     if (ChkSelected == 'No') {
+    //         $("#paymentChecked").html("@T("OfflineTransaction.PaymentSelectedMsg")");
+    //         return;
+    //     }
+
+    //     if (IsValidInvAmount == 'No') {
+    //         $("#paymentChecked").html("@T("OfflineTransaction.ValidPaymentMsg")");
+    //         return;
+    //     }
+
+    //     // ***********************************************
+    //     if (document.getElementById("PaymentTotal").value <= 0) {
+    //         $("#paymentChecked").html("@T("OfflineTransaction.ValidTotalPaymentMsg")");
+    //         //setTransactionInfo();
+    //     }
+    //     else {
+    //         Checkout.gotoSection('payment_info');
+    //     }
+    //     if ($("#PatmentMonerisUSA").val() == "MonerisUSD") {
+
+    //         setTransactionInfo();
+    //         $.ajax({
+    //             type: "POST",
+    //             url: '/PaymentInvoice/PaymentGate',
+    //             data: { hdnvalue: $('#PaymentTotal').val(), CustomerNo: $('#customernumber').val() },
+    //             success: function (data) {
+    //                 $('#co-payment-info-form').append(data);
+    //             }
+    //         });
+    //     }
+    // }
+
+    // // this function Check First NAme, Last NAme, Email
+    // function EmailIsRequired() {
+
+    //     $("#paymentChecked").html("");
+
+    //     var firstname = document.getElementById('firstname').value;
+    //     var lastname = document.getElementById('lastname').value;
+    //     var emailAddress = document.getElementById('custEmail').value;
+
+    //     $('#firstNameRequired').hide();
+    //     $('#lastNameRequired').hide();
+    //     $('#EmailRequired').hide();
+
+    //     if (firstname == "") {
+    //         $('#firstNameRequired').show();
+    //         return;
+    //     }
+    //     else if (lastname == "") {
+    //         $('#lastNameRequired').show();
+    //         return;
+    //     }
+    //     else if (emailAddress == "") {
+    //         $('#EmailRequired').show();
+    //         return;
+    //     }
+    //     else {
+    //         Checkout.gotoSection('invoice_details')
+    //     }
+    // }
+
+    // // this function Check Customer Number will be mendetory
+    // function CustomerNumberIsRequired() {
+    //     var customerNumer = document.getElementById('customernumber').value;
+    //     if (customerNumer == "") {
+    //         $('#custNumberRequired').show();
+    //         $("#custNumberRequired").html("Customer Number is required.");
+    //         return;
+    //     }
+    //     else {
+    //         $.ajax({
+    //             url: "/PaymentInvoice/CheckValidCustomer",
+    //             type: 'GET',
+    //             datatype: 'JSON',
+    //             contentType: "application/json; charset=utf-8",
+    //             data: { customer: customerNumer },
+    //             success: function (data) {
+    //                 if (data.includes("Error")) {
+    //                     $('#custNumberRequired').show()
+    //                     $("#custNumberRequired").text(data);
+    //                 }
+    //                 else {
+    //                     if (data.includes("NO")) {
+    //                         $('#custNumberRequired').show()
+    //                         $("#custNumberRequired").html("Customer Number is not valid or <br/> there is no outstanding balance for this customer ");
+    //                         $("#PatmentMonerisUSA").val("");
+
+    //                     }
+    //                     else if (data.includes("YES")) {
+
+    //                         // Customer is valid
+    //                         $('#custNumberRequired').hide();
+    //                         RefreshInvDetailsByCustomerNumber();
+    //                         $(".buttonForUsaMoneris").css("display", "none");
+    //                         Checkout.gotoSection('custinfo')
+    //                         // Get Company Name, If Customer is Valid
+    //                         GetCompanyNameByCustomerNumber();
+    //                     }
+    //                     else if (data.includes("MonerisIsNotActive")) {
+
+    //                         // $("#checkout-payment-info-load").css("display", "none");
+    //                         $("#custnumber-buttons-container").append("<div class='apologize'>We apologize for the inconvenience regarding credit card payments. Please call us or use e-transfer at accounting@hansamed.net, referencing your customer/invoice number. We appreciate your business and are committed to providing excellent service.</div>");
+    //                         $('.custnumberbtn').prop('disabled', true)
+    //                     }
+    //                     else if (data.includes("ForMoneris")) {
+
+    //                         $("#checkout-payment-info-load").css("display", "none");
+    //                         $(".PaymentMoneris").css("display", "none");
+    //                         $("#PatmentMonerisUSA").val("MonerisUSD");
+
+    //                         Checkout.gotoSection('custinfo');
+
+    //                         GetCompanyNameByCustomerNumber();
+    //                         RefreshInvDetailsByCustomerNumber();
+    //                     }
+    //                 }
+    //             }
+    //         });
+
+    //     }
+    //     //$.ajax({
+    //     //       type: "POST",
+    //     //       url: '/PaymentInvoice/GetCurrencyForPaymentInvoice',
+    //     //       data:{CustomerNo:$('#customernumber').val()},
+    //     //        success: function (data) {
+    //     //         if(data=="true"){
+    //     //             $("#checkout-payment-info-load").css("display", "none");
+    //     //               $(".PaymentMoneris").css("display","none");
+    //     //             $("#PatmentMonerisUSA").val("MonerisUSD");
+
+    //     //         }
+    //     //         else if(data=="false"){
+
+    //     //              $("#PatmentMonerisUSA").val("");
+    //     //              $(".buttonForUsaMoneris").css("display", "none");
+    //     //         }
+    //     //         else if(data=="MonerisIsNotActive"){
+    //     //            // $("#checkout-payment-info-load").css("display", "none");
+    //     //             $("#custnumber-buttons-container").append("<p>We apologize for the inconvenience regarding credit card payments. Please call us or use e-transfer at accounting@hansamed.net, referencing your customer/invoice number. We appreciate your business and are committed to providing excellent service.</p>");
+    //     //              $('.custnumberbtn'). prop('disabled', true)
+    //     //         }
+    //     //       }
+    //     //   });
+
+    // }
+    // function GetCompanyNameByCustomerNumber() {
+    //     var customerNumer = document.getElementById('customernumber').value;
+    //     $.ajax({
+    //         url: "/PaymentInvoice/GetCompanyName",
+    //         type: 'GET',
+    //         datatype: 'JSON',
+    //         contentType: "application/json; charset=utf-8",
+    //         data: { customer: customerNumer },
+    //         success: function (data) {
+    //             $("#companyName").val(data);
+    //         }
+    //     });
+    // }
+    // function onChangeHandler(chk) {
+    //     $("#paymentChecked").html("");
+    //     getInvoiceTotal();
+    // }
+    // function onSelectAllInvoices(chk) {
+
+    //     $("#paymentChecked").html("");
+    //     if (chk.checked) {
+    //         $('.invoiceDelete').prop('checked', true);
+    //     }
+    //     else {
+    //         $('.invoiceDelete').prop('checked', false);
+    //     }
+    //     getInvoiceTotal() // Refresh Totals
+    // }
+
+</script>
+
+<style type="text/css">
+
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    .button-invoice {
+        width: 100px;
+        margin: 0px;
+    }
+
+    input[type="number"], input[type="text"] {
+        height: 36px;
+        border: 1px solid #e9e9e9;
+        padding: 0 8px;
+        vertical-align: middle;
+        color: #777;
+        margin-left: 10px;
+    }
+
+    td {
+        padding: 5px;
+    }
+
+    .inputs input {
+        width: 100%;
+        max-width: 100%;
+        vertical-align: middle;
+        height: 36px;
+        border: 1px solid #e9e9e9;
+        padding: 0 8px;
+        vertical-align: middle;
+        color: #777;
+    }
+
+    .custlabel {
+        width: 200px;
+        font-weight: bolder;
+    }
+
+
+
+
+
+
+
+
+
+    /* Style the modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    /* Style the modal content */
+    .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: #fff;
+        padding: 40px; /* Increased padding for a larger modal */
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        max-width: 600px; /* Increased max-width for a larger modal */
+        width: 100%;
+        font-size: 22px;
+    }
+
+    /* Style the close button */
+    .close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 20px;
+        color: #555;
+        cursor: pointer;
+    }
+
+    /* Style the Open Modal button */
+    #myModalBtn {
+        padding: 10px 15px;
+        font-size: 16px;
+        cursor: pointer;
+        background-color: #4CAF50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+    }
+
+        #myModalBtn:hover {
+            background-color: #45a049;
+        }
+
+    .Paymentinvoice {
+        text-align: center;
+        padding-top:32px;
+    }
+
+        .Paymentinvoice h1 {
+            color: #323232;
+            text-align: center;
+            font-size: 30px;
+            line-height: 1.3;
+            margin: 0 0 20px;
+        }
+
+        .Paymentinvoice p {
+            color: #323232;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 20px;
+        }
+
+        .Paymentinvoice #click {
+            font-size: 20px;
+            text-decoration: underline;
+        }
+
+        .Paymentinvoice #click:hover {
+                color: #a3da40;
+        }
+
+        .Paymentinvoice h3, .Paymentinvoice h2 {
+            color: #323232;
+            text-align: center;           
+            margin: 0 0 20px;
+        }
+</style>
+<div class="Paymentinvoice">
+    
+    <h2>We appreciate your patience!</h2><h2> Your payment invoice page will be automatically redirected shortly.</h2><br /><h3>
+        Alternatively, feel free to
+        click on the provided link for immediate access..</h3>
+    <p>Redirecting in <span id="countdown">10</span> seconds</p>
+    <a id="click">Click here</a>
+    </div>
+@* <div class="page checkout-page">
+    <div class="page-title">
+        <h1>Pay Invoice</h1>
+    </div>
+    <div class="page-body checkout-data">
+        <ol class="opc" id="checkout-steps">
+            <li id="opc-custnumber" class="tab-section allow">
+                <div class="step-title">
+                    <span class="number">@customerNumberStepNumber</span>
+                    <h2 class="title">Customer Number</h2>
+                </div>
+                <div id="checkout-step-customernum" class="step a-item">
+                    <div class="inputs">
+                        <label class="control-label">Customer Number</label>
+                        @if (isRegisterCustomer)
+                        {
+                            <select asp-for="CustomerNumber" asp-items="Model.CustomerNumbers" style="width: 250px;" id="customernumber"></select>
+                            if (Model.CustomerNumbers.Count == 0)
+                            {
+                                <span class="field-validation-error">@T("OfflineTransaction.NoCustomerErrMsg")</span>
+                            }
+                        }
+                        else
+                        {
+                            <input class="form-control" value="@Model.CustomerNumber" style="width: 250px; text-transform:uppercase" id="customernumber" />
+                            <nop-required />
+                        }
+                        <span id="custNumberRequired" style="display:none;" class="field-validation-error"></span>
+                    </div>
+
+                    <div class="buttons" id="custnumber-buttons-container">
+                        <input type="button" title="@T("Common.Continue")" class="button-1 new-address-next-step-button custnumberbtn" value="@T("Common.Continue")" onclick="CustomerNumberIsRequired();" />
+                        <span class="please-wait" id="custnumber-please-wait" style="display: none;">@T("Common.LoadingNextStep")</span>
+                    </div>
+                </div>
+            </li>
+            <li id="opc-custinfo" class="tab-section">
+                <div class="step-title">
+                    <span class="number">@customerInfoStepNumber</span>
+                    <h2 class="title">Customer Information</h2>
+                </div>
+                <div id="checkout-step-custinfo" class="step a-item" style="display: none;">
+                    <div class="inputs">
+                        <label class="control-label">Billing Name</label>
+                        <input class="form-control" readonly style="width: 250px;" id="companyName" name="companyName" />
+                    </div>
+                    <div class="inputs">
+                        <label class="control-label">First Name</label>
+                        @if (isRegisterCustomer)
+                        {
+                            <input class="form-control" readonly style="width: 250px;" id="firstname" name="firstname" value="@Model.FirstName" />
+                        }
+                        else
+                        {
+                            <input class="form-control" style="width: 250px;" id="firstname" name="firstname" value="@Model.FirstName" />
+                        }
+                        <nop-required />
+                        <span id="firstNameRequired" style="display:none;" class="field-validation-error">First Name is required.</span>
+
+                    </div>
+                    <div class=" inputs">
+                        <label class="control-label">Last Name</label>
+                        @if (isRegisterCustomer)
+                        {
+                            <input class="form-control" readonly style="width: 250px;" id="lastname" name="lastname" value="@Model.LastName" />
+                        }
+                        else
+                        {
+                            <input class="form-control" style="width: 250px;" id="lastname" name="lastname" value="@Model.LastName" />
+
+                        }
+                        <nop-required />
+                        <span id="lastNameRequired" style="display:none;" class="field-validation-error">Last Name is required.</span>
+                    </div>
+                    <div class="inputs">
+                        <label class="control-label">eMail</label>
+                        @if (isRegisterCustomer)
+                        {
+                            <input class="form-control" readonly value="@Model.Email" style="width:250px;" id="custEmail" />
+                        }
+                        else
+                        {
+                            <input class="form-control" value="@Model.Email" style="width:250px;" id="custEmail" />
+                        }
+                        <nop-required />
+                        <span id="EmailRequired" style="display:none;" class="field-validation-error">Email is required.</span>
+                    </div>
+                    <div class="buttons" id="custinfo-buttons-container">
+                        <p class="back-link">
+                            <a href="#" onclick="Checkout.back(); return false;"><small>&laquo; </small>@T("Common.Back")</a>
+                        </p>
+                       
+                        <input type="button" class="button-1 new-address-next-step-button" title="@T("Common.Continue")" onclick="EmailIsRequired();" value="@T("Common.Continue")" />
+                        <span id="shipping-please-wait" class="please-wait" style="display: none;"> @T("Common.LoadingNextStep")</span>
+                    </div>
+                </div>
+            </li>
+            <li id="opc-invoice_details" class="tab-section">
+                <div class="step-title">
+                    <span class="number">@invoiceDetailsStepNumber</span>
+                    <h2 class="title">Document Details</h2>
+                </div>
+                <div id="checkout-step-invoice-details" class="step a-item" style="display: none;">
+                    <div class="panel-body">
+                        <div>@T("OfflineTransaction.CheckBoxHeaderMsg")</div>
+                        <br />
+                        <table id="invoicegrid" style="width: 280px;" class="table">
+                            <colgroup>
+                                <col style="width:110px;" />
+                                <col style="width:120px;" />
+                                <col style="width:50px;" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th style="width:100px;text-align:center;"><input type='checkbox' style='width: 20px; height: 20px;' id='chkSelectAllInvoice' onchange='onSelectAllInvoices(this)'></th>
+                                    <th style="text-align:center;" data-field="invoicenumber">Document No</th>
+                                    <th data-field="invoiceamount;" style="text-align: right;">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataRefresh" style="padding: 5px;"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <td></td>
+                                    <td style="text-align: right;"><b>Total:</b></td>
+                                    <td class="subtotal footable-last-column" style="border-top:solid; border-top-width: 3px; text-align: right; margin: 3px; padding: 5px;">
+                                        <span id="invoicetotal" style="text-align: right;" class="product-subtotal"></span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                    <span class="field-validation-error" id="lblDocumentDetails"></span>
+                    <br />
+                    <input type="button" onclick="RefreshInvDetailsByCustomerNumber()" value="Refresh Document" class="button-2" />
+                    <span id="paymentChecked" class="field-validation-error"></span>
+                    <br />
+                    <div class="buttons" id="shipping-method-buttons-container">
+                        <p class="back-link">
+                            <a href="#" onclick="Checkout.back(); return false;"><small>&laquo; </small>@T("Common.Back")</a>
+                        </p>
+
+                        
+                        <input type="button" class="button-1 shipping-method-next-step-button"
+                               onclick="CheckSkipPaymentInfo()"
+                               value="@T("Common.Continue")" />
+                        <span id="shipping-method-please-wait" class="please-wait" style="display: none;">@T("Common.LoadingNextStep")</span>
+                    </div>
+                </div>
+            </li>
+            <li id="opc-payment_info" class="tab-section">
+                <div class="step-title">
+                    <span class="number">@paymentInfoStepNumber</span>
+                    <h2 class="title">@T("Checkout.PaymentInfo")</h2>
+                </div>
+                <div id="checkout-step-payment-info" class="step a-item" style="display: none;">
+
+                    <form action="" id="co-payment-info-form">
+
+                        <input type="hidden" id="PaymentTotal" name="PaymentTotal" value="" />
+                        <input type="hidden" id="PaymentCustomerNumber" name="PaymentCustomerNumber" value="" />
+                        <input type="hidden" id="PaymentTranInfo" name="PaymentTranInfo" value="" />
+                        <input type="hidden" id="PaymentInvoiceTag" name="PaymentInvoiceTag" value="" />
+                        <input type="hidden" id="PaymentCustomerTag" name="PaymentCustomerTag" value="" />
+                        <input type="hidden" id="PatmentMonerisUSA" name="PatmentMonerisUSA" value="" />
+                        <div id="checkout-payment-info-load">
+                            @await Component.InvokeAsync("PaymentMoneris")
+
+                        </div>
+
+
+                        <div id="opc-payment_info" class="test"> </div>
+                    </form>
+
+                    <script asp-location="Footer">
+                        PaymentInfo.init('#co-payment-info-form', 'PaymentInvoice/SavePaymentInfo/');
+                    </script>
+                    <div class="buttons" id="payment-info-buttons-container" style="display: none;">
+                        <p class="back-link">
+                            <a href="#" onclick="Checkout.back(); return false;"><small>&laquo; </small>@T("Common.Back")</a>
+                        </p>
+                        <input type="button" class="button-1 payment-info-next-step-button" onclick="setTransactionInfo()" value="@T("Common.Continue")" id="paymentbutton" />
+                        <span class="please-wait" id="payment-info-please-wait" style="display: none;">@T("Common.LoadingNextStep")</span>
+                    </div>
+                </div>
+            </li>
+            <li id="opc-confirm_order" class="tab-section">
+                <div class="step-title">
+                    <span class="number">@confirmOrderStepNumber</span>
+                    <h2 class="title">Confirm Payment</h2>
+                </div>
+                <div id="checkout-step-confirm-payment" class="step a-item" style="display: none;">
+                    <div id="checkout-confirm-payment-load">
+                        <div style="display: inline-block" id="customertag">
+                            <table style="width:300px; padding:5px;text-align:left;">
+                                <colgroup>
+                                    <col style="width: 175px;" />
+                                    <col style="width: 175px;" />
+                                </colgroup>                                
+                                <tbody>
+                                    <tr><td class="custlabel">Customer No</td><td><div id="sumcustomernumber"></div></td></tr>
+                                    <tr><td class="custlabel">Billing Name</td><td><div id="sumcompanyname"></div></td></tr>
+                                    <tr><td class="custlabel">Contact Name</td><td><div id="sumcustomername"></div></td></tr>
+                                    <tr><td class="custlabel">Contact Email</td><td><div id="sumcustomeremail"></div></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <br />
+                        <br />
+                        <div style="display: inline-block" id="invoicetag">
+                            <table id="suminvoice" style="width:300px; padding:5px;text-align:left;">
+                                <colgroup>
+                                    <col style="width:110px;" />
+                                    <col style="width:120px;" />
+                                </colgroup>
+                                <thead>
+                                    <tr>
+                                        <td data-field="invoicenumber" style="font-weight:bold;">Document No</td>
+                                        <td data-field="invoiceamount" style="text-align: right;font-weight:bold;">Amount</td>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                    <script asp-location="Footer">
+                        ConfirmPayment.init('#co-payment-info-form', 'paymentinvoice/confirmpayment/', 'paymentinvoice/paymentcomplete/');
+                    </script>
+                    <div class="buttons" id="confirm-order-buttons-container">
+                        <p class="back-link">
+                            <a href="#" onclick="Checkout.back(); return false;"><small>&laquo; </small>@T("Common.Back")</a>
+                        </p>
+
+                        <input type="button" class="button-1 confirm-order-next-step-button PaymentMoneris " onclick="ConfirmPayment.save()" value="@T("Common.Confirm")" />
+                        <input type="button" class="button-1 buttonForUsaMoneris" value="@T("Common.Confirm")" />
+                        <span class="please-wait" id="confirm-order-please-wait" style="display: none;">@T("Checkout.SubmittingOrder")</span>
+                    </div>
+                </div>
+            </li>
+        </ol>
+    </div>
+    <input type="hidden" id="isCitagenixbtn" value="@Model.IsCitagenix" />
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <p></p>
+        </div>
+    </div> *@
+   @*  <script asp-location="Footer">
+        $(".html-widget #customer-type").css("display", "none")
+        $(".master-wrapper-content").css("filter", "").css("opacity", "unset").css("pointer-events", "unset");
+        $(".header").css("filter", "").css("opacity", "unset").css("pointer-events", "unset");
+        Accordion.init('checkout-steps', '.step-title', true);
+        Accordion.openSection('#opc-custnumber');
+    </script> *@
+@* </div> *@
+<script src="https://gateway.moneris.com/chktv2/js/chkt_v2.00.js"></script>
+<script>
+
+    // $(document).ready(function () {
+    //     // Attach a click event handler to the button
+
+    //     $('.buttonForUsaMoneris').click(function () {
+    //         // Use location.reload() to refresh the page
+    //         $("#myModal").show();
+    //         $("#myModal p").text("Your Payment is completed!").css("color", "#5a9e85");
+
+    //         $(".close").click(function () {
+    //             debugger
+    //             $("#myModal").hide();
+    //              location.reload();
+    //             // if ($("#isCitagenixbtn").val() == "IsCitagenix") {
+    //             //     window.location.href = "https://localhost:44369/customer/offlinetransactions";
+    //             // }
+    //             // else{
+    //             //     location.reload();
+    //             // }
+    //         });
+
+    //     });
+    // });
+</script>
+<script>
+        // Function to redirect after a specified time
+        function redirectToSpecificPage() {
+            var count = 10; // Number of seconds for the countdown
+            var countdownTimer = setInterval(function () {
+                count--;
+                $('#countdown').text(count);
+                if (count <= 0) {
+                    clearInterval(countdownTimer);
+                    // Replace 'specific-page-url' with the URL you want to redirect to
+                    window.location.href = 'https://hansamed.net/paymentinvoice';
+                    //alert("hii");
+                }
+            }, 1000); // Update every second
+        }
+
+    // Call the function when the page loads
+    window.onload = redirectToSpecificPage;
+    
+    $('#click').click(function () {
+        window.location.href = 'https://hansamed.net/paymentinvoice';
+    });
+</script> 

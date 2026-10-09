@@ -1,0 +1,707 @@
+﻿@model ProductDetailsModel
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Media
+@using System.Text
+@using Nop.Services.Catalog
+@using Nop.Services.Media
+@using Nop.Web.Infrastructure;
+@inject IDownloadService downloadService
+@inject CatalogSettings catalogSettings
+<style>
+    .style {
+        display: none;
+    }
+</style>
+@if (Model.ProductAttributes.Count > 0)
+{
+    var AttributeName = "";
+    int Dropdownlistcount = 1;
+    <div class="attributes">
+        <dl>
+            @foreach (var attribute in Model.ProductAttributes)
+            {
+                var controlId = $"{NopCatalogDefaults.ProductAttributePrefix}{attribute.Id}";
+                var textPrompt = !string.IsNullOrEmpty(attribute.TextPrompt) ? attribute.TextPrompt : attribute.Name;
+                <dt id="@($"{NopCatalogDefaults.ProductAttributePrefix}label_{attribute.Id}")">
+                    <label class="text-prompt">
+                        @textPrompt
+                    </label>
+                    @if (attribute.IsRequired)
+                    {
+                        <span class="required">*</span>
+                    }
+                    @if (!string.IsNullOrEmpty(attribute.Description))
+                    {
+                        <div class="attribute-description">
+                            @Html.Raw(attribute.Description)
+                        </div>
+                    }
+                </dt>
+                <dd id="@($"{NopCatalogDefaults.ProductAttributePrefix}input_{attribute.Id}")">
+                    @switch (attribute.AttributeControlType)
+                    {
+                        case AttributeControlType.DropdownList:
+                            {
+                                List<string> items = attribute.Values.Select(d => d.Name).ToList();
+                                items.Sort(new PriceChange.StrCmpLogicalComparer());
+                                <select data-attr="@(attribute.Id)" name="@(controlId)" id="@(controlId)" @(attribute.Values.Any(value => value.CustomerEntersQty) ? Html.Raw($"onchange=\"showHideDropdownQuantity('{controlId}')\"") : null)>
+                                    @if (!attribute.IsRequired)
+                                    {
+                                        @* <option value="0">@T("Products.ProductAttributes.DropdownList.DefaultItem")</option> *@
+                                        <option value="0">Select @(attribute.Name)</option>
+                                    }
+                                    @foreach (var attributeValue in items)
+                                    {
+                                        var Testingname = attributeValue;
+                                        var attributeName = string.IsNullOrEmpty(attribute.Values.Where(d => d.Name == attributeValue).FirstOrDefault()?.PriceAdjustment) ?
+                                        attributeValue :
+                                        T("Products.ProductAttributes.PriceAdjustment", attributeValue, attribute.Values.Where(d => d.Name == attributeValue).FirstOrDefault()?.PriceAdjustment,
+                                        attribute.Values.Where(d => d.Name == attributeValue).FirstOrDefault().CustomerEntersQty ? T("Products.ProductAttributes.PriceAdjustment.PerItem").Text : string.Empty).Text;
+                                        <option selected="@(attribute.Values.Where(d=>d.Name==attributeValue).FirstOrDefault()?.IsPreSelected)" value="@(attribute.Values.Where(d=>d.Name==attributeValue).FirstOrDefault()?.Id)"
+                                                style="display:@(Dropdownlistcount != 1 ? "none" : "block")">
+                                            @Testingname
+                                        </option>
+                                    }
+
+                                    AttributeName = AttributeName + " , " + Testingname;
+                                    }
+                                </select>
+                                Dropdownlistcount++;
+                                foreach (var attributeValue in attribute.Values.Where(value => value.CustomerEntersQty))
+                                {
+                                    <div class="qty-box" id="@(controlId)_@(attributeValue.Id)_qty_box" style="display:none">
+                                        <label for="@(controlId)_@(attributeValue.Id)_qty">@(T("Products.ProductAttributes.PriceAdjustment.Quantity").Text)</label>
+                                        <input type="text" name="@(controlId)_@(attributeValue.Id)_qty" id="@(controlId)_@(attributeValue.Id)_qty" value="@(attributeValue.Quantity)" />
+                                    </div>
+                                }
+                                <script asp-location="Footer">
+                                    $(document).ready(function () {
+                                        showHideDropdownQuantity("@controlId");
+                                    });
+                                </script>
+                            }
+                            break;
+                        case AttributeControlType.RadioList:
+                            {
+                                <ul data-attr="@(attribute.Id)" class="option-list">
+                                    @foreach (var attributeValue in attribute.Values)
+                                    {
+                                        var attributeName = string.IsNullOrEmpty(attributeValue.PriceAdjustment) ?
+                                        attributeValue.Name :
+                                        T("Products.ProductAttributes.PriceAdjustment", attributeValue.Name, attributeValue.PriceAdjustment,
+                                        attributeValue.CustomerEntersQty ? T("Products.ProductAttributes.PriceAdjustment.PerItem").Text : string.Empty).Text;
+                                        <li data-attr-value="@attributeValue.Id">
+                                            <input id="@(controlId)_@(attributeValue.Id)" type="radio" name="@(controlId)" value="@attributeValue.Id" checked="@attributeValue.IsPreSelected"
+                                            @(attribute.Values.Any(value => value.CustomerEntersQty) ? Html.Raw($"onclick=\"showHideRadioQuantity('{controlId}')\"") : null) />
+                                            <label for="@(controlId)_@(attributeValue.Id)">@attributeName</label>
+
+                                            @if (attributeValue.CustomerEntersQty)
+                                            {
+                                                <div class="qty-box" id="@(controlId)_@(attributeValue.Id)_qty_box" style="display:none">
+                                                    <label for="@(controlId)_@(attributeValue.Id)_qty">@(T("Products.ProductAttributes.PriceAdjustment.Quantity").Text)</label>
+                                                    <input type="text" name="@(controlId)_@(attributeValue.Id)_qty" id="@(controlId)_@(attributeValue.Id)_qty" value="@(attributeValue.Quantity)" />
+                                                </div>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                                <script asp-location="Footer">
+                                    $(document).ready(function () {
+                                        showHideRadioQuantity("@controlId");
+                                    });
+                                </script>
+                            }
+                            break;
+                        case AttributeControlType.Checkboxes:
+                        case AttributeControlType.ReadonlyCheckboxes:
+                            {
+                                <ul @(attribute.AttributeControlType == AttributeControlType.Checkboxes ? Html.Raw("data-attr=" + attribute.Id) : null) class="option-list">
+                                    @foreach (var attributeValue in attribute.Values)
+                                    {
+                                        var attributeName = string.IsNullOrEmpty(attributeValue.PriceAdjustment) ?
+                                        attributeValue.Name :
+                                        T("Products.ProductAttributes.PriceAdjustment", attributeValue.Name, attributeValue.PriceAdjustment,
+                                        attributeValue.CustomerEntersQty ? T("Products.ProductAttributes.PriceAdjustment.PerItem").Text : string.Empty).Text;
+                                        <li @(attribute.AttributeControlType == AttributeControlType.Checkboxes ? Html.Raw("data-attr-value=" + attributeValue.Id) : null)>
+                                            <input id="@(controlId)_@(attributeValue.Id)" type="checkbox" name="@(controlId)" value="@attributeValue.Id" checked="@attributeValue.IsPreSelected" @(attribute.AttributeControlType == AttributeControlType.ReadonlyCheckboxes ? Html.Raw(" disabled=\"disabled\"") : null)
+                                            @(attributeValue.CustomerEntersQty ? Html.Raw($"onchange=\"showHideCheckboxQuantity('{controlId}_{attributeValue.Id}')\"") : null) />
+                                            <label for="@(controlId)_@(attributeValue.Id)">@attributeName</label>
+
+                                            @if (attributeValue.CustomerEntersQty)
+                                            {
+                                                <div class="qty-box" id="@(controlId)_@(attributeValue.Id)_qty_box" style="display:none">
+                                                    <label for="@(controlId)_@(attributeValue.Id)_qty">@(T("Products.ProductAttributes.PriceAdjustment.Quantity").Text)</label>
+                                                    <input type="text" name="@(controlId)_@(attributeValue.Id)_qty" id="@(controlId)_@(attributeValue.Id)_qty" value="@(attributeValue.Quantity)" />
+                                                    <script asp-location="Footer">
+                                                        $(document).ready(function () {
+                                                            showHideCheckboxQuantity('@(controlId)_@(attributeValue.Id)');
+                                                        })
+                                                    </script>
+                                                </div>
+                                            }
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                            break;
+                        case AttributeControlType.TextBox:
+                            {
+                                <input name="@(controlId)" type="text" class="textbox" id="@(controlId)" value="@(attribute.DefaultValue)" />
+                            }
+                            break;
+                        case AttributeControlType.MultilineTextbox:
+                            {
+                                <textarea cols="20" id="@(controlId)" name="@(controlId)">@(attribute.DefaultValue)</textarea>
+                            }
+                            break;
+                        case AttributeControlType.Datepicker:
+                            {
+                                <nop-date-picker asp-day-name="@(controlId + "_day")"
+                                                 asp-month-name="@(controlId + "_month")"
+                                                 asp-year-name="@(controlId + "_year")"
+                                                 asp-begin-year="@DateTime.UtcNow"
+                                                 asp-end-year="@DateTime.UtcNow.AddYears(catalogSettings.CountDisplayedYearsDatePicker)"
+                                                 asp-selected-date="@CommonHelper.ParseDate(attribute.SelectedYear, attribute.SelectedMonth, attribute.SelectedDay)" />
+                            }
+                            break;
+                        case AttributeControlType.FileUpload:
+                            {
+                                Download download = null;
+                                if (!string.IsNullOrEmpty(attribute.DefaultValue))
+                                {
+                                    download = await downloadService.GetDownloadByGuidAsync(new Guid(attribute.DefaultValue));
+                                }
+
+                                @* register CSS and JS *@
+                                <link rel="stylesheet" href="~/lib_npm/fine-uploader/fine-uploader/fine-uploader.min.css" />
+                                <script asp-exclude-from-bundle="true" src="~/lib_npm/fine-uploader/jquery.fine-uploader/jquery.fine-uploader.min.js" asp-location="Footer"></script>
+
+                                //ex. ['jpg', 'jpeg', 'png', 'gif'] or []
+                                var allowedFileExtensions = string.Join(", ", attribute.AllowedFileExtensions.Select(x => "'" + x.Trim() + "'").ToList());
+
+                                if (download != null)
+                                {
+                                    <input id="@(controlId)" name="@(controlId)" type="hidden" value="@download.DownloadGuid" />
+                                }
+                                else
+                                {
+                                    <input id="@(controlId)" name="@(controlId)" type="hidden" />
+                                }
+
+                                @*fine uploader container*@
+                                <div id="@(controlId)uploader"></div>
+                                @*fine uploader template (keep it synchronized to \Content\fineuploader\templates\default.html)*@
+                                <script type="text/template" asp-location="Footer" id="@(controlId)-qq-template">
+                                    <div class="qq-uploader-selector qq-uploader">
+                                        <div class="qq-upload-drop-area-selector qq-upload-drop-area" qq-hide-dropzone>
+                                            <span>@T("Common.FileUploader.DropFiles")</span>
+                                        </div>
+                                        <div class="qq-upload-button-selector qq-upload-button">
+                                            <div>@T("Common.FileUploader.Upload")</div>
+                                        </div>
+                                        <span class="qq-drop-processing-selector qq-drop-processing">
+                                            <span>@T("Common.FileUploader.Processing")</span>
+                                            <span class="qq-drop-processing-spinner-selector qq-drop-processing-spinner"></span>
+                                        </span>
+                                        <ul class="qq-upload-list-selector qq-upload-list">
+                                            <li>
+                                                <div class="qq-progress-bar-container-selector">
+                                                    <div class="qq-progress-bar-selector qq-progress-bar"></div>
+                                                </div>
+                                                <span class="qq-upload-spinner-selector qq-upload-spinner"></span>
+                                                <span class="qq-edit-filename-icon-selector qq-edit-filename-icon"></span>
+                                                <span class="qq-upload-file-selector qq-upload-file"></span>
+                                                <input class="qq-edit-filename-selector qq-edit-filename" tabindex="0" type="text">
+                                                <span class="qq-upload-size-selector qq-upload-size"></span>
+                                                <a class="qq-upload-cancel-selector qq-upload-cancel" href="#">@T("Common.FileUploader.Cancel")</a>
+                                                <a class="qq-upload-retry-selector qq-upload-retry" href="#">@T("Common.FileUploader.Retry")</a>
+                                                <a class="qq-upload-delete-selector qq-upload-delete" href="#">@T("Common.FileUploader.Delete")</a>
+                                                <span class="qq-upload-status-text-selector qq-upload-status-text"></span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </script>
+                                <script asp-location="Footer">
+                                    $(document).ready(function () {
+                                        $("#@(controlId)uploader").fineUploader({
+                                            request: {
+                                                endpoint: '@(Url.RouteUrl("UploadFileProductAttribute", new { attributeId = attribute.Id }))'
+                                            },
+                                            template: "@(controlId)-qq-template",
+                                            multiple: false,
+                                            validation: {
+                                                allowedExtensions: [@Html.Raw(allowedFileExtensions)]
+                                            }
+                                        }).on("complete", function (event, id, name, responseJSON, xhr) {
+                                            $("#@(controlId)").val(responseJSON.downloadGuid);
+                                            if (responseJSON.success) {
+                                                $("#@(controlId + "downloadurl")").html("<a href='" + responseJSON.downloadUrl + "'>@T("Common.FileUploader.DownloadUploadedFile")</a>");
+                                                $("#@(controlId + "remove")").show();
+                                            }
+                                            if (responseJSON.message) {
+                                                alert(responseJSON.message);
+                                            }
+                                        });
+
+                                        $("#@(controlId + "remove")").on('click', function (e) {
+                                            $("#@(controlId + "downloadurl")").html("");
+                                            $("#@(controlId)").val('');
+                                            $(this).hide();
+                                        });
+                                    });
+                                </script>
+                                <div id="@(controlId + "downloadurl")">
+                                    @if (download != null)
+                                    {
+                                        <a href="@(Url.Action("GetFileUpload", "Download", new {downloadId = download.DownloadGuid}))" class="download-uploaded-file">@T("Common.FileUploader.DownloadUploadedFile")</a>
+                                    }
+                                </div>
+                                <div>
+                                    @if (download != null)
+                                    {
+                                        <a id="@(controlId + "remove")" class="remove-download-button">@T("Common.FileUploader.RemoveDownload")</a>
+                                    }
+                                    else
+                                    {
+                                        <a id="@(controlId + "remove")" class="remove-download-buttonn" style="display: none;">@T("Common.FileUploader.RemoveDownload")</a>
+                                    }
+                                </div>
+
+                            }
+                            break;
+                        case AttributeControlType.ColorSquares:
+                            {
+                                <ul data-attr="@(attribute.Id)" class="option-list attribute-squares color-squares" id="color-squares-@(attribute.Id)">
+                                    @foreach (var attributeValue in attribute.Values)
+                                    {
+                                        var attributeName = string.IsNullOrEmpty(attributeValue.PriceAdjustment) ?
+                                        attributeValue.Name :
+                                        T("Products.ProductAttributes.PriceAdjustment", attributeValue.Name, attributeValue.PriceAdjustment, string.Empty).Text;
+                                        <li data-attr-value="@attributeValue.Id" @(attributeValue.IsPreSelected ? @Html.Raw(" class=\"selected-value\"") : null)>
+                                            <label for="@(controlId)_@(attributeValue.Id)">
+                                                <span class="attribute-square-container" title="@attributeName">
+                                                    <span class="attribute-square" style="background-color:@(attributeValue.ColorSquaresRgb);">&nbsp;</span>
+                                                </span>
+                                                <input id="@(controlId)_@(attributeValue.Id)" type="radio" name="@(controlId)" value="@attributeValue.Id" checked="@attributeValue.IsPreSelected"
+                                                @(attribute.Values.Any(value => value.CustomerEntersQty) ? Html.Raw($"onclick=\"showHideRadioQuantity('{controlId}')\"") : null) />
+                                            </label>
+                                            <div class="tooltip-container">
+                                                <div class="not-available-text">@T("Products.ProductAttributes.NotAvailable")</div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                                foreach (var attributeValue in attribute.Values.Where(value => value.CustomerEntersQty))
+                                {
+                                    <div class="qty-box" id="@(controlId)_@(attributeValue.Id)_qty_box" style="display:none">
+                                        <label for="@(controlId)_@(attributeValue.Id)_qty">@(T("Products.ProductAttributes.PriceAdjustment.Quantity").Text)</label>
+                                        <input type="text" name="@(controlId)_@(attributeValue.Id)_qty" id="@(controlId)_@(attributeValue.Id)_qty" value="@(attributeValue.Quantity)" />
+                                    </div>
+                                }
+                                <script asp-location="Footer">
+                                    $(document).ready(function () {
+                                        $('.attributes #color-squares-@(attribute.Id)').on('click', 'input', function (event) {
+                                            $('.attributes #color-squares-@(attribute.Id)').find('li').removeClass('selected-value');
+                                            $(this).closest('li').addClass('selected-value');
+                                        });
+                                        showHideRadioQuantity("@controlId");
+                                    });
+                                </script>
+                            }
+                            break;
+                        case AttributeControlType.ImageSquares:
+                            {
+                                <ul data-attr="@(attribute.Id)" class="option-list attribute-squares image-squares" id="image-squares-@(attribute.Id)">
+                                    @foreach (var attributeValue in attribute.Values)
+                                    {
+                                        var attributeName = string.IsNullOrEmpty(attributeValue.PriceAdjustment) ?
+                                        attributeValue.Name :
+                                        T("Products.ProductAttributes.PriceAdjustment", attributeValue.Name, attributeValue.PriceAdjustment, string.Empty).Text;
+                                        <li data-attr-value="@attributeValue.Id" @(attributeValue.IsPreSelected ? @Html.Raw(" class=\"selected-value\"") : null)>
+                                            <label for="@(controlId)_@(attributeValue.Id)">
+                                                <span class="attribute-square-container">
+                                                    <span class="attribute-square" style="background: url('@(attributeValue.ImageSquaresPictureModel.ImageUrl)') 50% 50% no-repeat;">&nbsp;</span>
+                                                </span>
+                                                <input id="@(controlId)_@(attributeValue.Id)" type="radio" name="@(controlId)" value="@attributeValue.Id" checked="@attributeValue.IsPreSelected"
+                                                @(attribute.Values.Any(value => value.CustomerEntersQty) ? Html.Raw($"onclick=\"showHideRadioQuantity('{controlId}', true)\"") : null) />
+                                            </label>
+                                            <div class="tooltip-container">
+                                                <div class="tooltip-header">@attributeName</div>
+                                                <div class="tooltip-body"><img src="@(attributeValue.ImageSquaresPictureModel.FullSizeImageUrl)" alt="@attributeName" /></div>
+                                                <div class="not-available-text">@T("Products.ProductAttributes.NotAvailable")</div>
+                                            </div>
+                                        </li>
+                                    }
+                                </ul>
+                                foreach (var attributeValue in attribute.Values.Where(value => value.CustomerEntersQty))
+                                {
+                                    <div class="qty-box" id="@(controlId)_@(attributeValue.Id)_qty_box" style="display:none">
+                                        <label for="@(controlId)_@(attributeValue.Id)_qty">@(T("Products.ProductAttributes.PriceAdjustment.Quantity").Text)</label>
+                                        <input type="text" name="@(controlId)_@(attributeValue.Id)_qty" id="@(controlId)_@(attributeValue.Id)_qty" value="@(attributeValue.Quantity)" />
+                                    </div>
+                                }
+                                <script asp-location="Footer">
+                                    $(document).ready(function () {
+                                        $('.attributes #image-squares-@(attribute.Id)').on('click', 'input', function (event) {
+                                            $('.attributes #image-squares-@(attribute.Id)').find('li').removeClass('selected-value');
+                                            $(this).closest('li').addClass('selected-value');
+                                        });
+                                        showHideRadioQuantity("@controlId", true);
+                                    });
+                                </script>
+                            }
+                            break;
+                    }
+                </dd>
+            }
+        </dl>
+        <script asp-location="Footer">
+            function showHideDropdownQuantity(id) {
+                $('select[name=' + id + '] > option').each(function () {
+                    $('#' + id + '_' + this.value + '_qty_box').hide();
+                });
+                $('#' + id + '_' + $('select[name=' + id + '] > option:selected').val() + '_qty_box').css('display', 'inline-block');
+            };
+
+            function showHideRadioQuantity(id) {
+                $('input[name=' + id + ']:radio').each(function () {
+                    $('#' + $(this).attr('id') + '_qty_box').hide();
+                });
+                $('#' + id + '_' + $('input[name=' + id + ']:radio:checked').val() + '_qty_box').css('display', 'inline-block');
+            };
+
+            function showHideCheckboxQuantity(id) {
+                if ($('#' + id).is(':checked'))
+                    $('#' + id + '_qty_box').css('display', 'inline-block');
+                else
+                    $('#' + id + '_qty_box').hide();
+            };
+        </script>
+    </div>
+
+    if (Model.AllowAddingOnlyExistingAttributeCombinations && catalogSettings.AttributeValueOutOfStockDisplayType == AttributeValueOutOfStockDisplayType.Disable)
+    {
+        <script src="~/js/public.combinationsbehavior.js" asp-location="Footer"></script>
+
+        <script asp-location="Footer">
+            var combinationsBehavior_@(Model.Id);
+            $(document).ready(function () {
+                                        combinationsBehavior_@(Model.Id) = createCombinationsBehavior({
+                contentEl: '[data-productid="@Model.Id"]',
+                fetchUrl: '@Html.Raw(Url.RouteUrl("GetProductCombinations", new { productId = Model.Id }))'
+            });
+                                        combinationsBehavior_@(Model.Id).init();
+            });
+        </script>
+    }
+
+    //dynamic update support
+    var attributesHaveConditions = Model.ProductAttributes.Any(x => x.HasCondition);
+    var attributesHaveAssociatedPictures = Model.ProductAttributes.Any(x => x.ProductId > 0);
+    var attributeChangeScriptsBuilder = new StringBuilder();
+    var productId = Model.ProductAttributes.First().ProductId;
+    var attributeChangeHandlerFuncName = $"attribute_change_handler_{Model.Id}";
+    if (catalogSettings.AjaxProcessAttributeChange)
+    {
+        if (Model.AllowAddingOnlyExistingAttributeCombinations && catalogSettings.AttributeValueOutOfStockDisplayType == AttributeValueOutOfStockDisplayType.Disable)
+        {
+            <script asp-location="Footer">
+                $(document).ready(function () {
+                    $(combinationsBehavior_@(Model.Id)).on('processed', function () {
+                @(attributeChangeHandlerFuncName)();
+                    });
+                });
+            </script>
+        }
+        else
+        {
+            //generate change event script
+            foreach (var attribute in Model.ProductAttributes)
+            {
+                var controlId = $"{NopCatalogDefaults.ProductAttributePrefix}{attribute.Id}";
+                switch (attribute.AttributeControlType)
+                {
+                    case AttributeControlType.DropdownList:
+                        {
+                            attributeChangeScriptsBuilder.AppendFormat("$('#{0}').on('change', function(){{{1}();}});\n", controlId, attributeChangeHandlerFuncName);
+                        }
+                        break;
+                    case AttributeControlType.RadioList:
+                    case AttributeControlType.ColorSquares:
+                    case AttributeControlType.ImageSquares:
+                        {
+                            foreach (var attributeValue in attribute.Values)
+                            {
+                                attributeChangeScriptsBuilder.AppendFormat("$('#{0}_{1}').on('click', function(){{{2}();}});\n", controlId, attributeValue.Id, attributeChangeHandlerFuncName);
+                            }
+                        }
+                        break;
+                    case AttributeControlType.Checkboxes:
+                    case AttributeControlType.ReadonlyCheckboxes:
+                        {
+                            foreach (var attributeValue in attribute.Values)
+                            {
+                                attributeChangeScriptsBuilder.AppendFormat("$('#{0}_{1}').on('click', function(){{{2}();}});\n", controlId, attributeValue.Id, attributeChangeHandlerFuncName);
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        foreach (var attribute in Model.ProductAttributes)
+        {
+            foreach (var attributeValue in attribute.Values.Where(value => value.CustomerEntersQty))
+            {
+                var controlId = $"{NopCatalogDefaults.ProductAttributePrefix}{attribute.Id}";
+                attributeChangeScriptsBuilder.AppendFormat("$('#{0}_{1}_qty').on('input propertychange paste', function(){{{2}();}});\n", controlId, attributeValue.Id, attributeChangeHandlerFuncName);
+            }
+        }
+        <input type="hidden" id="hdnnumber">
+        //render scripts
+        //almost the same implementation is used in the \Views\Product\_RentalInfo.cshtml file
+        <script asp-location="Footer">
+            function @(attributeChangeHandlerFuncName)() {
+                $.ajax({
+                    cache: false,
+                    url: "@Html.Raw(Url.Action("productdetails_attributechange", "shoppingcart", new { productId = Model.Id, validateAttributeConditions = attributesHaveConditions, loadPicture = attributesHaveAssociatedPictures }))",
+                    data: $('#product-details-form').serialize(),
+                    type: "POST",
+                    success: function (data, textStatus, jqXHR) {
+                        debugger
+                        $(".product-price .WarningMessage").remove();
+                        $("#add-to-cart-button-@productId").css("pointer-events", "none").css("background-color", "gray");
+                        $("#add-to-wishlist-button-@productId").css("pointer-events", "none").css("background-color", "gray");
+                        //$("#add-to-cart-button-@productId").css("pointer-events", "unset").css("background-color", "#88a900");
+                        
+                        if (data.result != "") {
+
+                            var attributesvalue = data.result.split(",");
+                            var ddlvalues = data.DDlids.split(",");
+                            var lastddlid = "";
+                            for (var i = 0; i < ddlvalues.length; i++) {
+
+                                lastddlid = $(".attributes #product_attribute_" + ddlvalues[i]).closest('dd').next().next().find('select').attr('id')
+                            }
+                            var idlist = "";
+                            $(".attributes Select").each(function () {
+                                var selectid = $(this).attr("id").replace("product_attribute_", "");;
+                                idlist = idlist + "," + selectid;
+                            })
+                            var new_array = idlist.split(",");
+                            var diff = $(new_array).not(ddlvalues).get();
+
+                        @*     for (var i = 0; i < diff.length; i++) {
+                                //var ddlloopid = "product_attribute_" + diff[i];
+                                $("#product_attribute_" + diff[i] + " option ").css("display", "none").prop("selected", false);
+                                $("#product_attribute_" + diff[i] + " option[value=0]").css("display", "block");
+                                $("#product_attribute_" + diff[i] + " option ").prop('selectedIndex', 0);
+                                //$("#product_attribute_" + diff[i] + " option ").val(0);
+                            }
+
+                            for (var i = 0; i < attributesvalue.length; i++) {
+                                $("#" + lastddlid + " option[value=" + attributesvalue[i] + "]").css("display", "block");
+                            } *@
+                        }
+                        else {
+                            var firstddl = $(".attributes Select").get(0);
+                            var selectfirstid = $(firstddl).attr("id");
+                            var selectedddlvalue = $("#" + selectfirstid).val();
+                            var attributesNotvalue = data.DDlNotids.split(",");
+                            for (var i = 0; i < attributesNotvalue.length; i++) {
+                                //var ddlloopid = "product_attribute_" + diff[i];
+                                //$("#product_attribute_" + attributesNotvalue[i] + " option ").css("display", "none").prop("selected", false);
+                                //$("#product_attribute_" + attributesNotvalue[i] + " option[value=0]").css("display", "block");
+                                //$("#product_attribute_" + attributesNotvalue[i] + " option ").prop('selectedIndex', 0);
+
+                            }
+                            //alert(selectedddlvalue);
+                            $("#" + selectfirstid + " option ").css("display", "block");
+                            $("#" + selectfirstid).val(selectedddlvalue);
+
+                            // $('.price-value-@productId').text("$0.00");
+                            //$(".attributes Select  option ").css("display", "block").get(0);
+                        }
+                        if (data.IsRolesActive) {
+                            
+                            $(".product-price").append("<span class='WarningMessage'style='color: red;display: none;'>Product not available</span>");
+                            $(".WarningMessage").fadeIn();
+                            $("#add-to-cart-button-@productId").css("pointer-events", "none").css("background-color", "gray");
+                            $("#add-to-wishlist-button-@productId").css("pointer-events", "none").css("background-color", "gray");
+                            $('.price-value-@productId').text("");
+                            return false;
+                        }
+                        if (data.islogin == "true") {
+
+                            if (data.price != "$0.00") {
+
+                                if (data.result != "") {
+                                    if (data.Languageid == 2) {
+                                        data.price = data.price.replace("$", "").replace(".", ",") + " $"
+                                    }
+
+                                    $('.price-value-@productId').text(data.price);
+                                    console.log("yes")
+                                    $("#add-to-cart-button-@productId").css("pointer-events", "unset").css("background-color", "#88a900");
+                                    $("#add-to-wishlist-button-@productId").css("pointer-events", "unset").css("background-color", "#88a900");
+                                }
+                                //$('.additional-details').html('');
+                                var ChildSku = "<div class='manufacturer-part-number'><span class='label'>Part Number:</span> <span class='value' id='mpn-4053'>" + data.sku + "</span></div>";
+                                if ($(".additional-details .manufacturer-part-number:visible").length > 1) {
+                                    $(".additional-details").find('.manufacturer-part-number:visible').eq(1).remove();
+                                }
+
+
+                            }
+                        }
+
+                        if (data.basepricepangv) {
+                            $('#base-price-pangv-@productId').text(data.basepricepangv);
+                        } else {
+                            $('#base-price-pangv-@productId').hide();
+                        }
+                        if (data.sku) {
+                            $('#sku-@productId').text(data.sku).parent(".sku").show();
+
+                        } else {
+                            $('#sku-@productId').parent(".sku").hide();
+                        }
+                        if (data.mpn) {
+                            if ($("#hdnnumber").val() == "true") {
+
+                                $('#mpn-@productId').text(data.mpn).parent(".manufacturer-part-number").show();
+                            }
+                            else {
+                                $('#mpn-@productId').text(data.mpn).parent(".manufacturer-part-number").hide();
+                            }
+                            if (data.oldsku) {
+                                var ChildSku = "<div class='oldsku'><span class='label'>@T("_productAttributes.Manufacturer's")</span> <span class='value'>" + data.oldsku + "</span></div>";
+                                if ($(".additional-details .oldsku").length > 0) {
+                                    $(".additional-details .oldsku").remove();
+                                }
+                                $(".additional-details").append(ChildSku);
+
+                            }
+
+                        } else {
+                            $(".additional-details .oldsku").remove();
+                            $('#mpn-@productId').parent(".manufacturer-part-number").hide();
+                        }
+                        //$(".additional-details .manufacturer-part-number:visible .value").text("Testing");
+                        if (data.gtin) {
+                            $('#gtin-@productId').text(data.gtin).parent(".gtin").show();
+                        } else {
+                            $('#gtin-@productId').parent(".gtin").hide();
+                        }
+                        if (data.stockAvailability) {
+                            $('#stock-availability-value-@productId').text(data.stockAvailability);
+                        }
+                        if (data.enabledattributemappingids) {
+                            for (var i = 0; i < data.enabledattributemappingids.length; i++) {
+                                $('#@(NopCatalogDefaults.ProductAttributePrefix)label_' + data.enabledattributemappingids[i]).show();
+                                $('#@(NopCatalogDefaults.ProductAttributePrefix)input_' + data.enabledattributemappingids[i]).show();
+                            }
+                        }
+                        if (data.disabledattributemappingids) {
+                            for (var i = 0; i < data.disabledattributemappingids.length; i++) {
+                                $('#@(NopCatalogDefaults.ProductAttributePrefix)label_' + data.disabledattributemappingids[i]).hide();
+                                $('#@(NopCatalogDefaults.ProductAttributePrefix)input_' + data.disabledattributemappingids[i]).hide();
+                            }
+                        }
+
+                        if (data.pictureDefaultSizeUrl) {
+                            $(".picture-wrapper img").attr("src", data.pictureDefaultSizeUrl);
+                            $('#main-product-img-@productId').attr("src", data.pictureDefaultSizeUrl);
+                        }
+                        if (data.pictureFullSizeUrl) {
+                            $(".picture-wrapper a").attr("href", data.pictureFullSizeUrl);
+                            $('#main-product-img-lightbox-anchor-@productId').attr("href", data.pictureFullSizeUrl);
+                        }
+                        if (data.message) {
+                            alert(data.message);
+                        }
+
+                        $(document).trigger({ type: "product_attributes_changed", changedData: data });
+                    }
+                });
+            }
+            $(document).ready(function () {
+            @(attributeChangeHandlerFuncName)();
+            @Html.Raw(attributeChangeScriptsBuilder.ToString()
+            )
+
+                                                                                                                                                                                                                                                });
+        </script>
+    }
+}
+
+
+<script>
+    $(document).ready(function () {
+        $(".picture-wrapper").mouseover(function () {
+            var mainimage = $("#sevenspikes-cloud-zoom img").attr("src");
+            var str2 = "_550.";
+            if (mainimage.indexOf(str2) != -1) {
+                mainimage = mainimage.replace("_550", "");
+            }
+            $("#cloudZoomImage").click(function () {
+                $(".mfp-img").attr("src", mainimage);
+            })
+
+            //var mainimage = $("#sevenspikes-cloud-zoom a").attr("data-full-image-url");
+            if ($("#cloudzoom-zoom-image-1").length > 0) {
+                $("#cloudzoom-zoom-image-1").attr("src", mainimage);
+            }
+        });
+        // Check if the class is found
+        $(".sku").hide();
+        if ($(".attributes").length > 0) {
+            // If the class is found, hide the div
+            $(".manufacturer-part-number").hide();
+        }
+
+        $(".attributes select").change(function () {
+
+            var allSelects = $(".attributes select");
+
+            var lastSelect = allSelects.last();
+            var dropdowns = $(".attributes select").not(":last");
+
+
+    @* dropdowns.click(function () {
+                $("#hdnnumber").val("false");
+                });*@
+
+
+                if (lastSelect.val() !== "0" && $(this).val() !== "0") {
+                $("#hdnnumber").val("true");
+            }
+            else {
+                $("#hdnnumber").val("false");
+            }
+
+        });
+
+    });
+
+
+    $(window).on("load", function () {
+        if ($("#product-details-form .attributes").length == 0) {
+            
+            $(".nopAjaxCartProductVariantAddToCartButton").css("pointer-events", "unset").css("background-color", "#88a900");
+        }
+    });
+</script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        debugger
+     function myFunction(i)
+    {
+        alert("The text has been changed.");
+    }
+
+    </script>*@ 

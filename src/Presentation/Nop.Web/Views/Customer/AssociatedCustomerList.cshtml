@@ -1,0 +1,47 @@
+﻿@using Nop.Web.Models.AssociatedCustomer;
+@model List<AssociatedCustomerModel>;
+
+
+<style>
+    .AssociatedCustomer {
+        margin-bottom: 20px;
+    }
+
+    .AssociatedCustomer-header {
+        font-size: 1.5em;
+        margin-bottom: 10px;
+    }
+
+    .AssociatedCustomer-button {
+        margin-left: 10px;
+    }
+
+    .AssociatedCustomer-body {
+        padding: 10px;
+        border-top: 1px solid #ddd;
+    }
+
+</style>
+
+@foreach (var i in Model) 
+{
+    <div class="AssociatedCustomer" id="AssociatedCustomerExample_">
+        <div class="AssociatedCustomer-item">
+            <h2 class="AssociatedCustomer-header">
+                <span>@i.FirstName</span>
+                <button class="AssociatedCustomer-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_" aria-expanded="false" aria-controls="collapse_">
+                    View Orders
+                </button>
+            </h2>
+
+            <div id="collapse_" class="AssociatedCustomer-collapse collapse" data-bs-parent="#AssociatedCustomerExample_">
+                @foreach (var j in i.associateorders)
+                {
+                    <div class="AssociatedCustomer-body">
+                        Order ID: @j.OrderId
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,186 @@
+﻿@model Nop.Core.Domain.KnowledgeBaseArticle.KnowledgeBaseArticle
+@using System.Text.RegularExpressions;
+@Html.ValidationSummary(true)
+@Html.HiddenFor(model => model.Id)
+@{
+    ViewBag.PageTitle = "Edit Knowledge Base Article";
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Knowledge Base Article");
+}
+@{
+    var weeks = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "Monday", Text = "Monday" },
+        new SelectListItem { Value = "Tuesday", Text = "Tuesday" },
+        new SelectListItem { Value = "Wednesday", Text = "Wednesday" },
+        new SelectListItem { Value = "Thursday", Text = "Thursday" },
+        new SelectListItem { Value = "Friday", Text = "Friday" },
+        new SelectListItem { Value = "Saturday", Text = "Saturday" },
+        new SelectListItem { Value = "Sunday", Text = "Sunday" }
+    };
+}
+@if (ViewBag.RefreshPage == true)
+{
+    <script type="text/javascript">
+        try {
+            window.opener.document.forms['@(ViewBag.formId)'].@(ViewBag.btnId).click();
+
+        }
+        catch (e) { }
+        window.close();
+    </script>
+}
+<form asp-controller="KnowledgeBaseArticle" asp-action="editKnowledgeBaseArticle" method="post">
+    <input type="hidden" id="hdnid" value="@Model.Id" />
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            Edit Knowledge Base Article
+            <small><i class="fa fa-arrow-circle-left"></i>@Html.ActionLink("back to  list", "Index")</small>
+        </h1>
+        <div class=" float-right">
+            <button type="submit" name="save" class="btn btn-primary ">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.Save")
+            </button>
+            <button type="submit" name="save-continue" class="btn btn-primary ">
+                <i class="fa fa-floppy-o"></i>
+                @T("Admin.Common.SaveContinue")
+            </button>
+        </div>
+        <div class="float-right">
+            <a href="/KnowledgeBase/Index?PageNameID=@Regex.Replace(Model.Category.Replace(" ", ""), "[^a-zA-Z0-9]", "")&pagesubcategory=@Regex.Replace(Model.SubCategory.Replace(" ", ""), "[^a-zA-Z0-9]", "")&SubtitleId=@Regex.Replace(Model.Product.Replace(" ", ""), "[^a-zA-Z0-9]", "")" class="btn btn-info">
+                <i class="far fa-eye"></i> Preview   
+            </a>
+        </div>
+
+    </div>
+    <div class="card-body">
+        <div class="content">
+            <div class="form-horizontal">
+                <div class="panel-group">
+                    <div class="panel panel-default">
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="Category" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Category" />
+                                <span asp-validation-for="Category"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="CategoryDescription" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="CategoryDescription" />
+                                <span asp-validation-for="CategoryDescription"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="SubCategory" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="SubCategory" />
+                                <span asp-validation-for="SubCategory"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="Category" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Category" />
+                                <span asp-validation-for="Category"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="SubCategoryDescription" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="SubCategoryDescription" />
+                                <span asp-validation-for="SubCategoryDescription"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="Brand" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Brand" />
+                                <span asp-validation-for="Brand"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="Product" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Product" />
+                                <span asp-validation-for="Product"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="ArticleTitle" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor  asp-for="ArticleTitle" asp-template="RichEditor" />
+                                <span asp-validation-for="ArticleTitle" ></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="ArticleBody" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for ="ArticleBody" asp-template="RichEditor" />
+                                <span asp-validation-for="ArticleBody"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="CustomerRoles" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="CustomerRoles" />
+                                <span asp-validation-for="CustomerRoles"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="CategoryIcon" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="CategoryIcon" />
+                                <span asp-validation-for="CategoryIcon"></span>
+                            </div>
+                        </div>
+                        <div class="margin-bottom row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="ColorCode" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="ColorCode" /> 
+                                <span asp-validation-for="ColorCode"></span>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-3">
+                                <nop-label asp-for="Active" />
+                            </div>
+                            <div class="col-md-9">
+                                <nop-editor asp-for="Active" />
+                                <span asp-validation-for="Active"></span>
+                            </div>
+                        </div>
+                               
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</form>

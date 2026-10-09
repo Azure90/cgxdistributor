@@ -1,0 +1,105 @@
+﻿@model Nop.Web.Areas.Admin.Models.CustomPage.CustomPageModel
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.CustomPage.List").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Custom Page");
+}
+
+<style>
+
+    .content-wrapper {
+        background-color: #ffffff;
+    }
+
+    .panel-body {
+        background: #fff;
+        padding: 20px;
+    }
+</style>
+
+<div class="content-header clearfix">
+    <h2 class="pull-left">
+        @if (Model.ID == 0)
+        {
+            <span>Create Knowledge Base</span>
+        }
+        else
+        {
+            <span>Edit Knowledge Base</span>
+        }
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="CustomListPage">@T("Admin.ContentManagement.Topics.BackToList")</a>
+        </small>
+    </h2>
+</div>
+
+<div class="panel-body">
+
+    <form enctype="multipart/form-data" asp-action="index">
+        <input asp-for="ID" type="hidden" />
+        @if (Model.ID != 0)
+        {
+        <input asp-for="LanguageId" type="hidden" />
+        }
+        @if (Model.ID == 0)
+        {
+        <div class="margin-bottom row">
+        <div class="col-md-3">
+        <label>Language</label>
+        </div>
+        <div class="col-md-9">
+        <select name="LanguageId" class="validation" data_spnid="spnLanguagesubtitle" id="Language" value="selected" asp-for="LanguageId">
+        <option value="Select Language">Select Language</option>
+        <option value="1">English</option>
+        <option value="2">Français</option>
+
+        </select>
+        <span id="spnLanguagesubtitle" class="custom-validation"></span>
+        </div>
+        </div>
+        }
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="BannerImage" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="BannerImage" />
+                <span asp-validation-for="BannerImage"></span>
+            </div>
+        </div>
+
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Title" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Title" />
+                <span asp-validation-for="Title"></span>
+            </div>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Description" />
+            </div>
+            <div class="col-md-9">
+                <nop-textarea asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description"></span>
+            </div>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Active" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Active" />
+                <span asp-validation-for="Active"></span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" onclick="return save()">Save</button>
+        <span id="allfield"></span>
+    </form>
+</div>
+

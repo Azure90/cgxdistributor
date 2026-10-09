@@ -1,0 +1,189 @@
+﻿@using Nop.Web.Areas.Admin.Models.CustomPage
+@model CustomDocumentsModel;
+
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.Contentmanagement.Customdocuments.EditDocument").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("My documents");
+}
+
+<form asp-controller="CustomDocuments" asp-action="EditCustomDocument" method="post">
+    <input asp-for="Id" type="hidden" />
+
+    <div class="content-header clearfix">
+        <h1 class="float-left">
+            @T("Admin.Contentmanagement.Customdocuments.EditDocument") - @Model.FileName
+            <small>
+                <i class="fas fa-arrow-circle-left"></i>
+                <a asp-action="CustomDocumentsList">back to list</a>
+            </small>
+        </h1>
+        <div class="float-right">
+            <button type="submit" name="save" class="btn btn-primary">
+                <i class="far fa-save"></i>
+                @T("Admin.Common.Save")
+            </button>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+            <div class="form-horizontal">
+                <nop-cards id="custom-docuemnts-cards">
+                    <style>
+                        .card-custom-documents {
+                            margin-bottom: 10px;
+                            border-top: 3px solid #00c0ef;
+                            border-left: 0;
+                            border-right: 0;
+                            border-bottom: 0;
+                            box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+                        }
+                    </style>
+                    <div class="card card-outline card-custom-documents" id="CustomDocuments-info">
+                        <div class="card-header with-border clearfix">
+                            <div class="card-title">
+                                <i class="far fa-file-pdf"></i>Documents info
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomMainCategory">Main Category</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The main category for the header in document tab">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="MainCategory" asp-required="true" />
+                                    <span asp-validation-for="MainCategory"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomSubCategory">Sub Category</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The sub category for the document tab">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="SubCategory" />
+                                    <span asp-validation-for="SubCategory"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomCategory">Category</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The category for the document tab">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="Category" />
+                                    <span asp-validation-for="Category"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomFileName">File Name</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The file name for the document">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="FileName" asp-required="true" />
+                                    <span asp-validation-for="FileName"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomDownloadLink">Download Link</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The Download link for the documents">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="DownloadLink" asp-required="true" />
+                                    <span asp-validation-for="DownloadLink"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomVideoLink">Video Link</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The video link to play in document tab">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="VideoLink" />
+                                    <span asp-validation-for="VideoLink"></span>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomDocumentBpCode">BPCode</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The Bp Code for the allowed customers">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-select asp-for="BPCode" asp-items="Model.AvailableCustomers" asp-multiple="false" asp-required="true" />
+                                    <script>
+                                        $(document).ready(function () {
+                                            var categoryIdsInput = $('#@Html.IdFor(model => model.BPCode)').data("kendoMultiSelect");
+                                            categoryIdsInput.setOptions({
+                                                autoClose: false,
+                                                filter: "contains"
+                                            });
+
+                                            @if (Model.AvailableCustomers.Count == 0)
+                                            {
+                                                <text>
+                                                        categoryIdsInput.setOptions({
+                                                            enable: false,
+                                                            placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                                        });
+                                                    categoryIdsInput._placeholder();
+                                                    categoryIdsInput._enable();
+                                                </text>
+                                            }
+                                        });
+                                    </script>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <div class="label-wrapper">
+                                        <label class="col-form-label" for="CustomDisplayOrder">Dispaly Order</label>
+                                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The Display order for the tabs in the account page">
+                                            <i class="fas fa-question-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    <nop-editor asp-for="DisplayOrder" />
+                                    <span asp-validation-for="DisplayOrder"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </nop-cards>
+            </div>
+        </div>
+    </section>
+</form>

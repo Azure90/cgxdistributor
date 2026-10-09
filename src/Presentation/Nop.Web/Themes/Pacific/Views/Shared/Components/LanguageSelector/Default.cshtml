@@ -1,0 +1,141 @@
+﻿@model LanguageSelectorModel
+@using Microsoft.AspNetCore.Http
+@using System.Net
+@using Nop.Core
+@inject IWebHelper webHelper
+@inject IHttpContextAccessor httpContextAccessor
+@inject IWorkContext _workContext
+<link href="~/css/custompage/pacificthemecss/pacificcss.css" rel="stylesheet" />
+@if (Model.AvailableLanguages.Count > 1)
+{
+    <div class="desktop-language-selector">
+        @{
+            var rawUrl = webHelper.GetRawUrl(httpContextAccessor.HttpContext.Request);
+
+            var currentLanguage = Model.AvailableLanguages.FirstOrDefault(x => x.Id == Model.CurrentLanguageId);
+
+            var languages = await Model.AvailableLanguages.SelectAwait(async lang => new SelectListItem
+                {
+                    Text = lang.Name,
+                    Value = webHelper.ModifyQueryString(Url.RouteUrl("ChangeLanguage", new { langid = lang.Id }, webHelper.GetCurrentRequestProtocol()), "returnurl", rawUrl),
+                    Selected = lang.Id.Equals(Model.CurrentLanguageId)
+                }).ToListAsync();
+
+            if (Model.UseImages)
+            {
+                    <ul class="language-list">
+                        @foreach (var lang in Model.AvailableLanguages)
+                    {
+                            <li>
+                                <a href="@webHelper.ModifyQueryString(Url.RouteUrl("ChangeLanguage", new {langid = lang.Id}, webHelper.GetCurrentRequestProtocol()), "returnurl", rawUrl)" title="@lang.Name">
+                                    <img title='@lang.Name' alt='@lang.Name' @(lang.Id == Model.CurrentLanguageId ? " class=selected" : null)
+                                         src="@Url.Content("~/images/flags/" + @lang.FlagImageFileName) " />
+                                </a>
+                            </li>
+                    }
+                    </ul>
+            }
+            else
+            {
+                    <select id="customerlanguage" name="customerlanguage" asp-items="@languages" onchange="setLocation(this.value);" aria-label="@T("Languages.Selector.Label")"></select>
+            }
+        }
+    </div>
+    <div class="mobile-language-selector">
+        @* <div class="current-language-image">
+    <img title='@currentLanguage.Name' alt='@currentLanguage.Name' src="@Url.Content("~/images/flags/" + currentLanguage.FlagImageFileName) " />
+    </div>
+    <select id="customerlanguage" name="customerlanguage" asp-items="@languages" onchange="setLocation(this.value);"></select> *@
+
+
+        @if (_workContext.GetCurrentCustomerAsync().Result.Email == null)
+        {
+
+            <div class="divroles">
+                <label> Customer Type :</label>
+                <select class="form-select valid selectroles1">
+                    <option value="cad">Canada</option>
+                    <option value="usd">United States</option>
+                    <option value="intl">International</option>
+
+                </select>
+            </div>
+        }
+        else
+        {
+            <div class="AssociatedCustomer1 selectAssociatedOuter">
+                @* <label> Associated Customer :</label>
+        <select class="form-control valid Associated" onchange="redirectToPage()">
+        <option value="0">Select </option>
+        </select> *@
+            </div>
+        }        
+    </div>
+}
+<script>
+    $.ajax({
+        type: 'GET',
+        url: '/Customer/Getthesubcustomerlist',
+        success: function (data) {
+            if (data.length > 0) {
+                var associatecustomer = "";
+                // associatecustomer += " <label>Associated Customer:</label>";
+                associatecustomer += "<select class= 'form - control valid Associated'  onchange = 'redirectToPage()'>";
+                associatecustomer += " <option  value='0'> Select Associated Customer </option>";
+                associatecustomer += "</select>";
+                $(".AssociatedCustomer1").append(associatecustomer);
+                for (var i = 0; i < data.length; i++) {
+
+                    var addclass = "option_" + data[i].Id;
+                    var associatecustomer1 = "<option data-isactive='" + data[i].Active + "' class='" + addclass + "' value='" + data[i].Id + "'>" + data[i].DisplayName + "</option>"
+
+                    $(".Associated").append(associatecustomer1);
+                }
+                const bannerValue = getCookie('ImpersonateCustomerid');
+                var aa = parseInt(bannerValue);
+                if (aa > 0) {
+                    $(".Associated").val(aa);
+                }
+            }
+            else {
+                $(".AssociatedCustomer1").hide();
+            }
+        }
+    })
+    $('.selectroles1').change(function () {
+        if ($('.selectroles1 :selected').val() == "cad") {
+            window.location.href = "https://hansamed.net/about-hansamed";
+        } else {
+            $.ajax({
+                type: 'Post',
+                url: '/ProductGroup/Filter',
+                data: { id: $('.selectroles1 :selected').val() },
+                success: function (data) {
+                    location.reload();
+                }
+            })
+        }
+    })
+    $(document).ready(function () {
+        $.ajax({
+            type: 'Post',
+            url: '/Customer/customerrole',
+
+            success: function (data) {
+                var obj = "usd";
+
+                if (data == "USD B2C") {
+                    obj = "usd"
+                }
+                else if (data == "CAD B2C") {
+                    obj = "cad"
+                }
+                else if (data == "USD B2B INTL") {
+                    obj = "intl"
+                }
+                $(".selectroles1").val(obj);
+
+            }
+        })
+    })
+</script>

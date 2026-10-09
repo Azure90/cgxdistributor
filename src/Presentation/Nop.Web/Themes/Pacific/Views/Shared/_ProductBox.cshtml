@@ -1,0 +1,520 @@
+﻿@model ProductOverviewModel
+
+@using Microsoft.AspNetCore.Http.Extensions
+@using Nop.Core
+@using Nop.Core.Domain.Catalog
+@using Nop.Core.Domain.Orders
+@using Nop.Core.Domain.Tax
+@using Nop.Services.Catalog
+@using Nop.Services.Configuration
+@using Nop.Services.Customers
+@using Nop.Services.Discounts
+@using Nop.Web.Infrastructure;
+@using Nop.Services.Orders;
+
+@inject CatalogSettings catalogSettings
+@inject ISettingService settingService
+@inject IStoreContext storeContext
+@inject IViewComponentSelector viewComponentSelector
+@inject IWorkContext workContext
+@inject ICustomerService customerService
+@inject IDiscountService discountService
+@inject IShoppingCartService shoppingCartService;
+@inject IProductsWithBPCodeService productWithBPCodeService;
+
+@{
+    var currcustomer = workContext.GetCurrentCustomerAsync().Result;
+
+    var currRoles = customerService.GetCustomerRolesAsync(currcustomer).Result.Where(d => d.Name == "CAD B2C"
+                                            || d.Name == "USD B2C"
+                                            || d.Name == "USD B2B INTL"
+                                            || d.Name == "CAD B2C HS"
+                                            || d.Name == "USD B2B ST"
+                                            || d.Name == "USD B2B DS"
+                                            || d.Name == "CAD B2B ST"
+                                            || d.Name == "CAD B2B DS"
+                                            ).FirstOrDefault();
+}
+<style>
+    .product-grid .item-box button.product-box-add-to-cart-button {
+        width: calc(100% - 109px);
+    }
+</style>
+@{
+    //Model.IsSample = true;
+    //prepare "Add to cart" AJAX link
+    var addtocartlink = "";
+    var shoppingCartTypeId = (int)ShoppingCartType.ShoppingCart;
+    var quantity = 1;
+    var checkprice = "";
+
+    // Check for mega menu custom item is enabled or not
+    bool isCustomMegaMenuItemEnabled = false;
+
+    // load setting value
+    var setting = await settingService.GetSettingAsync("CustomPromotion.IsEnabledCustomMegaMenuItem");
+    bool.TryParse(setting?.Value?.Trim('"'), out isCustomMegaMenuItemEnabled);
+
+    // Check for cart button is enabled or not
+    var isCartButtonDisabled = await discountService.GetCartButtonSettingForCustomerRolesAsync("DisableCartButtonForDiscountRoles");
+
+
+    if (Model.ProductPrice.ForceRedirectionAfterAddingToCart)
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity, forceredirection = Model.ProductPrice.ForceRedirectionAfterAddingToCart });
+    }
+    else
+    {
+        addtocartlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = shoppingCartTypeId, quantity = quantity });
+    }
+
+    var addtowishlistlink = Url.RouteUrl("AddProductToCart-Catalog", new { productId = Model.Id, shoppingCartTypeId = (int)ShoppingCartType.Wishlist, quantity = quantity });
+    var addtocomparelink = Url.RouteUrl("AddProductToCompare", new { productId = Model.Id });
+
+    var storeId = (await storeContext.GetCurrentStoreAsync()).Id;
+
+    var hoverVariant = await settingService.GetSettingByKeyAsync("pacificthemesettings.itemboxhover", "one", storeId, true);
+    var hoverVariantClass = "hover-variant-" + hoverVariant;
+
+    var ProductPrice = @Model.ProductPrice.Price;
+
+    if (ProductPrice == "$0.00")
+    {
+        var customer = workContext.GetCurrentCustomerAsync().Result;
+        @*  var GetallRoles =  customerService.GetCustomerRoles(customer).Where(d => d.Name == "LISTPRICE 2023 CAD"
+                || d.Name == "LISTPRICE 2023 USD"
+                || d.Name == "INTNAT 2023"
+                || d.Name == "HOSPIT 2023 CAD"
+                || d.Name == "20OFF 2023 CAD"
+                || d.Name == "DIST1 2023 CAD"
+                || d.Name == "DISTD 2023 CAD"
+                ).FirstOrDefault();*@
+
+        var GetallRoles = customerService.GetCustomerRolesAsync(customer).Result.Where(d => d.Name == "CAD B2C"
+                                                                            || d.Name == "USD B2C"
+                                                                            || d.Name == "USD B2B INTL"
+                                                                            || d.Name == "CAD B2C HS"
+                                                                            || d.Name == "USD B2B ST"
+                                                                            || d.Name == "USD B2B DS"
+                                                                            || d.Name == "CAD B2B ST"
+                                                                            || d.Name == "CAD B2B DS"
+                                                                            ).FirstOrDefault();
+        if (GetallRoles != null)
+        {
+            PriceChange obj = new PriceChange();
+            checkprice = obj.getthelowestprice(Model.Id, customer.Id, GetallRoles.Id);
+            ProductPrice = checkprice + @T("ShoppingCart.Startingfrom");
+        }
+
+    }
+    else
+    {
+        var customer = workContext.GetCurrentCustomerAsync().Result;
+        PriceChange obj = new PriceChange();
+        checkprice = obj.getthelowestprice(Model.Id, customer.Id);
+        if (checkprice != "$0.00")
+        {
+            if (!checkprice.Contains("0,00 $"))
+            {
+                // Commented by tpss sh
+                //if (ProductPrice != checkprice)
+                {
+                    if (isCustomMegaMenuItemEnabled)
+                    {
+                        // special price count
+                        var specialCount = obj.CheckSpecialPriceDisocunt(Model.Id, customer.Id);
+                        if (specialCount > 0)
+                        {
+                            // Special price → Best Price label
+                            ProductPrice = checkprice;
+
+                            // calculate old price
+
+                           // var oldPrice = await shoppingCartService.CheckMaxTierPriceForProductAsync(Model.Id, ProductPrice);
+
+                            // check if both prices are equal
+
+                            //var oldParsePrice = shoppingCartService.ParsePrice(oldPrice);
+                            // var parsePrice = shoppingCartService.ParsePrice(ProductPrice);
+                            // if (oldParsePrice > parsePrice)
+                            //     Model.ProductPrice.OldPrice = oldPrice;
+                            // else
+                            //     Model.ProductPrice.OldPrice = string.Empty;
+                        }
+                        else
+                        {
+                            ProductPrice = checkprice;
+                        }
+                    }
+                    else
+                    {
+                        ProductPrice = checkprice;
+                    }                    
+                }
+            }
+            else
+            {
+                if (workContext.GetWorkingLanguageAsync().Result.Id == 2)
+                {
+                    if (ProductPrice != null)
+                    {
+                        ProductPrice = ProductPrice.Replace("$", "").Replace(".", ",");
+                        ProductPrice = ProductPrice + " $";
+                    }
+                }
+
+            }       
+        }
+        else
+        {
+            if (workContext.GetWorkingLanguageAsync().Result.Id == 2)
+            {
+                if (ProductPrice != null)
+                {
+                    ProductPrice = ProductPrice.Replace("$", "").Replace(".", ",");
+                    ProductPrice = ProductPrice + " $";
+                }
+            }
+
+            if (ProductPrice == "0")
+            {
+                Model.ProductPrice.OldPrice = string.Empty;
+                ProductPrice = checkprice + @T("ShoppingCart.Startingfrom");
+            }
+            else
+            {
+                if (isCustomMegaMenuItemEnabled)
+                {
+                    var productWithDiscount = await shoppingCartService.CheckProductPriceWithDiscountAsync(Model.Id);
+                    if (!string.IsNullOrEmpty(productWithDiscount) && !productWithDiscount.Contains("$0.00"))
+                    {
+                        ProductPrice = productWithDiscount;
+
+                        // calculate old price
+                        // var oldPrice = await shoppingCartService.CheckMaxTierPriceForProductAsync(Model.Id, ProductPrice);
+
+                        // // check if both prices are equal
+                        // var oldParsePrice = shoppingCartService.ParsePrice(oldPrice);
+                        // var parsePrice = shoppingCartService.ParsePrice(ProductPrice);
+                        // if (oldParsePrice > parsePrice)
+                        //     Model.ProductPrice.OldPrice = oldPrice;
+                        // else
+                        //     Model.ProductPrice.OldPrice = string.Empty;
+                    }
+                    else
+                    {
+                        ProductPrice = checkprice;
+                    }
+                }
+                else
+                {
+                    if (!checkprice.Contains("$0.00"))
+                    {
+                        Model.ProductPrice.OldPrice = string.Empty;
+                        ProductPrice = checkprice;
+                    }
+                }
+
+                // commented by tpss sh for special price/discount price
+                // ProductPrice = checkprice;
+            }
+        }
+    }
+}
+
+<div class="product-item @hoverVariantClass" data-productid="@Model.Id">
+    <div class="picture">
+        @if (Model.PictureModels.Count > 1)
+        {
+            <div class="swiper" id="swiper-@Model.Id" dir="@Html.GetUIDirection(!await Html.ShouldUseRtlThemeAsync())">
+                <div class="swiper-wrapper">
+                    @foreach (var picture in Model.PictureModels)
+                    {
+                        <a class="swiper-slide" href="@(Url.RouteUrl<Product>(new { SeName = Model.SeName }))" title="@picture.Title">
+                            @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                            {
+                                @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                                         {
+                    ("src", picture.ImageUrl),
+                    ("alt", picture.AlternateText),
+                    ("title", picture.Title)
+                                         })
+                            }
+                            else
+                            {
+                                <img class="picture-img" alt="@picture.AlternateText" src="@picture.ImageUrl" title="@picture.Title" />
+                            }
+                        </a>
+                    }
+                </div>
+                <div class="swiper-pagination"></div>
+            </div>
+            <script asp-location="Footer">
+                new Swiper('#swiper-@(Model.Id)', {
+                    pagination: {
+                        clickable: true,
+                        el: '.swiper-pagination',
+                    },
+                });
+            </script>
+        }
+        else
+        {
+            var picture = Model.PictureModels.FirstOrDefault();
+
+            @*******    Commented by tpss sh for exclusive discount ******@
+            @* if (Model.IsSample)
+            {
+                <a href="@(Url.RouteUrl<Product>(new { SeName = Model.SeName }))" title="@picture?.Title">
+                    @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                    {
+                        @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                         {
+                            ("src", picture.ImageUrl),
+                            ("alt", picture.AlternateText),
+                            ("title", picture.Title)
+                          })
+                    }
+                    else
+                    {
+                        <img class="picture-img" alt="@picture?.AlternateText" src="@picture?.ImageUrl" title="@picture?.Title" />
+                    }
+                </a>
+            }
+            else
+            {
+
+                <a href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = Model.Id,s=Model.IsSample, a="0"})" title="@picture?.Title" class="GetpageRediect">
+                    @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                    {
+                        @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                         {
+                            ("src", picture.ImageUrl),
+                            ("alt", picture.AlternateText),
+                            ("title", picture.Title)
+                          })
+                    }
+                    else
+                    {
+                        <img class="picture-img" alt="@picture?.AlternateText" src="@picture?.ImageUrl" title="@picture?.Title" />
+                    }
+                </a>
+            } *@
+
+            @* Added by tpss sh  *@
+            @if (!Model.DiscountOrSpecialApplied)
+            {
+                <a href="@(Url.RouteUrl<Product>(new { SeName = Model.SeName }))" title="@picture?.Title">
+                    @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                    {
+                        @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                        {
+                            ("src", picture.ImageUrl),
+                            ("alt", picture.AlternateText),
+                            ("title", picture.Title)
+                        })
+                    }
+                    else
+                    {
+                        <img class="picture-img" alt="@picture?.AlternateText" src="@picture?.ImageUrl" title="@picture?.Title" />
+                    }
+                </a>
+            }
+            else
+            {
+                <a href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = Model.Id,s=Model.IsSample, a="0"})" title="@picture?.Title" class="GetpageRediect">
+                    @if (viewComponentSelector.SelectComponent("LazyLoadImage") != null)
+                    {
+                        @await Component.InvokeAsync("LazyLoadImage", new (string Key, string Value)[]
+                        {
+                            ("src", picture.ImageUrl),
+                            ("alt", picture.AlternateText),
+                            ("title", picture.Title)
+                        })
+                    }
+                    else
+                    {
+                        <img class="picture-img" alt="@picture?.AlternateText" src="@picture?.ImageUrl" title="@picture?.Title" />
+                    }
+                </a>
+            }            
+        }
+    </div>
+    <div class="details">
+        <div class="details-top">
+            <h2 class="product-title">
+                <a href="@(Url.RouteUrl<Product>(new {SeName = Model.SeName }))">@Model.Name</a>
+            </h2>
+            @if (Model.ReviewOverviewModel.AllowCustomerReviews)
+            {
+                var ratingPercent = 0;
+                if (Model.ReviewOverviewModel.TotalReviews != 0)
+                {
+                    ratingPercent = ((Model.ReviewOverviewModel.RatingSum * 100) / Model.ReviewOverviewModel.TotalReviews) / 5;
+                }
+                <div class="product-rating-box" title="@string.Format(T("Reviews.TotalReviews").Text, Model.ReviewOverviewModel.TotalReviews)">
+                    <div class="rating">
+                        <div style="width: @(ratingPercent)%">
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (catalogSettings.ShowSkuOnCatalogPages && !string.IsNullOrEmpty(Model.Sku))
+        {
+            <div class="sku">
+                @Model.Sku
+            </div>
+        }
+
+        <div class="description" @(catalogSettings.ShowShortDescriptionOnCatalogPages ? "" : "data-short-description=none")>
+            @Html.Raw(Model.ShortDescription)
+        </div>
+
+        <div class="prices">
+            @{
+                var isPriceDiscounted = "only-price";
+                if (!string.IsNullOrEmpty(Model.ProductPrice.OldPrice))
+                {
+                    isPriceDiscounted = "actual-price";
+                }
+            }
+            @if (workContext.GetCurrentCustomerAsync().Result.Email != null || T("Product.Price.LoginForPrice").Text == "product.price.loginforprice")
+            {
+                // <span class="price @isPriceDiscounted">@Model.ProductPrice.Price</span> 
+
+                @********** Commented by tpss sh for exclusive discount  *******@
+                @* @if (Model.IsSample == true) *@
+                @if (!Model.DiscountOrSpecialApplied)
+                {
+                    <span class="price @isPriceDiscounted">
+                        @ProductPrice
+                    </span>
+                    @* <span class="price actual-price finalprice" data-productmodelprice="@Model.ProductPrice.Price" data-productlowprice="@checkprice" data-productid="@Model.Id">@ProductPrice</span> *@
+                }
+
+                @if (!string.IsNullOrEmpty(Model.ProductPrice.OldPrice))
+                {
+                    <span class="price old-price">@Model.ProductPrice.OldPrice</span>
+                }
+                @if (Model.ProductPrice.DisplayTaxShippingInfo)
+                {
+                    var inclTax = await workContext.GetTaxDisplayTypeAsync() == TaxDisplayType.IncludingTax;
+                    //tax info is already included in the price (incl/excl tax). that's why we display only shipping info here
+                    //of course, you can modify appropriate locales to include VAT info there
+                    <span class="tax-shipping-info">
+                        @T(inclTax ? "Products.Price.TaxShipping.InclTax" : "Products.Price.TaxShipping.ExclTax", Url.RouteTopicUrl("shippinginfo"))
+                    </span>
+                }
+                @if (!string.IsNullOrEmpty(Model.ProductPrice.BasePricePAngV))
+                {
+                    <div class="base-price-pangv">
+                        @Model.ProductPrice.BasePricePAngV
+                    </div>
+                }
+
+            }
+            else
+            {
+                @if (currRoles != null)
+                {
+                    @if (currRoles.Name != "USD B2B INTL")
+                    {
+                        <span class="price actual-price" data-productmodelprice="@Model.ProductPrice.Price" data-productlowprice="@checkprice"><a href="login/?returnUrl=@Context.Request.GetEncodedPathAndQuery()">@T("Product.Price.LoginForPrice")</a></span>
+
+                    }
+                    else
+                    {
+
+                        <span class="price actual-price" data-productmodelprice="@Model.ProductPrice.Price" data-productlowprice="@checkprice"><a href="/contactus">Contact for Price</a></span>
+
+                    }
+                }
+            }
+        </div>
+        <div class="add-info">
+            @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.ProductBoxAddinfoBefore, additionalData = Model })
+            <div class="buttons">
+                @if (!Model.ProductPrice.DisableBuyButton)
+                {
+                    var addToCartText = T("ShoppingCart.AddToCart").Text;
+                    if (Model.ProductPrice.IsRental)
+                    {
+                        addToCartText = T("ShoppingCart.Rent").Text;
+                    }
+                    if (Model.ProductPrice.AvailableForPreOrder)
+                    {
+                        addToCartText = T("ShoppingCart.PreOrder").Text;
+                    }
+                    if (isCartButtonDisabled)
+                    {
+                        addToCartText = T("ShoppingCart.InformationButton").Text;
+                    }
+                    @* <button type="button" class="button-2 product-box-add-to-cart-button GetpageRediect" onclick="AjaxCart.addproducttocart_catalog('@addtocartlink');return false;">@(addToCartText)</button> *@
+
+                    @********** Commented by tpss sh for exclusive discount  *******@
+                    @if (!Model.DiscountOrSpecialApplied)
+                    {
+                        @*  <button type="button" data-productid="@Model.Id" class="button-2 product-box-add-to-cart-button GetpageRediect">Add To Cart</button> *@
+
+                       <button type="button" data-productid="@Model.Id" class="button-2 product-box-add-to-cart-button GetpageRediect">@(addToCartText)</button>
+                    }
+                    else
+                    {
+                        <button type="button" data-productid="@Model.Id" class="button-2 product-box-add-to-cart-button GetpageRediect">More Information</button>
+                   }
+                }
+                @if (!Model.ProductPrice.DisableWishlistButton)
+                {
+                    @* <button data-productid="@Model.Id" type="button" class="button-2 add-to-wishlist-button "  title="@T("ShoppingCart.AddToWishlist")" onclick="AjaxCart.addproducttocart_catalog('@addtowishlistlink');return false;">@T("ShoppingCart.AddToWishlist")</button> *@
+                }
+                @if (!Model.ProductPrice.DisableAddToCompareListButton)
+                {
+                    @* <button data-productid="@Model.Id" type="button" class="button-2 add-to-compare-list-button GetpageRediect" title="@T("ShoppingCart.AddToCompareList")"  onclick="AjaxCart.addproducttocomparelist('@addtocomparelink');return false;" >@T("ShoppingCart.AddToCompareList")</button> *@
+                }
+            </div>
+
+            @********** Commented by tpss sh for exclusive discount  *******@
+           @* @if (Model.IsSample == true) 
+            {
+                <a id="btnaddtocart_@Model.Id" class="item-box-overlay" href="@(Url.RouteUrl<Product>(new {SeName = Model.SeName }))" title="@Model.Name">
+                    <span class="item-box-overlay-tint"></span>
+                </a>
+            }
+            else
+            {
+                <a id="btnaddtocart_@Model.Id" class="item-box-overlay" href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = Model.Id,s=true, a="0"})" title="@Model.Name">
+                    <span class="item-box-overlay-tint"></span>
+                </a> 
+            } *@
+
+            @* Added by tpss sh  *@
+            @if (!Model.DiscountOrSpecialApplied)
+            {
+                <a id="btnaddtocart_@Model.Id" class="item-box-overlay" href="@(Url.RouteUrl<Product>(new {SeName = Model.SeName }))" title="@Model.Name">
+                    <span class="item-box-overlay-tint"></span>
+                </a>
+            }
+            else
+            {
+                <a id="btnaddtocart_@Model.Id" class="item-box-overlay" href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = Model.Id,s=true, a="0"})" title="@Model.Name">
+                    <span class="item-box-overlay-tint"></span>
+                </a> 
+            }
+
+            @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.ProductBoxAddinfoAfter, additionalData = Model })
+        </div>
+        <div class="attribute-squares-wrapper"></div>
+    </div>
+</div>
+<script>
+    $(document).on("click", ".GetpageRediect", function () {
+        debugger
+        var proid = $(this).attr("data-productid");
+        var Productdetail = $("#btnaddtocart_" + proid).attr("href");
+
+        window.location.href = Productdetail;
+    });
+
+
+</script>

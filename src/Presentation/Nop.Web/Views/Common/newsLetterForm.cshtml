@@ -1,0 +1,192 @@
+﻿@model ContactUsModel
+@{
+    Layout = "_ColumnsOne";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.newsLetterForm").Text);
+    //page class
+    NopHtml.AppendPageCssClassParts("html-contact-page");
+}
+<style>
+    .contact-page .form-fields{
+        max-width: 1200px !important
+    }
+</style>
+
+<div class="page contact-page custom-contact custom-newsletter ">
+
+    <div @*class="page-body"*@>
+        @await Component.InvokeAsync("TopicBlock", new { systemName = "NewsLetterForm" })
+        @* @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContactUsTop }) *@
+        @if (ViewBag.successmessage == "Success")
+        {
+
+            <span style=" font-weight: 700; margin: 25px; margin: 86px 452px;padding: 13px 57px; border-radius: -27px 20px 12px 17px; width: 640px; color: #270; background-color: #DFF2BF;">
+                Mail Sent Successfully!!
+            </span>
+
+        }
+        else
+        {
+
+            <form asp-route="newsLetterForm" method="post">
+                <div asp-validation-summary="ModelOnly" class="message-error"></div>
+                <div class="fieldset">
+                    <div class="form-fields" style="background-color: #fff">
+
+                        <div class="inputs">
+                            <label asp-for=" Email" asp-postfix=":">@T("Support.Email.Hint")</label>
+                            <input asp-for="Email" placeholder="Email" class="Email validation" data_spnid="spnemail" />
+                            <nop-required />
+                            <span id="spnemail" class="custom-validation"></span>
+                        </div>
+                        <div class="inputs">
+                            <label asp-for="Salutation" asp-postfix=":">Salutation</label>
+                            @*<input asp-for="FullName" placeholder="@T("ContactUs.FullName.Hint")" class="fullname" />*@
+                            <select name="Salutation" data_spnid="spnsalutation" class="Salutation validation" asp-items=" @Model.Salutationlist"></select>
+                            <nop-required />
+                            <span id="spnsalutation" class="custom-validation"></span>
+                        </div>
+                        <div class="inputs">
+                            <label asp-for="FirstName" asp-postfix=":">@T("Support.FirstName.Hint")</label>
+                            <input asp-for="FirstName" placeholder="First Name" data_spnid="spnfirstname" class="FirstName validation" />
+                            <nop-required />
+                            <span id="spnfirstname" class="custom-validation"></span>
+                        </div>
+                        <div class="inputs">
+                            <label asp-for="LastName" asp-postfix=":">@T("Support.LastName.Hint")</label>
+                            <input asp-for="LastName" placeholder="LastName" data_spnid="spnlastname" class="LastName validation" />
+                            <nop-required />
+                            <span id="spnlastname" class="custom-validation"></span>
+                        </div>
+                        <input type="hidden" id="hidden" data_spnid="spnemail" name="Specialty" />
+                        <div class="inputs custom-checkbox">
+                            <label asp-for="Specialty" asp-postfix=":">@T("Support.FieldSpecialty.Hint")</label>
+                            @if (Model.Specialty != null)
+                            {
+                                @foreach (var obj in Model.Specialty)
+                                {
+                                    <tr>
+                                        <td>
+                                            <label>
+                                                <input type="checkbox" data_spnid="spnspecialty" class="Speciality validation" name="Specialty" value="@obj" />
+                                                @obj
+                                            </label>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            <nop-required />
+                            <span id="spnspecialty" class="custom-validation"></span>
+                        </div>
+                            <div class="inputs">
+                                <label asp-for="country" asp-postfix=":">@T("Support.Country.Hint")</label>
+                                @*<input asp-for="FullName" placeholder="@T("ContactUs.FullName.Hint")" class="fullname" />*@
+                                <select name="Country" data_spnid="spncountry" class="Country validation" asp-items=" @Model.countrylist"></select>
+                                <nop-required />
+                                <span id="spncountry" class="custom-validation"></span>
+                            </div>
+                            <div class="inputs">
+                                <label asp-for="ZipCode" asp-postfix=":">@T("Catalogues.Postalcode.Hint")</label>
+                                <input asp-for="ZipCode" data_spnid="spnzipcode" placeholder="Postal / Zip Code" class="ZipCode validation" />
+                                <nop-required />
+                                <span id="spnzipcode" class="custom-validation"></span>
+                            </div>
+                        <div class="inputs">
+                            <label asp-for="Preferredlanguage" asp-postfix=":">@T("Support.Preferredlanguage.Hint")</label>
+                            @* <legend class="hs-field-desc" style="display: block;">In what language would you like to receive our Newsletter?</legend>*@
+                            <select name="Preferredlanguage" data_spnid="spnlanguage" class="Preferredlanguage validation" asp-items=" @Model.PrefferedLanguageList"></select>
+                            <nop-required />
+                            <span id="spnlanguage" class="custom-validation"></span>
+                        </div>
+                        @if (Model.SubjectEnabled)
+                        {
+                            <div class="inputs">
+                                <label asp-for="Subject" asp-postfix=":"></label>
+                                <input asp-for="Subject" data_spnid="spnsubject" placeholder="@T("ContactUs.Subject.Hint")" class="subject validation" />
+                                <nop-required />
+                                <span id="spnsubject" class="custom-validation"></span>
+                            </div>
+                        }
+                        <div class="captcha">
+                            @if (Model.DisplayCaptcha)
+                            {
+                                <nop-captcha />
+                            }
+                        </div>
+                    </div>
+                </div>
+                <span id="allfield"></span>
+                <div class="buttons">
+                    <input type="submit" onclick="return save()" name="send-email" class="button-1 contact-us-button" value="@T("Support.Submit.Hint")" />
+                </div>
+            </form>
+        }
+        @await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContactUsBottom })
+    </div>
+</div>
+
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> *@
+<script>
+    function save() {
+        var item = $("#hidden").val()
+        debugger;
+        var hidden = []
+        var data = {}
+        var obj = ""
+        var status = false;
+
+        for (var i = 0; i < @Model.Specialty.Count; i++) {
+            data = $('input[name="Specialty"]:checked:eq("' + i + '")').val()
+            if (data != undefined) {
+                obj = obj + "," + data;
+
+            }
+
+        }
+        $("#hidden").val(obj);
+
+        debugger
+        $(".validation").each(function (index) {
+            debugger
+            if ($(this).val() == "" || $(this).val() == null || $(this).val() == "Please Select" /*|| !$("#spnspecialty").is(":checked")*/) {
+                // $('.btnuser').attr('disabled', true)
+                $(this).css({ 'border': '1px solid red' });
+                $("#allfield").text("@T("Support.allrequiredfields.Hint")").css("color", "red");
+                status = false;
+            }
+            else {
+                // $('.btnuser').attr('disabled', false)
+                if ($("#Email").val() == "testing@example.com" || $("#Email").val() == "sample@email.tst") {
+                    
+                    
+                    location.reload();
+                    status = false;
+                }
+                else {
+                    $(this).css({ 'border': '1px solid black' });
+                    status = true;
+                }
+            }
+        });
+        return status;
+    }
+
+
+    $(".validation").blur(function () {
+        debugger
+        var spnid = $(this).attr("data_spnid");
+        if ($(this).val() == "" || $(this).val() == null || $(this).val() == 0 || $(this).val() == "Please Select" || ($(this).attr('type') == 'checkbox' && !$('.Speciality').is(':checked'))) {
+            $(this).css({ 'border': '1px solid red' });
+            debugger
+            $("#" + spnid).text("@T("Support.thisrequiredfields.Hint")").css("color", "red")
+
+        }
+        else {
+
+            $(this).css({ 'border': '1px solid black' });
+            $("#" + spnid).text("").css("color", "red")
+        }
+    })
+</script>
+

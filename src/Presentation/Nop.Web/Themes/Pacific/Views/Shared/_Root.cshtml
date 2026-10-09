@@ -1,0 +1,77 @@
+﻿@{
+    Layout = "_Root.Head";
+}
+@using Nop.Core
+@inject IWorkContext _workContext
+@await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.BodyStartHtmlTagAfter })
+@{ await Html.RenderPartialAsync("_Notifications"); }
+@{ await Html.RenderPartialAsync("_JavaScriptDisabledWarning"); }
+@{ await Html.RenderPartialAsync("_OldInternetExplorerWarning"); }
+<style>
+    .responsive-nav-wrapper div.itemsIcon {
+        background: #fff;
+        width: 53px;
+        height: 50px;
+    }
+
+    .responsive-nav-wrapper .itemsIcon svg {
+        width: 21px;
+        fill: transparent;
+        transform: translateY(2px);
+        height: 21px;
+        stroke: #a3da40;
+        margin-top: 13px;
+        stroke-width: 3;
+    }
+@@media (max-width: 1260px) {
+      body {
+        padding-top: 90px
+      }
+      .header-signup-banner{
+          position: static
+      }
+      .header {
+        padding-top: 0 !important;
+      }
+
+        .header-menu:not(.open) {
+        z-index: 1050 !important;
+    }
+}
+</style>
+
+<div class="master-wrapper-page">
+    @{ await Html.RenderPartialAsync("_Header"); }
+    <script asp-location="Footer">
+        var localized_data = {
+            AjaxCartFailure: "@T("AjaxCart.Failure")"
+        };
+        AjaxCart.init(false, '.header-links .cart-qty', '.header-links .wishlist-qty', '.flyout-cart-wrapper', localized_data);
+    </script>
+    <div class="overlayOffCanvas"></div>
+   @*  @if (_workContext.GetCurrentCustomerAsync().Result.Email != null)
+    {
+        <div class="itemsIcon" onclick="return previousorder()">
+            <svg class="feather feather-heart" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" style="
+            "></path>
+            </svg>
+        </div>
+    } *@
+    
+    <div class="master-wrapper-content">
+        @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.ContentBefore })
+        @await Component.InvokeAsync("Widget", new { widgetZone = "pacific_color_squares" })
+        @if (IsSectionDefined("Breadcrumb"))
+        {
+            @RenderSection("Breadcrumb") 
+        }
+        <div class="master-column-wrapper">
+            @RenderBody()
+        </div>
+        @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.ContentAfter })
+    </div>
+    @await Component.InvokeAsync(typeof(FooterViewComponent))
+</div>
+@await Component.InvokeAsync(typeof(EuCookieLawViewComponent))
+@await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.BodyEndHtmlTagBefore })

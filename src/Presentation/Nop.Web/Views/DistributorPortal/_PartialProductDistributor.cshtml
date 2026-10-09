@@ -1,0 +1,411 @@
+﻿@using Nop.Web.Models.DistributorPortal;
+@model DistributorPortalModel
+@{
+    int currentPage = Model.CurrentPage;
+    int totalPages = Model.TotalPages;
+    int size = Model.PageSize;
+}
+@{
+    int[] pageSizes = new[] { 8, 12, 16, 20 };
+    var procount = Model.ProductList.Where(d => d.ModuleName == "Training Courses" && d.SubModuleName == "Virtual Training Request").Count();
+    var virtualcount = "";
+    if (Model.virtualtraining != null)
+    {
+        virtualcount = "notdisplay";
+    }
+
+}
+<style>
+    .hover-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .hover-text {
+        display: none;
+        position: absolute;
+        top: -79%;
+        /* left: -50px; */
+        right: -19px;
+        background-color: #f9f9f9;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        white-space: nowrap;
+        z-index: 1;
+    }
+
+    .hover-container:hover .hover-text {
+        display: block;
+    }
+</style>
+
+@{
+
+    int maxPagesToShow = 4;
+
+    int startPage = Math.Max(1, currentPage - (maxPagesToShow / 2));
+    int endPage = startPage + maxPagesToShow - 1;
+
+    if (endPage > totalPages)
+    {
+        endPage = totalPages;
+        startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
+}
+
+@if (procount <= 0)
+{
+
+    <div class="product-page-sizes">
+        <select id="products-pagesize" name="products-pagesize" class="productsPageSizeDropDown">
+            @foreach (var pageSize in pageSizes)
+            {
+                <option value="@pageSize" selected="@(Model.PageSize == pageSize ? "selected" : null)">
+                    @pageSize
+                </option>
+            }
+        </select>
+        <span>per page</span>
+    </div>
+
+}
+
+<div id="tempDataMessage">@TempData["Message"]</div>
+<div style="margin: 0 0 47px;" class="virtualimage  pro_row @(Model.ProductList.Any(x => x.SubModuleName == "Video") ? "videogrid" : Model.ProductList.Any(x => x.SubModuleName == "Image") ? "imageGrid": "")">
+
+    @foreach (var data in Model.ProductList.GroupBy(x => x.Id).Select(g => g.First()))
+    {
+        if (@* data.ModuleName != "Social Media" && *@ data.SubModuleName != "Virtual Training Request")
+        {
+            <div class="pro_box_outer">
+                <div class="pro_img">
+                    @if (data.ModuleName == "Training Courses")
+                    {
+                        <a href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = data.Id,s=data.IsSample,a=data.Sku})">
+                            <img src="@data.Image" alt="Product Image" />
+                        </a>
+                    }
+                    else
+                    {
+                        @if (data.IsSample == false)
+                        {
+                            <a href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = data.Id,s=data.IsSample,a=data.Sku})">
+                                <img src="@data.Image" alt="Product Image" />
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/@data.UrlSlug">
+                                <img src="@data.Image" alt="Product Image" />
+                            </a>
+                        }
+
+                    }
+                </div>
+
+                <div class="pro_details">
+                    @* <div class="pro_breadcrumb">
+            <b>Products:</b>
+            <p>
+            Regen Biomaterials > Bone Graft > Allografts
+            </p>
+            </div> *@
+                    @if (data.ModuleName == "Training Courses")
+                    {
+                        <a href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = data.Id,s=data.IsSample,a=data.Sku})">
+                            <p class="pro_trademark"><b>@data.Name</b></p>
+                        </a>
+                    }
+                    else
+                    {
+                        @if (data.IsSample == false)
+                        {
+                            <a href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = data.Id,s=data.IsSample,a=data.Sku})">
+                                <p class="pro_trademark"><b>@data.Name</b></p>
+                            </a>
+                        }
+                        else
+                        {
+                            <a href="/@data.UrlSlug">
+                                <p class="pro_trademark"><b>@data.Name</b></p>
+                            </a>
+                        }
+
+                    }
+                    @if (data.ShortDescription != null)
+                    {
+                        @if (data.ShortDescription.Contains("$$"))
+                        {
+
+                            var aa = data.ShortDescription.Split("$$");
+                            <a>
+                                <p>@Html.Raw(aa[0])</p>
+                            </a>
+                        }
+
+                    }
+
+                    @if (data.ModuleName == "Products" || data.ModuleName == "Social Media")
+                    {
+                        <ul class="pro_attributes">
+                            <li><img src="~/images/picture.svg" /> Pictures</li>
+                            <li><img src="~/images/documents.svg" /> Documents</li>
+                            <li><img src="~/images/videos.svg" /> Videos</li>
+                            @if (data.socialmediashow == "show")
+                            {
+                                <li style="grid-column: span 2;"><img src="~/images/social-media.svg" /> Social Media</li>
+                            }
+                        </ul>
+                    }
+                    @if (data.ModuleName != "Training Courses")
+                    {
+                        @if (data.IsSample == true)
+                        {
+                            <div class="pro_link"><a class="add-to-cart-button btnmoreinfo" href="/@data.UrlSlug"><span>Add To Cart</span></a></div>
+
+                        }
+                        else if (data.SubModuleName == "Image")
+                        {
+                            <a class="zoom-in-button btneducation">
+                                <span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M506.141 477.851 361.689 333.399c65.814-80.075 61.336-198.944-13.451-273.73-79.559-79.559-209.01-79.559-288.569 0s-79.559 209.01 0 288.569c74.766 74.766 193.62 79.293 273.73 13.451l144.452 144.452c7.812 7.812 20.477 7.812 28.289 0 7.813-7.813 7.813-20.478.001-28.29zM319.949 319.948c-63.96 63.96-168.03 63.959-231.99 0-63.96-63.96-63.96-168.03 0-231.99 63.958-63.957 168.028-63.962 231.99 0 63.96 63.96 63.96 168.03 0 231.99z" fill="#000000" opacity="1" data-original="#000000" class=""></path><path d="M301.897 183.949h-77.94v-77.94c0-11.048-8.956-20.004-20.004-20.004-11.048 0-20.004 8.956-20.004 20.004v77.94h-77.94c-11.048 0-20.004 8.956-20.004 20.004 0 11.048 8.956 20.004 20.004 20.004h77.94v77.94c0 11.048 8.956 20.004 20.004 20.004 11.048 0 20.004-8.956 20.004-20.004v-77.94h77.94c11.048 0 20.004-8.956 20.004-20.004 0-11.048-8.956-20.004-20.004-20.004z" fill="#000000" opacity="1" data-original="#000000" class=""></path></g></svg>
+                                </span>
+                            </a>
+
+
+
+                            <div class="pro_link">
+                                <a class="add-to-cart-button btneducation"><span>Download Image</span></a>
+
+                            </div>
+
+
+                        }
+                        else
+                        {
+                            <div class="pro_link"><a class="add-to-cart-button btnmoreinfo" href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = data.Id,s=data.IsSample, a="0",sm=data.socialmediashow})" @* href="/@data.UrlSlug" *@><span>More information</span></a></div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="pro_link"><a class="add-to-cart-button btnmoreinfo" href="@Url.Action("ProductDetailPage", "DistributorPortal", new { pid = data.Id,s=data.IsSample,a=data.Sku})" @* href="@data.UrlSlug" *@><span>Access to course</span></a></div>
+                        @* @Html.Raw(data.UrlSlug) *@
+                    }
+                </div>
+            </div>
+        }
+
+        else
+        {
+            <div class="pro_box_outer image_overlay">
+                <div class="pro_img" style="position: relative">
+                    @if (data.SubModuleName == "Image")
+                    {
+
+                        <img style="object-fit: cover" src="@data.Image" alt="Product Image" />
+
+                    }
+                    else
+                    {
+                        <iframe src="@data.Image"
+                                width="640" height="360"
+                                frameborder="0"
+                                allow="autoplay; fullscreen; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+
+                    }
+                    @if (data.SubModuleName == "Image")
+                    {
+                        <div class="pro_details video_title_bottom">
+                            <a class="zoom-in-button">
+                                <span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="20" height="20" x="0" y="0" viewBox="0 0 512 512" style="enable-background:new 0 0 512 512" xml:space="preserve" class=""><g><path d="M506.141 477.851 361.689 333.399c65.814-80.075 61.336-198.944-13.451-273.73-79.559-79.559-209.01-79.559-288.569 0s-79.559 209.01 0 288.569c74.766 74.766 193.62 79.293 273.73 13.451l144.452 144.452c7.812 7.812 20.477 7.812 28.289 0 7.813-7.813 7.813-20.478.001-28.29zM319.949 319.948c-63.96 63.96-168.03 63.959-231.99 0-63.96-63.96-63.96-168.03 0-231.99 63.958-63.957 168.028-63.962 231.99 0 63.96 63.96 63.96 168.03 0 231.99z" fill="#000" opacity="1" data-original="#000" class=""></path><path d="M301.897 183.949h-77.94v-77.94c0-11.048-8.956-20.004-20.004-20.004-11.048 0-20.004 8.956-20.004 20.004v77.94h-77.94c-11.048 0-20.004 8.956-20.004 20.004 0 11.048 8.956 20.004 20.004 20.004h77.94v77.94c0 11.048 8.956 20.004 20.004 20.004 11.048 0 20.004-8.956 20.004-20.004v-77.94h77.94c11.048 0 20.004-8.956 20.004-20.004 0-11.048-8.956-20.004-20.004-20.004z" fill="#000" opacity="1" data-original="#000" class=""></path></g></svg>
+                                </span>
+                            </a>
+                            <div class="pro_link">
+                                <h3 class="pro_trademark">@data.Name</h3>
+                                <div class="hover-container">
+                                    <a class="add-to-cart-button btneducation"><span></span></a>
+                                    <div class="hover-text">Download Image</div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="pro_details video_title_bottom">
+                            <div class="pro_link">
+                                <h3 class="pro_trademark">@data.Name</h3>
+                                <div class="hover-container">
+                                    <a href="@data.UrlSlug" class="add-to-cart-button"><span></span></a>
+                                    <div class="hover-text">Download Video</div>
+                                </div>
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+            </div>
+        }
+    }
+</div>
+
+@* } *@
+
+<div id="zoomModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8); z-index:99999; justify-content:center; align-items:center;">
+
+    <img id="zoomedImage"
+         style="max-width:90%; max-height:90%; box-shadow: 0 0 10px #fff; border: 4px solid white;" />
+
+</div>
+@if (procount <= 0)
+{
+    @if (totalPages > 1)
+    {
+        <div class="pager">
+            <ul>
+                @* Left arrow *@
+                @if (currentPage > 1)
+                {
+                    <li class="previous-page">
+                        <a href="#" data-page="@(currentPage - 1)">&#8592;</a>
+                    </li>
+                }
+
+                @* Page numbers *@
+                @for (int i = startPage; i <= endPage; i++)
+                {
+                    if (i == currentPage)
+                    {
+                        <li class="current-page"><span>@i</span></li>
+                    }
+                    else
+                    {
+                        <li class="individual-page">
+                            <a href="#" data-page="@i">@i</a>
+                        </li>
+                    }
+                }
+
+                @* Right arrow *@
+                @if (currentPage < totalPages)
+                {
+                    <li class="next-page">
+                        <a href="#" data-page="@(currentPage + 1)">&#8594;</a>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @*
+
+
+    <div class="ant-pagination-total-text">
+        Page @Model.CurrentPage of @Model.TotalPages
+    </div> *@
+
+}
+
+<script>
+    $(document).off('click', '[data-page]').on('click', '[data-page]', function (e) {
+        e.preventDefault();
+
+        var page = $(this).data('page');
+        var productId = $("#hdnproduct").val();
+        var name = $("#hdnname").val();
+        var pageSize = $('#products-pagesize').val();
+
+        $.ajax({
+            url: '/DistributorPortal/DistributorPortalforproducts',
+            type: 'GET',
+            data: {
+                value: productId,
+                page: page,
+                name: name,
+                pageSize: pageSize
+            },
+            success: function (data) {
+                $('#partialContainer').html(data);
+            },
+            error: function () {
+                alert('Error loading data');
+            }
+        });
+    });
+
+
+
+
+    $(document).off('change', '#products-pagesize').on('change', '#products-pagesize', function () {
+        var pageSize = $(this).val();
+        var currentPage = 1; // Reset to first page when page size changes
+        var productId = $("#hdnproduct").val();
+        var name = $("#hdnname").val();
+
+        $.ajax({
+            type: 'GET',
+            url: '/DistributorPortal/DistributorPortalforproducts',
+            data: {
+                value: productId,
+                page: currentPage,
+                pageSize: pageSize,
+                name: name
+            },
+            success: function (result) {
+                $('#partialContainer').html(result);
+            },
+            error: function () {
+                alert('Failed to load data.');
+            }
+        });
+    });
+
+
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Download image
+        $(".btneducation").on("click", function () {
+            var imageUrl = $(this).closest(".pro_box_outer").find("img").attr("src");
+            var a = document.createElement('a');
+            a.href = imageUrl;
+            a.download = imageUrl.split('/').pop();
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+        $(".add-to-cart-buttonvideo").on("click", function () {
+            var videoUrl = $(this).closest(".pro_box_outer").find("iframe").attr("src");
+            debugger
+            if (videoUrl) {
+                var a = document.createElement('a');
+                a.href = videoUrl;
+                a.download = videoUrl.split('/').pop(); // Gets the filename
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                alert("Video URL not found or not downloadable.");
+            }
+        });
+
+        $(".zoom-in-button").on("click", function () {
+            debugger
+            var imageUrl = $(this).closest(".pro_box_outer").find("img").attr("src");
+            $("#zoomedImage").attr("src", imageUrl);
+            $("#zoomModal").css("display", "flex");
+        });
+
+
+        // Close modal when clicked
+        $("#zoomModal").on("click", function () {
+            $(this).css("display", "none")
+        });
+    });
+</script>

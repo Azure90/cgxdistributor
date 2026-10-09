@@ -1,0 +1,145 @@
+﻿@await Component.InvokeAsync("TopicBlock", new { systemName = "About Hansamed" })
+@await Component.InvokeAsync("Widget", new { widgetZone = PublicWidgetZones.ContactUsTop })
+
+@if (ViewBag.successmessage== "Success")
+{
+<span style="
+   font-weight: 700;
+    margin: 25px;
+    margin: 86px 452px;
+    padding: 13px 57px;
+    border-radius: -27px 20px 12px 17px;
+    width: 640px;
+    color: #270;
+    background-color: #DFF2BF;
+">Mail Sent Successfully!!</span>
+}
+else{
+<div id="MainAboutform" style="display:none" >
+    <h3>BECOME A CITAGENIX PARTNER</h3>
+    <div class="custom-supportpage">
+    <form asp-route="AboutHansamed" method="post" >
+        <div class="form-column">
+            <div class="input">
+                <label  for="email">Email</label>
+                <input data_spnid="spnemail" class="email validation" type="email" name="email" />
+                <span id="spnemail" class="custom-validation"></span>
+            </div>
+            <div class="input">
+                <label for="country">Country</label>
+                <select class="country validation" data_spnid="spncountry" name="country">
+                    <option disabled="disabled" value="">Please Select</option>
+                    <option value="United States">India</option>
+                    <option value="United States">United States</option>
+                    <option value="Canada">Canada</option>
+                    <option value="South America">South America</option>
+                    <option value="Europe">Europe</option>
+                    <option value="Asia/Pacific Region">Asia/Pacific Region</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Africa">Africa</option>
+                </select>
+                <span id="spncountry" class="custom-validation"></span>
+            </div>
+        </div>
+        <div class="form-column">
+            <div class="input">
+                <label for="salutation">Salutation</label>
+                <select class="salutation validation" data_spnid="spnsalutation" name="salutation">
+                    <option disabled="disabled" value="">Please Select</option>
+                    <option value="Dr.">Dr.</option>
+                    <option value="Drs.">Drs.</option>
+                    <option value="Mr.">Mr.</option>
+                    <option value="Ms.">Ms.</option>
+                </select>
+                <span id="spnsalutation" class="custom-validation"></span>
+            </div>
+
+            <div class="input">
+                <label for="firstName">First name</label>
+                <input type="text" class="firstname validation" data_spnid="spnfirstName" name="firstName" />
+                <span id="spnfirstName" class="custom-validation"></span>
+            </div>
+            <div class="input">
+                <label for="lastName"> Last name</label>
+                <input type="text" class="lastName validation" data_spnid="splastName" name="lastName" />
+                <span id="spnlastName" class="custom-validation"></span>
+            </div>
+        </div>
+        <div class="form-column">
+            <div class="input">
+                <label for="companyName">Company name</label>
+                <input type="text" name="companyName" />
+
+            </div>
+            <div class="input">
+                <label for="phone"> Phone number</label>
+                <input type="tel" name="phone" />
+                <span id="spnphone"></span>
+            </div>
+        </div>
+        <div class="form-column">
+            <div class="input">
+                <label for="Message">Message</label>
+                <textarea class="hs-input validation" name="message" data_spnid="spnMessage" required="" placeholder=""></textarea>
+                <span id="spnMessage" class="custom-validation"></span>
+            </div>
+        </div>
+        <span id="allfield"></span>
+        <div class="actions">
+            <input type="submit" onclick="return save()" class="hs-button primary  large"  value="Submit">
+         </div>
+    </form>
+    </div>
+</div>
+}
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> *@
+<script>
+    var htmldata = "<h1>About</h1>";
+    $(".topic-block-title").addClass("page-title").html("").html(htmldata);
+    $("#maincontactform").html($("#MainAboutform").html())
+    function save() {
+        var status = false;
+        debugger
+        $(".validation").each(function(index) {
+            debugger
+            if ($(this).val() == "" || $(this).val() == null || $(this).val() == "Select" /*||!$(this).is(":checked")*/) {
+                // $('.btnuser').attr('disabled', true)
+                $(this).css({ 'border': '1px solid red' });
+                $("#allfield").text("Please complete all required fields.").css("color", "red");
+                //$("#allfield").text("@T("AboutHansamed.required.Hint")").css("color", "red");
+                status = false;
+            }
+            else {
+                // $('.btnuser').attr('disabled', false)
+                if ($("#Email").val() == "testing@example.com" || $("#Email").val() == "sample@email.tst") {
+
+
+                    location.reload();
+                    status = false;
+                }
+                else {
+                    $(this).css({ 'border': '1px solid black' });
+                    status = true;
+                }
+            }
+        });
+        return status;
+    }
+
+    $(".validation").blur(function() {
+
+        var spnid = $(this).attr("data_spnid");
+        if ($(this).val() == "" || $(this).val() == null || $(this).val() == 0 || $(this).val() == "Select" /*||!$("#spnRegeneration").is(":checked")*/) {
+            $(this).css({ 'border': '1px solid red' });
+            debugger
+            $("#" + spnid).text("@T("AboutHansamed.required.Hint")").css("color", "red")
+
+        }
+        else {
+
+            $(this).css({ 'border': '1px solid black' });
+            $("#" + spnid).text("").css("color", "red")
+        }
+    })
+</script>
+

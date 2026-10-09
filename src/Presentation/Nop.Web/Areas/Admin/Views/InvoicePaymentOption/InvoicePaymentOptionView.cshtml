@@ -1,0 +1,249 @@
+﻿@using Nop.Web.Areas.Admin.Models.InvoicePayment;
+@model InvoicePaymentModel
+@{
+    ViewBag.PageTitle = "Invoice Payment Option";
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Invoice Payment Option");
+}
+<style>
+    tbody td {
+        word-break: break-all;
+    }
+
+    .btn {
+        word-break: keep-all
+    }
+</style>
+<section class="content pt-3">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="panel panel-default panel-search">
+                @* <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <label class="control-label" for="ActiveInactive" title="">
+                                        Pay Now Button
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="checkbox" id="PayNowButton" checked="@ViewBag.PayNowButton">
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="col-md-4">
+                                    <label class="control-label" for="ActiveInactive" title="">
+                                        Pay Now Option
+                                    </label>
+                                </div>
+                                <div class="col-md-8">
+                                    <input type="checkbox" id="PayNowOption" checked="@ViewBag.PayNowOption">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-8 col-md-offset-4">
+                                    <span id="showrangemsg"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> *@
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="margin-bottom customer-days-container container-fluid py-3 px-3">
+                        <div class="row">
+                            <div class="col-md-auto">
+                                <a style="margin-top: 38px" href="@Url.Action("editInvoicePaymentOption")" class="btn bg-blue">
+                                    <i class="fa fa-plus-square"></i>
+                                    @T("Admin.Common.AddNew")
+                                </a>
+                            </div>
+                            
+                            <div class="col-md-12">
+                                <span class="spntext"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-8 col-md-offset-4">
+                                <span id="showrangemsg"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="form-horizontal">
+                <div class="cards-group">
+
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <table id="SpecialPriceList" class="table table-bordered" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>PaymentTittle</th>
+                                                <th>paymentOption</th>
+                                                <th>CustomerRole</th>
+                                                <th>Paynow Button</th>
+                                                <th>payment option</th>
+                                                <th>Active</th>                                               
+                                                <th>Action</th>                                               
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+
+                                            @foreach (var item in Model.ModelList)
+                                            {
+                                                <tr>
+                                                    <td>@Html.Raw(item.PaymentTittle)</td>
+                                                    <td>@Html.Raw(@item.paymentOption)</td>
+                                                    <td>@item.CustomerRoleName</td>
+                                                    <td>@item.PaynowButton</td>
+                                                    <td>@item.Paynowtoption</td>
+                                                    <td>@item.Active</td>                                                    
+                                                    <td>
+                                                        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("editInvoicePaymentOption","InvoicePaymentOption", new { @item.Id })'">Edit</button>
+
+                                                        <button type="button" class="btn btn-danger" id="dltcontent" onclick="Delete(@item.Id)">Delete</button>
+
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+<script>
+    $('#PayNowButton').change(function () {
+        var val = $(this).prop("checked");
+
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("SetActiveInactivePayNowButton", "InvoicePaymentOption"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#showrangemsg").text("Pay now Button are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#showrangemsg").text("Pay now Button are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>
+<script>
+    $('#PayNowOption').change(function () {
+        var val = $(this).prop("checked");
+
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("SetActiveInactivePayNowOption", "InvoicePaymentOption"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#showrangemsg").text("Pay now Option are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#showrangemsg").text("Pay now Option are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>
+<script>
+    // $("#SpecialPriceList").dataTable();
+    // function ImportExcelFile() {
+    //     debugger
+    //     var status = false;
+    //     var form = $('#__AjaxAntiForgeryForm');
+    //     var token = $('input[name="__RequestVerificationToken"]', form).val();
+    //     var formData = new FormData();
+    //     var file = $('#File')[0].files[0];
+    //     console.log(file);
+    //     status = file != "" && file != null ? true : false;
+
+    //     formData.append('file', file);
+    //     // var postData = {
+    //     //     file: file,
+    //     //     __RequestVerificationToken:token
+    //     // };
+    //     // addAntiForgeryToken(postData);
+    //     if (status) {
+    //         $.ajax({
+    //             url: '/Admin/DistributorCourses/ImportExcelFile',
+    //             type: 'POST',
+    //             data: formData,
+    //             processData: false,
+    //             contentType: false,
+    //             success: function (result) {
+    //                 $('.excelMessage').text(result).css('display', 'inline-block').fadeOut(5000);
+    //                 $('#File').val("");
+    //                 window.location.reload();
+    //             }
+    //         });
+    //     }
+    //     else {
+    //         $('.excelMessage').text("Please choose a file.").css('display', 'inline-block').fadeOut(3000);
+    //     }
+    // }
+    function Delete(id) {
+        if (confirm("Are you sure you want to delete this entry? Any related content will also be lost.Warning: This action cannot be undone.") == true) {
+
+            var postData = {
+                id: id
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                type: 'Post',
+                url: '/Admin/InvoicePaymentOption/Delete',
+                data: postData,
+                success: function (data) {
+                    window.location.reload();
+
+                }
+            })
+            return true;
+        } else {
+
+            return false;
+        }
+
+
+    }
+</script>
+
+

@@ -1,0 +1,113 @@
+﻿
+@model MainResponse
+
+<style>
+    #monerisCheckout-outerDiv #monerisCheckout-Frame {
+        max-width:100% !important;
+    height: 520px !important;
+}
+
+</style>
+
+<div id="monerischeckout-payment-form">
+    <div id="monerisCheckout-outerDiv" style="width:100%;height:100%;">
+        <div id="monerisCheckout"></div>
+    </div>
+    <div id="monerischeckout-errors" role="alert"></div>   
+</div>
+ <input type="hidden" id="StoreId" name="StoreId" value="@Model.Response.StoreId" />
+ <input type="hidden" id="ApiToken" name="ApiToken" value="@Model.Response.ApiToken" />
+ <input type="hidden" id="UseSandbox" name="UseSandbox" value="@Model.Response.Sandbox" />
+<script>
+    var monerisCheckoutNopcommerce;
+
+    function monerisCheckoutPaymentFormInit() {
+        $(document).ready(function () {
+            monerisCheckoutNopcommerce = new monerisCheckout();
+            monerisCheckoutNopcommerce.setMode("@(Model.Response.UseSandbox ? "qa" : "prod")");
+            monerisCheckoutNopcommerce.setCheckoutDiv("monerisCheckout");
+
+            //monerisCheckoutNopcommerce.setCallback("page_loaded", monerisCheckoutNopcommercePageLoad);
+            monerisCheckoutNopcommerce.setCallback("cancel_transaction", monerisCheckoutNopcommerceCancelTransaction);
+            monerisCheckoutNopcommerce.setCallback("error_event", monerisCheckoutNopcommerceErrorEvent);
+            monerisCheckoutNopcommerce.setCallback("payment_receipt", monerisCheckoutNopcommercePaymentReceipt);
+            monerisCheckoutNopcommerce.setCallback("payment_complete", monerisCheckoutNopcommercePaymentReceipt);
+            //monerisCheckoutNopcommerce.setCallback("page_closed", monerisCheckoutNopcommercePageClosed));
+            //monerisCheckoutNopcommerce.setCallback("payment_submitted", monerisCheckoutNopcommercePaymentSubmitted);
+
+            monerisCheckoutNopcommerce.startCheckout("@Model.Response.Ticket");
+        });
+    }
+    function monerisCheckoutNopcommercePaymentReceipt(obj) {
+
+        var monerisResponce = JSON.parse(obj);
+         var Traninfo=JSON.stringify($('#PaymentTranInfo').val());
+           var InvoiceTag=$('#PaymentInvoiceTag').val();
+           var CustomerTag=$('#PaymentCustomerTag').val();        
+        $.ajax({
+            url: "/PaymentInvoice/PaymentReceipt",
+            type: "Post",
+            cache: false,
+            data: { ticketId: monerisResponce.ticket,CustomerNo:$("#customernumber").val(), TotalAmount:$("#PaymentTotal").val() ,
+            PaymentTranInfo: Traninfo,PaymentInvoiceTag:InvoiceTag,PaymentCustomerTag:CustomerTag,StoreId:$("#StoreId").val(),ApiToken:$("#ApiToken").val(),UseSandbox:$("#UseSandbox").val()                
+            },
+        
+            success: function (data) {
+                console.log(data);
+                // if (data.lastresult == false) 
+                if (data == false) 
+                {
+
+                    $("#myModal").show();
+                    $("#myModal p").text("Your Payment has been failed due to some reason!").css("color", "#d43a3a");
+
+                    $(".close").click(function () {
+                        $("#myModal").hide();
+                        location.reload();
+                    });
+                }
+                else {
+                    Checkout.gotoSection('confirm_order');
+                    //window.location = "/home/Index";
+                }
+            }, error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function monerisCheckoutNopcommerceComplete(obj) {
+
+        window.location = "/PaymentInvoice/Index";
+    }
+
+    function monerisCheckoutNopcommerceCancelTransaction() {
+        monerisCheckoutNopcommerce.closeCheckout();
+        if (window.Checkout) {
+            Checkout.back();
+        }
+        else {
+            //window.location = "/home/CallBack";
+        }
+    }
+    function monerisCheckoutNopcommerceErrorEvent(obj) {
+        console.log(obj);
+        //var monerisResponce = JSON.parse(obj);
+        monerisCheckoutNopcommerceCancelTransaction();
+    }
+    function showMonerisCheckoutError(errors) {
+        var error_html = "";
+        for (var i = 0; i < errors.length; i++) {
+            error_html += "<li> " + errors[i].message + " </li>";
+        }
+        document.getElementById("monerischeckout-errors").innerHTML = error_html;
+    }
+
+    function deferjqueryloading(method) {
+        if (window.jQuery && typeof $ == 'function' && window.monerisCheckout)
+            method();
+        else
+            setTimeout(function () { deferjqueryloading(method) }, 50);
+    }
+    deferjqueryloading(monerisCheckoutPaymentFormInit);
+</script>

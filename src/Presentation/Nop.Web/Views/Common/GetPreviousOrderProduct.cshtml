@@ -1,0 +1,700 @@
+﻿@using Nop.Web.Models.Catalog;
+@using Nop.Core.Domain.Orders;
+@* @model ProductDetailsModel.AddToCartModel *@
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    :root {
+        --primary-color: #1A415C;
+        --white-color: #ffffff;
+        --font-family: 'zap';
+    }
+
+    .sidebar-content {
+        display: flex;
+        flex-flow: wrap;
+        gap: 12px;
+        overflow-y: auto;
+        height: calc(100dvh - 150px);
+        margin-bottom: 10px;
+        align-content: flex-start;
+    }
+
+        .sidebar-content .item-box {
+            width: auto;
+            margin: 0;
+            flex-basis: calc(33.33% - 8px);
+        }
+
+            .sidebar-content .item-box .buttons-lower button {
+                padding-left: 0;
+                margin: 0;
+            }
+
+    #sidebar {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 90%;
+        height: 100vh;
+        transition: right 0.3s ease;
+        z-index: 15319;
+        padding: 0 20px 16px 20px;
+        box-shadow: 0 0 4px 1px #919191;
+        background: var(--white-color);
+        max-width: 710px;   
+    }
+
+    #overlay {
+        display: none !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #0000004d;
+        z-index: 1;
+    }
+
+    #openSidebar {
+        font-size: 16px;
+        font-family: var(--font-family);
+        font-weight: bold;
+        color: var(--white-color);
+        text-transform: uppercase;
+        border-radius: 0;
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+        background-color: var(--primary-color);
+        height: 45px;
+        transition: all .7s;
+        border: none;
+        max-width: 360px;
+    }
+
+    .sidebar_header {
+        background: #a3da40;
+        margin: 0 -20px 20px;
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #fff;
+        font-size: 16px;
+    }
+
+    #closeSidebar {
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        background-color: transparent;
+    }
+
+        #closeSidebar svg {
+            height: 12px;
+            margin-right: 8px;
+        }
+
+        #closeSidebar span {
+            color: #fff;
+            font-size: 16px;
+        }
+
+        #closeSidebar svg path, #closeSidebar svg {
+            stroke: #fff;
+        }
+
+
+    .sidebar-title {
+        color: var(--primary-color);
+        font-family: var(--font-family);
+        font-size: 32px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 41px;
+        margin: 30px 0 4px 0;
+    }
+
+    .sidebar-subtitle {
+        color: var(--primary-color);
+        font-size: 16px;
+        line-height: 20px;
+        margin-bottom: 32px;
+    }
+
+    .optionContainer {
+        border: 1px solid #dfdfdf;
+        padding: 20px 84px 20px 32px;
+        position: relative;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+
+        .optionContainer.selected {
+            border: 1px solid var(--primary-color);
+            cursor: default;
+        }
+
+    .optionhead {
+        color: var(--primary-color);
+        font-family: var(--font-family);
+        font-size: 20px;
+        font-style: normal;
+        font-weight: 600;
+        line-height: 24px;
+        margin-left: 8px;
+    }
+
+    .optiondesc {
+        color: var(--primary-color);
+        font-family: var(--font-family);
+        font-size: 14px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 10px;
+    }
+
+    .iconWrapper {
+        align-items: center;
+        display: flex;
+        height: 28px;
+        justify-content: center;
+        width: 28px;
+    }
+
+    .topWrapper {
+        display: flex;
+        align-items: center;
+    }
+
+    .checkedSvgWrapper {
+        align-items: center;
+        display: flex;
+        height: 100%;
+        justify-content: center;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 84px;
+    }
+
+    .continueButton {
+        align-items: center;
+        background-color: var(--primary-color);
+        border: none;
+        color: var(--white-color);
+        cursor: pointer;
+        display: flex;
+        font-family: var(--font-family);
+        font-size: 16px;
+        height: 52px;
+        justify-content: center;
+        line-height: 20px;
+        text-transform: uppercase;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    .productContainer {
+        border: 1px solid #dfdfdf;
+        padding: 19px 20px 20px 25px;
+        position: relative;
+        margin-bottom: 20px;
+        cursor: default;
+    }
+
+    .diamondOption {
+        color: green;
+        font-family: var(--font-family);
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 400;
+        line-height: 20px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+    }
+
+        .diamondOption i {
+            color: #1a415c;
+            font-weight: 600;
+        }
+
+    .productContainer .picture {
+        float: left;
+        width: 70px;
+        text-align: center;
+    }
+
+        .productContainer .picture a {
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .productContainer .picture a:before {
+                content: "";
+                display: block;
+                padding-top: 100%;
+            }
+
+        .productContainer .picture img {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: auto;
+            max-width: 100%;
+        }
+
+        .productContainer .picture + .product {
+            margin: 0 0 0 80px;
+        }
+
+    .productContainer .name {
+        margin: 0 0 10px;
+        font-size: 14px;
+    }
+
+        .productContainer .name a {
+            color: #1A415C;
+        }
+
+            .productContainer .name a:hover {
+                color: #248ece;
+            }
+
+    .selected .checkedSvgWrapper svg rect {
+        fill: var(--primary-color);
+    }
+
+    .selected .checkedSvgWrapper svg path {
+        stroke: var(--white-color);
+    }
+
+    .optionContainer.disabled {
+        border: 1px solid #0000;
+        cursor: default;
+    }
+
+    .disabled .optionhead, .disabled .optiondesc {
+        color: #b9b9b9;
+    }
+
+    .disabled .checkedSvgWrapper svg rect {
+        fill: var(--white-color);
+    }
+
+    .optionContainer.disabled svg path {
+        stroke: #e4e4e4;
+    }
+
+    .optionContainer.disabled .checkedSvgWrapper svg path {
+        stroke: var(--white-color);
+    }
+
+    div#podium-website-widget {
+        z-index: 1 !important;
+    }
+
+    
+    .category-navigation-title, .header-menu {
+        z-index: 0;
+    }
+
+
+    .sidebar-content .item-box .product-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+
+    .sidebar-content .item-box .product-title, .sidebar-content .item-box .prices {
+        height: auto;
+    }
+
+    .sidebar-content .item-box .product-title {
+        margin-bottom: 5px;
+    }
+
+    .sidebar-content .item-box .buttons-lower {
+        margin-top: auto;
+    }
+
+    .item-box .product-item {
+        border: 1px solid #e9e9e9;
+        background-color: #fff;
+        text-align: center;
+    }
+
+    .item-box .picture {
+        z-index: 1;
+        overflow: hidden;
+        margin: 0 0 15px;
+    }
+
+        .item-box .picture a {
+            display: block;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .item-box .picture a:before {
+                content: "";
+                display: block;
+                padding-top: 100%;
+            }
+
+        .item-box .picture img {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            max-width: 100%;
+            margin: auto;
+        }
+
+    .item-box .product-rating-box {
+        display: inline-block;
+        margin: 0 0 10px;
+        position: static;
+        opacity: 1
+    }
+
+    .item-box .rating {
+        background: url('https://citagenix.com/Themes/Pavilion/Content/img/rating-sprite.png') left top repeat-x;
+        width: 80px;
+        height: 13px;
+        position: static;
+    }
+
+        .item-box .rating div {
+            background: #f74258 url('https://citagenix.com/Themes/Pavilion/Content/img/rating-sprite.png') left bottom repeat-x;
+            height: 13px;
+        }
+
+    .item-box .product-title {
+        height: 40px;
+        overflow: hidden;
+        padding: 0 15px;
+        font-size: 14px;
+        font-weight: normal;
+        color: #333;
+    }
+
+        .item-box .product-title a {
+            display: block;
+        }
+
+    .item-box .prices {
+        height: 22px;
+        margin: 0 0 20px;
+        overflow: hidden;
+        padding: 0 15px;
+    }
+
+    .item-box .actual-price {
+        padding: 0 4px;
+        vertical-align: middle;
+        font-size: 15px;
+        font-weight: bold;
+        color: #00a1b1;
+    }
+
+    .item-box .buttons-lower {
+        font-size: 0;
+    }
+
+        .item-box .buttons-lower button {
+            display: block;
+            width: 100%;
+            height: 43px;
+            border: 0;
+            background-color: #fff;
+            font-size: 0;
+            transition: all .2s ease;
+        }
+
+            .item-box .buttons-lower button span {
+                display: inline-block;
+                position: relative;
+                height: 18px;
+                background-color: #fff;
+                padding: 0 0 0 25px;
+                font-size: 13px;
+                font-weight: bold;
+                color: #777;
+                text-transform: uppercase;
+                transition: all .2s ease;
+            }
+
+                .item-box .buttons-lower button span:before {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 15px;
+                    height: 18px;
+                    background: #f74258 url('https://citagenix.com/Themes/Pavilion/Content/img/cart-button-1.png') left top no-repeat;
+                    transition: all .2s ease;
+                }
+
+                .item-box .buttons-lower button span:after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 15px;
+                    height: 18px;
+                    background: #f74258 url('https://citagenix.com/Themes/Pavilion/Content/img/cart-button-1.png') left bottom no-repeat;
+                    transition: all .2s ease;
+                    opacity: 0;
+                }
+
+    .ajax-cart-button-wrapper {
+        position: relative;
+    }
+
+        .ajax-cart-button-wrapper button {
+            vertical-align: middle;
+        }
+
+    .item-box .rating div, .item-box .buttons-lower button span:before, .item-box .buttons-lower button span:after {
+        background-color: #a3da40;
+    }
+
+    .item-box .actual-price {
+        color: #71367a;
+    }
+
+    .sidebar-content .item-box .buttons-lower button {
+        padding-left: 0;
+        margin: 0;
+    }
+
+    .sidebar-content .item-box .product-item {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .sidebar-content .item-box .product-title, .sidebar-content .item-box .prices {
+        height: auto;
+    }
+
+    .sidebar-content .item-box .product-title {
+        margin-bottom: 5px;
+    }
+
+    .sidebar-content .item-box .buttons-lower {
+        margin-top: auto;
+    }
+
+    .item-box .product-item .picture{
+        border-bottom: 0;
+    }
+
+    .item-box .add-info{
+        display: block
+    }
+
+    .item-box .prices {
+        height: 22px;
+        margin: 0 0 20px;
+        overflow: hidden;
+        padding: 0 15px;
+    }
+
+    .item-box .actual-price {
+        padding: 0 4px;
+        vertical-align: middle;
+        font-size: 15px;
+        font-weight: bold;
+        color: #00a1b1;
+    }
+
+    .item-box .actual-price {
+        color: #71367a;
+    }
+
+    .prices .finalprice {
+        font-size: 13px !important;
+    }
+
+    .sidebar-content .item-box .prices {
+        height: auto;
+    }
+    @@media (max-width: 767px) {
+        .sidebar-content .item-box {
+            flex-basis: calc(50% - 6px);
+        }
+    }
+
+</style>
+
+
+<div id="sidebar" class="order_sidebar">
+    <div class="sidebar_header">
+        <button id="closeSidebar">
+            <svg viewBox="0 0 19 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="m6.17 11.72-4.95-5 4.95-5m11.05 4.933H1.55" stroke="#1A415C" stroke-linecap="round"
+                      stroke-linejoin="round"></path>
+                0
+            </svg>
+            <span>Back</span>
+        </button>
+        <span>Missing anything?</span>
+    </div>
+    <div class="sidebar-content">
+        @if (Model.Count > 0)
+        {
+            @foreach (Nop.Web.Models.Common.GetPreviousOrderModel item in Model)
+            {
+                string baseUrl = "https://hansamed.blob.core.windows.net/citagenixtest-thumbnail/";
+                string imageName = item.Image + ".jpeg"; // Assuming this is the filename or identifier of the image
+                string imageUrl = baseUrl + imageName;
+                <div class="item-box">
+                    <div class="product-item sevenspikes-ajaxcart" data-productid="@item.ProductId.">
+                        <div class="picture"><a href="/@item.UrlSlug" id="btnaddtocart_@item.ProductId" title="Show details for Raptos® Allograft particulates" tabindex="0"> <img src="@item.Image" alt="@item.ProductName" title="@item.ProductName" style="opacity: 1;"> </a></div><div class="details">
+                            <div class="product-rating-box" title="0 review(s)"><div class="rating">
+                                <div style="width:0%"></div></div></div>
+                                <div class="attribute-squares-wrapper"></div><h2 class="product-title">
+                                    <a href="/@item.UrlSlug" tabindex="0">@item.ProductName</a></h2><div class="add-info">
+                                <div class="prices"><span class="price actual-price finalprice" data-productmodelprice="$0.00" data-productlowprice="$43.95" data-productid="@item.ProductId">@item.Price</span></div>
+                            </div>
+                        </div>
+                        <div class="buttons-lower">
+                            <div class="ajax-cart-button-wrapper qty-enabled" data-productid="@item.ProductId" data-isproductpage="false">
+                                
+                                <button type="button" class="button-2 product-box-add-to-cart-button GetpageRediect" data-productid="@item.ProductId"><span>Add to cart</span></button>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+           @*  @foreach (Nop.Web.Models.Common.GetPreviousOrderModel item in Model)
+            {
+                <div class="item-box">
+
+
+
+                    
+                    <div class="product-item hover-variant-one sevenspikes-ajaxcart" data-productid="@item.ProductId">
+                        <div class="picture">
+                            <a href="/@item.UrlSlug" id="btnaddtocart_@item.ProductId">
+
+
+                                <img src="@item.Image" data-lazyloadsrc="https://accessories-pacific.nop-templates.com/images/thumbs/0000309_foloy-business-sport-grouped_125.jpeg" alt="@item.ProductName" title="@item.ProductName" loadedimage="true">
+                            </a>
+                        </div>
+                        <div class="details">
+                            <div class="details-top">
+                                <h2 class="product-title" style="height: 36px;">
+                                    <a href="/@item.UrlSlug">@item.ProductName</a>
+                                </h2>
+                                <div class="product-rating-box" title="0 review(s)">
+                                    <div class="rating">
+                                        <div style="width: 0%">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+                            <div class="prices" style="height: 17px;">
+                                <span class="price only-price" data-productid="@item.ProductId"> @item.Price</span>
+                            </div>
+                            <div class="add-info">
+
+
+                                <div class="buttons">
+                                    <div class="ajax-cart-button-wrapper qty-enabled" ata-productid="@item.ProductId" data-isproductpage="false">
+
+                                        <button type="button" class="button-2 product-box-add-to-cart-button nopAjaxCartProductListAddToCartButton" data-productid="@item.ProductId">
+                                            Add to cart
+                                        </button>
+
+
+                                    </div>
+
+                                </div>
+                                <a class="item-box-overlay" href="/foloy-business-sport" title="Show details for Foloy Business Sport (Grouped)">
+                                    <span class="item-box-overlay-tint"></span>
+                                </a>
+
+                            </div>
+                            <div class="attribute-squares-wrapper"></div>
+                        </div>
+                    </div>
+                </div>
+            } *@
+
+        }
+        else
+        {
+            <h3>@T("Common.GetPreviousOrder")</h3>
+        }
+        <div class="row">
+            <div id="diamondText" class="productContainer" style="display:none;"></div>
+        </div>
+
+        
+
+    </div>
+    <input type="button" id="continue-button" style="background: #a3da40;" class="continueButton" value="CONTINUE">
+</div>
+
+<div id="overlay"></div>
+
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+        if ($("#hdnprevoiusorder").val() == "fromheader") {
+            $("#continue-button").css("display", "none");
+        }
+        const closeSidebarButton = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        sidebar.style.right = '0';
+        overlay.style.display = 'block';
+        closeSidebarButton.addEventListener('click', (e) => {
+            sidebar.style.right = '-100%';
+            overlay.style.display = 'none';
+            e.preventDefault();
+        });
+    });
+
+    $(document).on("click", ".GetpageRediect", function () {
+        var proid = $(this).attr("data-productid");
+        var Productdetail = $("#btnaddtocart_" + proid).attr("href");
+
+        window.location.href = Productdetail;
+    });
+    $("#continue-button").click(function () {
+        $("#hdnstatus").val("true");
+        $("#checkout").click();
+    });
+    $("#closeSidebar").click(function () {
+        $("#hdnprevoiusorder").val("");
+    });
+    // Call the function to set the cookie
+
+</script>

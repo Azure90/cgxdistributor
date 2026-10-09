@@ -1,0 +1,435 @@
+﻿@using Nop.Core.Domain.Orders.PreOrders
+@using Nop.Web.Areas.Admin.Models.Orders.PreOrders
+
+@model PreOrderModel
+
+
+<div class="card card-outline card-custom-preorders" id="CustomPreOrders-message-info">
+    <div class="card-header with-border clearfix">
+        <div class="card-title">
+            <i class="fas fa-envelope-open"></i> Message Templates Info
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div class="form-group row validation-summary-container mb-2" style="display:none;">
+            <div class="col-md-3"></div>
+            <div class="col-md-9">
+                <span id="reminderValidationSummary" class="field-validation-error"></span>
+                <span id="reminderSuccessSummary" class="text-success" style="display:none;"></span>
+            </div>
+        </div>    
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="intReminderActive">Initial Reminder Active</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the intital reminder template active.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReminderSettings.InitialReminderActive" />
+                <span asp-validation-for="ReminderSettings.InitialReminderActive"></span>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="InitialTemplateId">Select Initial Reminder Template</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select eligible customer roles for pre-order.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group-append input-group-required">
+                    <div class="input-group">
+                        <nop-select asp-for="ReminderSettings.InitialReminderTemplateId" asp-items="@Model.ReminderSettings.AvailableMessageTemplates" asp-multiple="false" />
+                    </div>
+                    <div class="input-group-btn">
+                        <nop-required />
+                    </div>
+                </div>
+
+                <script>
+                    $(document).ready(function () {
+                        var categoryIdsInput = $('#@Html.IdFor(model => Model.ReminderSettings.InitialReminderTemplateId)').data("kendoMultiSelect");
+                        categoryIdsInput.setOptions({
+                            autoClose: false,
+                            filter: "contains"
+                        });
+
+                    @if (Model.ReminderSettings.AvailableMessageTemplates.Count == 0)
+                    {
+                        <text>
+                                categoryIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                });
+                            categoryIdsInput._placeholder();
+                            categoryIdsInput._enable();
+                        </text>
+                    }                                                                                                                                                                                                });
+                </script>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="InitialReminderDay">Initial Reminder Days</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <nop-editor asp-for="ReminderSettings.InitialReminderDays" asp-required="true" />
+                <span asp-validation-for="ReminderSettings.InitialReminderDays"></span>
+            </div>            
+        </div>
+
+        @* <div class="form-group row mt-3"> 
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="EdReminderActive">Editable Reminder Active</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the pre-order feature active.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <nop-editor asp-for="ReminderSettings.EditableReminderActive" />
+                <span asp-validation-for="ReminderSettings.EditableReminderActive"></span>
+            </div>
+        </div>
+
+       <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="EditableTemplateId">Select Editable Reminder Template</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select eligible customer roles for pre-order.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group-append input-group-required">
+                    <div class="input-group">
+                        <nop-select asp-for="ReminderSettings.EditableReminderTemplateId" asp-items="@Model.ReminderSettings.AvailableMessageTemplates" asp-multiple="false" />
+                    </div>
+                    <div class="input-group-btn">
+                        <nop-required />
+                    </div>
+                </div>
+
+                <script>
+                    $(document).ready(function () {
+                        var categoryIdsInput = $('#@Html.IdFor(model => Model.ReminderSettings.EditableReminderTemplateId)').data("kendoMultiSelect");
+                        categoryIdsInput.setOptions({
+                            autoClose: false,
+                            filter: "contains"
+                        });
+
+                    @if (Model.ReminderSettings.AvailableMessageTemplates.Count == 0)
+                    {
+                        <text>
+                                categoryIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                });
+                            categoryIdsInput._placeholder();
+                            categoryIdsInput._enable();
+                        </text>
+                    }                                                                                                                                                                                                });
+                </script>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="EditableReminderDay">Editable Reminder Days</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReminderSettings.EditableReminderDays" asp-required="true" />
+                <span asp-validation-for="ReminderSettings.EditableReminderDays"></span>
+            </div>
+        </div> *@
+
+        <div class="form-group row mt-3">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="FinalReminder">Final Reminder Active</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the final reminder template active.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReminderSettings.FinalReminderActive" />
+                <span asp-validation-for="ReminderSettings.FinalReminderActive"></span>
+            </div>            
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="FinalTemplateId">Select Final Reminder Template</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select eligible customer roles for pre-order.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group-append input-group-required">
+                    <div class="input-group">
+                        <nop-select asp-for="ReminderSettings.FinalReminderTemplateId" asp-items="@Model.ReminderSettings.AvailableMessageTemplates" asp-multiple="false" />
+                    </div>
+                    <div class="input-group-btn">
+                        <nop-required />
+                    </div>
+                </div>
+
+                <script>
+                    $(document).ready(function () {
+                        var categoryIdsInput = $('#@Html.IdFor(model => Model.ReminderSettings.FinalReminderTemplateId)').data("kendoMultiSelect");
+                        categoryIdsInput.setOptions({
+                            autoClose: false,
+                            filter: "contains"
+                        });
+
+                    @if (Model.ReminderSettings.AvailableMessageTemplates.Count == 0)
+                    {
+                        <text>
+                                categoryIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                });
+                            categoryIdsInput._placeholder();
+                            categoryIdsInput._enable();
+                        </text>
+                    }                                                                                                                                                                                                });
+                </script>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="FinalReminderDay">Final Reminder Days</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReminderSettings.FinalReminderDays" asp-required="true" />
+                <span asp-validation-for="ReminderSettings.FinalReminderDays"></span>
+            </div>            
+        </div>
+
+        <div class="form-group row mt-3">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="DelReminderActive">Delivery Reminder Active</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Check to make the delivery reminder template active.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReminderSettings.DeliveryReminderActive" />
+                <span asp-validation-for="ReminderSettings.DeliveryReminderActive"></span>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="DeliveryTemplateId">Select Delivery Reminder Template</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Select eligible customer roles for pre-order.">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="input-group-append input-group-required">
+                    <div class="input-group">
+                        <nop-select asp-for="ReminderSettings.DeliveryReminderTemplateId" asp-items="@Model.ReminderSettings.AvailableMessageTemplates" asp-multiple="false" />
+                    </div>
+                    <div class="input-group-btn">
+                        <nop-required />
+                    </div>
+                </div>
+
+                <script>
+                    $(document).ready(function () {
+                        var categoryIdsInput = $('#@Html.IdFor(model => Model.ReminderSettings.DeliveryReminderTemplateId)').data("kendoMultiSelect");
+                        categoryIdsInput.setOptions({
+                            autoClose: false,
+                            filter: "contains"
+                        });
+
+                    @if (Model.ReminderSettings.AvailableMessageTemplates.Count == 0)
+                    {
+                        <text>
+                                categoryIdsInput.setOptions({
+                                    enable: false,
+                                    placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                });
+                            categoryIdsInput._placeholder();
+                            categoryIdsInput._enable();
+                        </text>
+                    }                                                                                                                                                                                                });
+                </script>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="col-form-label" for="DeliveryReminderDay">Delivery Reminder Days</label>
+                    <div title="" data-toggle="tooltip" class="ico-help" data-original-title="">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="ReminderSettings.DeliveryReminderDays" asp-required="true" />
+                <span asp-validation-for="ReminderSettings.DeliveryReminderDays"></span>
+            </div>
+        </div>
+        <div class="form-group row mt-3">
+            <div class="col-md-9 offset-md-3">
+                <button type="button" id="UpdateReminderSettings" class="btn btn-primary">Update settings</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            $('#UpdateReminderSettings').click(function () {
+
+                var postData = {
+                    InitialReminderTemplateId: $("#@Html.IdFor(model => model.ReminderSettings.InitialReminderTemplateId)").val(),
+                    InitialReminderDays: $("#@Html.IdFor(model => model.ReminderSettings.InitialReminderDays)").val(),
+                    InitialReminderDays: $("#@Html.IdFor(model => model.ReminderSettings.InitialReminderDays)").val(),
+                    InitialReminderActive: $("#@Html.IdFor(model => model.ReminderSettings.InitialReminderActive)").is(":checked"),
+
+                    EditableReminderTemplateId: $("#@Html.IdFor(model => model.ReminderSettings.EditableReminderTemplateId)").val(),
+                    EditableReminderDays: $("#@Html.IdFor(model => model.ReminderSettings.EditableReminderDays)").val(),
+                    EditableReminderActive: $("#@Html.IdFor(model => model.ReminderSettings.EditableReminderActive)").is(":checked"),
+
+                    FinalReminderTemplateId: $("#@Html.IdFor(model => model.ReminderSettings.FinalReminderTemplateId)").val(),
+                    FinalReminderDays: $("#@Html.IdFor(model => model.ReminderSettings.FinalReminderDays)").val(),
+                    FinalReminderActive: $("#@Html.IdFor(model => model.ReminderSettings.FinalReminderActive)").is(":checked"),
+
+                    DeliveryReminderTemplateId: $("#@Html.IdFor(model => model.ReminderSettings.DeliveryReminderTemplateId)").val(),
+                    DeliveryReminderDays: $("#@Html.IdFor(model => model.ReminderSettings.DeliveryReminderDays)").val(),
+                    DeliveryReminderActive: $("#@Html.IdFor(model => model.ReminderSettings.DeliveryReminderActive)").is(":checked")
+                };
+
+                // Validation
+                if (!postData.InitialReminderTemplateId || postData.InitialReminderTemplateId === "0") {
+                    showValidationSummary("Please select the Initial Reminder email template.");
+                    return;
+                }
+
+                // if (!postData.EditableReminderTemplateId || postData.EditableReminderTemplateId === "0") {
+                //     showValidationSummary("Please select the Editable Reminder email template.");
+                //     return;
+                // }
+
+                if (!postData.FinalReminderTemplateId || postData.FinalReminderTemplateId === "0") {
+                    showValidationSummary("Please select the Final Reminder email template.");
+                    return;
+                }
+
+                if (!postData.DeliveryReminderTemplateId || postData.DeliveryReminderTemplateId === "0") {
+                    showValidationSummary("Please select the Delivery Reminder email template.");
+                    return;
+                }
+
+                if (isNaN(postData.InitialReminderDays) || parseInt(postData.InitialReminderDays) < 0) {
+                    showValidationSummary("Initial Reminder Days must be a valid number greater than or equal to 0.");
+                    return;
+                }
+
+                // if (isNaN(postData.EditableReminderDays) || parseInt(postData.EditableReminderDays) < 0) {
+                //     showValidationSummary("Editable Reminder Days must be a valid number greater than or equal to 0.");
+                //     return;
+                // }
+
+                if (isNaN(postData.FinalReminderDays) || parseInt(postData.FinalReminderDays) < 0) {
+                    showValidationSummary("Final Reminder Days must be a valid number greater than or equal to 0.");
+                    return;
+                }
+
+                if (isNaN(postData.DeliveryReminderDays) || parseInt(postData.DeliveryReminderDays) < 0) {
+                    showValidationSummary("Delivery Reminder Days must be a valid number greater than or equal to 0.");
+                    return;
+                }
+
+                $('#UpdateReminderSettings').prop('disabled', true);
+
+                addAntiForgeryToken(postData);
+
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "@Html.Raw(Url.Action("UpdatePreOrderReminderSettings", "Preorder"))",
+                    data: postData,
+                    beforeSend: function () {
+
+                        hideSummary();
+                    },
+                    success: function (data, textStatus, jqXHR) {
+                        if (data.Result) {
+                            showSuccessSummary("Reminder settings saved successfully.");
+                        } else {
+                            showValidationSummary(data.Message || "An error occurred while saving reminder settings.");
+                            display_nop_error(data);
+                        }
+                    },
+                    complete: function (jqXHR, textStatus) {
+                        $('#UpdateReminderSettings').attr('disabled', false);
+                    }
+                });
+            });
+        });
+
+        function showValidationSummary(message) {
+            $("#reminderSuccessSummary").hide().text("");
+
+            $("#reminderValidationSummary")
+                .text(message)
+                .show();
+
+            $(".validation-summary-container").show();
+        }
+
+        function showSuccessSummary(message) {
+            $("#reminderValidationSummary").hide().text("");
+
+            $("#reminderSuccessSummary")
+                .text(message)
+                .show();
+
+            $(".validation-summary-container").show();
+
+            setTimeout(function () {
+                $("#reminderSuccessSummary").fadeOut(300);
+                $(".validation-summary-container").fadeOut(300);
+            }, 3000);
+        }
+
+        function hideSummary() {
+            $("#reminderValidationSummary").hide().text("");
+            $("#reminderSuccessSummary").hide().text("");
+
+            $(".validation-summary-container").hide();
+        }
+    </script>
+</div>
+

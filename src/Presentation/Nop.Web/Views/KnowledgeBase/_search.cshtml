@@ -1,0 +1,112 @@
+﻿
+<style>
+    .ui-menu .ui-menu-item {
+        padding: 10px 15px;
+        line-height: 24px;
+        color: rgb(81,111,144);
+
+    }
+
+    .ui-autocomplete {
+        width: 100% !important;
+        max-width: 920px;       
+    }
+</style>
+
+
+<input id="PassId" name="PassId" type="text" class="ui-autocomplete-input" autocomplete="off" placeholder="Search for answers">
+@* <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> *@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
+
+
+@if (ViewBag.PageId != null && ViewBag.Subtitle != null)
+{
+    <script>
+        $(window).on('load', function () {
+            
+            var uri = window.location.href.toString();
+            if (uri.indexOf("?") > 0) {
+                var clean_uri = uri.substring(0, uri.indexOf("?"));
+                window.history.replaceState({}, document.title, clean_uri);
+            }
+            var PageId = '@ViewBag.PageId';
+            var Subtitle = '@ViewBag.Subtitle';
+            var Qid = '@ViewBag.Qid';
+            var pagesubcategory = '@ViewBag.pagesubcategory';
+            
+            pagesubcategory = $("<div>").html(pagesubcategory).text();
+            Subtitle = $("<div>").html(Subtitle).text();
+            
+            
+                
+               @*  $(".Question_" +  pagesubcategory + Subtitle).click(); *@
+            
+            
+          @*   $('html, body').animate({
+          
+                    scrollTop: $("#bone-grafts1").offset().top
+
+            }, 1000); *@
+        });
+    </script>
+}
+else
+{
+    <script>
+        $(window).on('load', function () {
+            var uri = window.location.href.toString();
+            if (uri.indexOf("?") > 0) {
+                var clean_uri = uri.substring(0, uri.indexOf("?"));
+                window.history.replaceState({}, document.title, clean_uri);
+            }
+
+        });
+    </script>
+}
+
+<script>
+
+    $("#PassId").autocomplete({
+
+        source: function (request, response) {
+            var customer = new Array();
+            $.ajax({
+                async: false,
+                cache: false,
+                type: "POST",
+                url:
+                    "@(Url.Action("Autocomplete", "KnowledgeBase"))",
+                data: {
+                    "term": request.term
+                },
+                success: function (data) {
+                    for (var i = 0; i < data.length; i++) {
+                        customer[i] = { label: data[i].Value, id: data[i].Key };
+                    }
+                }
+            });
+            response(customer);
+        },
+        select: function (event, ui) { 
+            var Contentid = ui.item.id;
+            //fill selected customer details on form
+            $.ajax({
+                async: false,
+                cache: false,
+                type: "POST",
+                url: "/KnowledgeBase/GetData",
+                data: { id: Contentid },
+                success: function (data) {
+
+                    window.location.href = "/KnowledgeBaseFAQ?PageNameID=" + data.PageNameId + "&pagesubcategory=" + data.pagesubcategory+ "&SubtitleId=" + data.SubtitleId + "&Qid=" + data.Qid;
+
+
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert('Failed to retrieve states.');
+                }
+            });
+        }
+    });
+</script>

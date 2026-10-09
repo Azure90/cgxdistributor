@@ -1,0 +1,75 @@
+﻿@model CheckoutPaymentInfoModel
+<div class="checkout-data">
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.OpCheckoutPaymentInfoTop, additionalData = Model })
+    <div class="section payment-info">
+        <div class="info">
+            @await Component.InvokeAsync(Model.PaymentViewComponent)
+        </div>
+        <div asp-validation-summary="ModelOnly" class="message-error"></div>
+    </div>
+    @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.OpCheckoutPaymentInfoBottom, additionalData = Model })
+    @if (Model.DisplayOrderTotals)
+    {
+        <div class="section order-summary">
+            @await Component.InvokeAsync(typeof(OrderSummaryViewComponent))
+        </div>
+    }
+
+    @if (Model.IsPreOrderCart)
+    {
+       <script>
+            $(function () {
+                debugger;
+                const prefix = "PreOrder-";
+                const $po = $("#PurchaseOrderNumber");
+
+                if (!$po.length)
+                    return;
+
+                if (!$po.val()) {
+                    $po.val(prefix);
+                }
+
+                // Keep the prefix intact after any edit
+                $po.on("input", function () {
+                    if (!this.value.startsWith(prefix)) {
+                        var suffix = this.value.replace(/^PreOrder-?/, "");
+                        this.value = prefix + suffix;
+                    }
+                });
+
+                // Prevent deleting the prefix
+                $po.on("keydown", function (e) {
+
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+
+                    // Block Backspace
+                    if (e.key === "Backspace" && start <= prefix.length) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Block Delete
+                    if (e.key === "Delete" && start < prefix.length) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    if (!e.ctrlKey && !e.metaKey && e.key.length === 1 && start < prefix.length) {
+                        e.preventDefault();
+                        this.setSelectionRange(prefix.length, this.value.length);
+                    }
+                });
+
+                // Keep cursor after the prefix
+                $po.on("click focus", function () {
+                    if (this.selectionStart < prefix.length) {
+                        this.setSelectionRange(prefix.length, prefix.length);
+                    }
+                });
+
+            });
+        </script>
+    }
+</div>

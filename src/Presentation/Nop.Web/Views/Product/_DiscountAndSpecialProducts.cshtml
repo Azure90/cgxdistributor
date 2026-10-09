@@ -1,0 +1,90 @@
+﻿@model CatalogProductsModel
+@{
+    // Pager configurations
+    int maxPagesToShow = 5;
+    int totalProducts = (Model?.TotalItems ?? 0) > 0 ? Model.TotalItems : (Model?.Products?.Count() ?? 0);
+    int pageSize = (Model?.PageSize ?? 0) > 0 ? Model.PageSize : 15;
+    int currentPage = (Model?.PageNumber ?? 0) > 0 ? Model.PageNumber : 1;
+    int totalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+
+    int startPage = Math.Max(1, currentPage - maxPagesToShow / 2);
+    int endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+}
+
+<div class="products-wrapper">
+    <div id="loader-overlay" style="display:none;">
+        <div class="loader"></div>
+    </div>
+
+    @if (Model?.Products?.Count > 0)
+    {
+        <div class="product-grid">
+            <div class="item-grid">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="item-box">
+                        @await Html.PartialAsync("_ProductBox", product)
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if (totalPages > 1)
+        {
+            <div id="customPager" class="pager">
+                <ul>
+                    @* Show "First" link *@
+                    @if (totalPages > maxPagesToShow && currentPage > 1)
+                    {
+                        <li class="first-page">
+                            <a href="javascript:void(0);" data-page="1">First</a>
+                        </li>
+                    }
+
+                    @* Show Previous *@
+                    @if (currentPage > 1)
+                    {
+                        <li class="previous-page">
+                            <a href="javascript:void(0);" data-page="@(currentPage - 1)">Previous</a>
+                        </li>
+                    }
+
+                    @* Numbered pages *@
+                    @for (int i = startPage; i <= endPage; i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <li class="current-page"><span>@i</span></li>
+                        }
+                        else
+                        {
+                            <li class="individual-page"><a href="#" data-page="@i">@i</a></li>
+                        }
+                    }
+
+                    @* Show Next *@
+                    @if (currentPage < totalPages)
+                    {
+                        <li class="next-page">
+                            <a href="javascript:void(0);" data-page="@(currentPage + 1)">Next</a>
+                        </li>
+                    }
+
+                    @* Show "Last" link *@
+                    @if (totalPages > maxPagesToShow && currentPage < totalPages)
+                    {
+                        <li class="last-page">
+                            <a href="javascript:void(0);" data-page="@totalPages">Last</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    }
+    else
+    {
+        <div>
+            <p>@T("Catalog.Products.NoResult")</p>
+        </div>
+    }
+</div>

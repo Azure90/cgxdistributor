@@ -1,0 +1,161 @@
+﻿@model Nop.Web.Areas.Admin.Models.CustomPage.CustomPageContentModel
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.ContentPage.List").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Custom Content Page");
+}
+<style>
+
+    .content-wrapper {
+        background-color: #ffffff;
+    }
+
+    .panel-body {
+        background: #fff;
+        padding: 20px;
+    }
+
+</style>
+<div class="content-header clearfix">
+    <h2 class="pull-left">
+        @if (Model.ID == 0)
+        {
+            <span>Create Knowledge Content Base</span>
+        }
+        else
+        {
+            <span>Edit Knowledge Content Base</span>
+        }
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="ContentPageList">@T("Admin.ContentManagement.Topics.BackToList")</a>
+        </small>
+    </h2>
+</div>
+<div class="panel-body">
+    <form enctype="multipart/form-data" asp-action="ContentPage">
+        <input asp-for="ID" type="hidden" />
+           @if (Model.ID != 0)
+        {
+        <input asp-for="LanguageId" type="hidden" />
+        }
+        @if (Model.ID == 0)
+        {
+        var first = Model.LanguageId == "1" ? "selected" : null;
+        var Second = Model.LanguageId == "2" ? "selected" : null; ;
+
+        <div class="margin-bottom row">
+        <div class="col-md-3">
+        <label>Language</label>
+        </div>
+        <input type="hidden" value="@Model.LanguageId" id="hdnLanguageId" />
+        <div class="col-md-9">
+        <select name="LanguageId" class="validation" data_spnid="spnLanguage" id="ddlLanguage" value="selected" asp-for="LanguageId">
+        <option value="1">English</option>
+        <option value="2">Français</option>
+        </select>
+
+
+
+
+
+
+        <span id="spnLanguage" class="custom-validation"></span>
+        </div>
+        </div>
+        }
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <label>Page Name</label>
+            </div>
+            <div class="col-md-4">
+                <select id="drpEmpList" class="form-control " asp-for="TblcustomPageId">
+                    <option value="">--Select--</option>
+                    @foreach (var i in Model.CustomPageList)
+                    {
+                        <option class="tr_@i.LanguageId AlltrLanguageId" value="@i.Id">@i.Tittle</option>
+                    }
+                </select>
+
+            </div>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Title" />
+            </div>
+            <div class="col-md-4">
+                <select id="drpEmpList" class="form-control " asp-for="SubTitleID">
+                    <option value="">--Select--</option>
+                    @foreach (var i in Model.TitleList)
+                    {
+                        <option class="tr_@i.LanguageId AlltrLanguageId" value="@i.Id">@i.SubTittle</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Question" />
+            </div>
+            <div class="col-md-9  " data_spnid="spnQuestion">
+                <nop-editor asp-for="Question" />
+                <span asp-validation-for="Question"></span>
+            </div>
+            <span></span>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Answer" />
+            </div>
+            <div class="col-md-9 ">
+                <nop-editor asp-for="Answer" asp-template="RichEditor" />
+                <span asp-validation-for="Answer"></span>
+            </div>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Active" />
+            </div>
+            <div class="col-md-9 ">
+                <nop-editor asp-for="Active" />
+                <span asp-validation-for="Active"></span>
+            </div>
+        </div>
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Display" />
+            </div>
+            <div class="col-md-9">
+                <nop-editor asp-for="Display" />
+                <span asp-validation-for="Display"></span>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" onclick="return save()">Save</button>
+
+    </form>
+
+</div>
+<script>
+
+    $(window).load(function () {
+        $("#ddlLanguage").trigger("change");
+    })
+
+
+    $("#ddlLanguage").change(function () {
+        var id = $('#ddlLanguage :selected').val();
+
+        if (id > 0) {
+
+            $(".AlltrLanguageId").css("display", "none");
+            $(".tr_" + id).css("display", "table-row");
+        }
+        else {
+
+            $(".AlltrLanguageId").css("display", "table-row");
+        }
+    });
+
+</script>

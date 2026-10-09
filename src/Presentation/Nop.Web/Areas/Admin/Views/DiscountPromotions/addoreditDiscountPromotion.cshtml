@@ -1,0 +1,254 @@
+﻿@model Nop.Web.Areas.Admin.Models.DiscountPromotions.DiscountPromotionModel
+@{
+    //page title
+    ViewBag.PageTitle = T("Admin.DiscountPromotion.List").Text;
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Discounts Promotion");
+}
+<style>
+
+    .content-wrapper {
+        background-color: #ffffff;
+    }
+
+    .panel-body {
+        background: #fff;
+        padding: 20px;
+    }
+
+    #discountForm {
+        display: grid;
+        gap: 20px
+    }
+</style>
+<div class="content-header clearfix">
+    <h2 class="pull-left">
+        @if (Model.Id == 0)
+        {
+            <span>Create Discount Promotion</span>
+        }
+        else
+        {
+            <span>Edit Discount Promotion</span>
+        }
+        <small>
+            <i class="fa fa-arrow-circle-left"></i>
+            <a asp-action="DiscountPromotionList">@T("Admin.ContentManagement.Topics.BackToList")</a>
+        </small>
+    </h2>
+</div>
+<div class="panel-body">
+    <form enctype="multipart/form-data" asp-action="DiscountPromotion" id="discountForm">
+        <input asp-for="Id" type="hidden" />
+        <div id="designer" class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="control-label" for="DiscountPromotionType" title="">Discount Promotion Type</label>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <select class="form-control ddlChangeValue" asp-for="DiscountPromotionType" asp-items="@Model.AvailableMessageTemplates">                   
+                </select>
+            </div>
+        </div>
+        @if (Model.Id != 0)
+        {
+            <div class="margin-bottom row">
+                <div class="col-md-3">
+                    <nop-label asp-for="DiscountCode" />
+                </div>
+                <div class="col-md-5" data_spnid="spnQuestion">
+                    <nop-editor html-attributes="new { @readonly = true }" asp-for="DiscountCode" />
+                    <span asp-validation-for="DiscountCode"></span>
+                    <span id="spntext"></span>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="margin-bottom row">
+                <div class="col-md-3">
+                    <nop-label asp-for="DiscountCode" />
+                </div>
+                <div class="col-md-5" data_spnid="spnQuestion">
+                    <nop-editor asp-for="DiscountCode" />
+                    <span asp-validation-for="DiscountCode"></span>
+                </div>
+                <span id="spntext"></span>
+            </div>
+        }
+
+        <div class="margin-bottom row divnewcustomer">
+            <div class="col-md-3">
+
+                <nop-label asp-for="OrderCount" />
+            </div>
+            <div class="col-md-5" data_spnid="spnQuestion">
+                <nop-editor asp-for="OrderCount" />
+                <span asp-validation-for="OrderCount"></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="margin-bottom row ">
+            <div class="col-md-3">
+                <nop-label asp-for="AddDays" />
+            </div>
+            <div class="col-md-5" data_spnid="spnQuestion">
+                <nop-editor asp-for="AddDays" />
+                <span asp-validation-for="AddDays"></span>
+            </div>
+            <span id="spntext"></span>
+        </div>
+
+        <div id="designer" class="form-group row">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="control-label" for="designerId" title="">
+                        Select Message Template
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-5">
+                @*  @Html.HiddenFor(x => x.DesignerId, new { @Id = "DesignerId" }) *@
+                @Html.DropDownListFor(m => m.MessageTemplatetId, Model.MessageTemplateNames, new { @class = "form-control ddlChangeValue" })
+            </div>
+        </div>
+
+
+
+        <div class="margin-bottom row">
+            <div class="col-md-3">
+                <nop-label asp-for="Active" />
+            </div>
+            <div class="col-md-5">
+                <nop-editor asp-for="Active" />
+                <span asp-validation-for="Active"></span>
+            </div>
+        </div>
+        <h3 class="divRemindercustomer" style="width: fit-content; border:solid 1px black; background-color:gray; @(Model.MessageTemplatetId == 2 ? "display:block;" : "display:none;")"> Reminder mail for lost customers if not active after above mail.</h3>
+        <div class="margin-bottom row divRemindercustomer" style="@(Model.MessageTemplatetId == 2 ? "display:block;" : "display:none;")">
+
+            <div class="col-md-3">
+                <nop-label asp-for="ReminderDays" />
+            </div>
+            <div class="col-md-5" data_spnid="spnQuestion">
+                <nop-editor asp-for="ReminderDays" />
+                <span asp-validation-for="ReminderDays"></span>
+                <span></span>
+            </div>
+        </div>
+        <div class="form-group row divRemindercustomer" style="@(Model.MessageTemplatetId == 2 ? "display:block;" : "display:none;")">
+            <div class="col-md-3">
+                <div class="label-wrapper">
+                    <label class="control-label" for="designerId" title="">
+                        Select Reminder Message Template
+                    </label>
+                </div>
+            </div>
+            <div class="col-md-5">
+                @*  @Html.HiddenFor(x => x.DesignerId, new { @Id = "DesignerId" }) *@
+                @Html.DropDownListFor(m => m.ReminderMessageTemplatetId, Model.ReminderMessageTemplateNames, new { @class = "form-control ddlChangeValue" })
+            </div>
+        </div>
+        <div>
+
+            <button type="submit" class="btn btn-primary" id="saveButton" disabled>Save</button>
+        </div>
+    </form>
+
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        var remdata = '@Model.DiscountPromotionType';
+        if (remdata == 2) {
+            $(".divRemindercustomer").css("display", "flex");
+
+            $(".divnewcustomer").css("display", "none");
+        }
+        let isValid = true;
+
+        // Function to check form validity
+        function checkFormValidity() {
+
+            isValid = true; // Reset isValid flag before validation
+
+            $('#discountForm').find('input, textarea').each(function () {
+                debugger
+                if ($(this).val().trim() === '') {
+                    isValid = false;
+                    return false; // Break loop if any field is empty
+                }
+            });
+
+            // Update button state based on validity
+            $('#saveButton').prop('disabled', !isValid);
+        }
+
+        // Event listener for form fields
+        $('#discountForm').on('input', 'input, textarea', function () {
+            checkFormValidity();
+        });
+
+        // Initial check on page load
+        checkFormValidity();
+
+        // Check DiscountCode validity via AJAX
+        var modelId = $("#Id").val();
+        if (modelId == 0) {
+            $("#DiscountCode").blur(function () {
+                let discountCode = $("#DiscountCode").val().trim();
+                if (discountCode === "") {
+                    $("#spntext").text("Code cannot be empty").css("color", "red");
+                    isValid = false;
+                    checkFormValidity(); // Update button state
+                    return;
+                }
+
+                let postData = {
+                    couponcode: discountCode
+                };
+                addAntiForgeryToken(postData); // Add anti-forgery token to the request
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/Admin/DiscountPromotions/CheckValidcode',
+                    data: postData,
+                    success: function (data) {
+                        debugger
+                        if (data.Result == "1") {
+                            isValid = false;
+                            $("#spntext").text("Entered code is invalid").css("color", "red");
+                        }
+                        else if (data.Result == "2") {
+                            isValid = false;
+                            $("#spntext").text("Code is already inserted").css("color", "red");
+                        }
+                        else if (data.Result == "0") {
+                            isValid = true;
+                            $("#spntext").text("");
+                        }
+
+                        checkFormValidity(); // Update button state
+                    },
+                    error: function () {
+                        isValid = false;
+                        $("#spntext").text("An error occurred. Please try again.").css("color", "red");
+                        checkFormValidity(); // Update button state
+                    }
+                });
+            });
+        }
+    });
+    $(".ddlChangeValue").change(function () {
+        if ($(".ddlChangeValue").val() == 2) {
+            $(".divRemindercustomer").css("display", "flex");
+            $(".divnewcustomer").css("display", "none");
+        }
+        else {
+            $(".divRemindercustomer").css("display", "none");
+            $(".divnewcustomer").css("display", "flex");
+        }
+    });
+</script>

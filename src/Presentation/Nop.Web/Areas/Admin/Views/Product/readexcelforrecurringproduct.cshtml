@@ -1,0 +1,34 @@
+﻿
+<form id="form1" method="post" action="readexcelforrecurring" enctype="multipart/form-data">
+<div class="text-center">
+
+    <input type="file" id="file1" name="file" />
+    <div id="sweetmsg"></div>
+</div>
+    @if (ViewBag.message != null)
+    {
+        <script>
+            $("#sweetmsg").text("Inserted Successfully!!").css("color","green")
+            setTimeout(function () {
+                $("#sweetmsg").fadeOut();
+            }, 5000); // 5000 milliseconds = 5 seconds
+        </script>
+    }
+    else if (ViewBag.message == "notinserted")
+    {
+        <script>
+            $("#sweetmsg").text("Not Inserted !!").css("color", "red")
+            setTimeout(function () {
+                $("#sweetmsg").fadeOut();
+            }, 5000); // 5000 milliseconds = 5 seconds
+        </script>
+    }
+
+</form>
+
+    
+        <script>
+    document.getElementById('file1').onchange = function () {
+        document.getElementById('form1').submit();
+    };    
+    </script>

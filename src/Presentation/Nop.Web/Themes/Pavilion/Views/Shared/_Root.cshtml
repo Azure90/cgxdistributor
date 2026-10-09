@@ -1,0 +1,130 @@
+﻿@using Nop.Core
+@using Nop.Services.Configuration
+
+@inject IStoreContext storeContext
+@inject ISettingService settingService
+@inject IWorkContext _workContext
+@{
+    Layout = "_Root.Head";
+
+    var controllerName = Url.ActionContext.RouteData.Values["controller"].ToString();
+    var actionName = Url.ActionContext.RouteData.Values["action"].ToString();
+    var isHomePage = controllerName.Equals("home", StringComparison.InvariantCultureIgnoreCase) && actionName.Equals("index", StringComparison.InvariantCultureIgnoreCase);
+
+    var storeId = (await storeContext.GetCurrentStoreAsync()).Id;
+    bool isLogoStickyOnMobileDevice = await settingService.GetSettingByKeyAsync("pavilionthemesettings.islogostickyonmobiledevice", false, storeId, true);
+    string stickyLogoClass = isLogoStickyOnMobileDevice ? "mobile-sticky-logo" : string.Empty;
+}
+
+@await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.BodyStartHtmlTagAfter })
+@{
+    await Html.RenderPartialAsync("_Notifications");
+}
+@{
+    await Html.RenderPartialAsync("_JavaScriptDisabledWarning");
+}
+@{
+    await Html.RenderPartialAsync("_OldInternetExplorerWarning");
+}
+<style>
+    .responsive-nav-wrapper div.itemsIcon {
+        background: #fff;
+        width: 53px;
+        height: 50px;
+    }
+
+    .responsive-nav-wrapper .itemsIcon svg {
+        width: 21px;
+        fill: transparent;
+        transform: translateY(2px);
+        height: 21px;
+        stroke: #88a900;
+        margin-top: 13px;
+        stroke-width: 3;
+    }
+
+</style>
+<div class="master-wrapper-page @stickyLogoClass">
+    @{
+        await Html.RenderPartialAsync("_Header");
+    }
+    <script asp-location="Footer">
+        var localized_data = {
+            AjaxCartFailure: "@T("AjaxCart.Failure")"
+        };
+        AjaxCart.init(false, '.header-links .cart-qty', '.header-links .wishlist-qty', '#flyout-cart', localized_data);
+    </script>
+    <div class="overlayOffCanvas"></div>
+    <div class="responsive-nav-wrapper-parent">
+        <div class="responsive-nav-wrapper">
+            <div class="menu-title">
+                <span>@T("SevenSpikes.Themes.Common.MenuTitle")</span>
+            </div>
+            <div class="shopping-cart-link">
+                <span>@T("ShoppingCart")</span>
+            </div>
+            <div class="filters-button">
+                <span>@T("SevenSpikes.Themes.Common.Filters")</span>
+            </div>
+            <div class="personal-button" id="header-links-opener">
+                <span>@T("SevenSpikes.Themes.Common.Personal")</span>
+            </div>
+            <div class="preferences-button" id="header-selectors-opener">
+                <span>@T("SevenSpikes.Themes.Pavilion.Header.Preferences")</span>
+            </div>
+            <div class="search-wrap">
+                <span>@T("Search")</span>
+            </div>
+            @if (_workContext.GetCurrentCustomerAsync().Result.Email != null)
+            {
+                <div class="itemsIcon" onclick="return previousorder()">
+                    <svg class="feather feather-heart" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" style="
+        "></path>
+                    </svg>
+                </div>
+            }
+           
+        </div>
+    </div>
+    <div class="master-wrapper-content">
+        @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.ContentBefore })
+        @await Component.InvokeAsync("Widget", new { widgetZone = "pavilion_color_squares" })
+
+        <div class="master-column-wrapper">
+            @RenderBody()
+        </div>
+        @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.ContentAfter })
+    </div>
+    @if (isHomePage)
+    {
+        @await Component.InvokeAsync("Widget", new { widgetZone = "homepage_content_after" })
+    }
+    @await Component.InvokeAsync(typeof(FooterViewComponent))
+</div>
+@await Component.InvokeAsync(typeof(EuCookieLawViewComponent))
+@await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.BodyEndHtmlTagBefore })
+@* <script>
+    function previousorder() {
+        debugger
+        $("#hdnprevoiusorder").val("fromheader");
+        if ($("#hdnstatus").val() == "") {
+            $.ajax({
+                url: '/Common/GetPreviousOrderProduct',
+                type: 'get',
+                success: function (data) {
+
+                    console.log(data);
+                    $("#render").html(data.innerhtml);
+
+                },
+            });
+            return false;
+        }
+        else {
+            $("#hdnstatus").val("");
+            return true;
+        }
+
+    }
+</script> *@

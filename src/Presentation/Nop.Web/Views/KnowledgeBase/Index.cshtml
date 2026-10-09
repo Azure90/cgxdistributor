@@ -1,0 +1,343 @@
+﻿@* @using Nop.Web.Models.KnowledgeBase;
+@model KnowledgeBaseModel *@
+@using System.Text.RegularExpressions;
+@using Nop.Web.Models.KnowledgeBaseArticle;
+@model KnowledgeBaseArticleModel
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+@* <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script> *@
+
+
+@* <link href="~/css/custompage/knowledgebase/knowledgebasemainpage.css" rel="stylesheet" /> *@
+<link href="~/css/custompage/knowledgebase/index.css" rel="stylesheet" />
+<style>
+    ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    a {
+        text-decoration: none;
+    }
+
+    .header-links a {
+        color: #000;
+    }
+
+    .cus_accordion .accordion-button {
+        border: none;
+        display: block;
+        width: 100%;
+        text-align: left;
+        position: relative;
+    }
+
+        .cus_accordion .accordion-button::after {
+            content: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23052c65'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            position: absolute;
+            right: 0;
+            top: 9px;
+            z-index: 1;
+            height: 22px;
+            width: 22px;
+            transition: all .3s ease-in-out
+        }
+
+    .cus_accordion .accordion-collapse {
+        padding-inline: 20px !important
+    }
+
+    .cus_accordion .accordion-button.active::after {
+        transform: scaleY(-1)
+    }
+
+    * {
+        scroll-behavior: smooth
+    }
+    .accordion-body .accordion-header{
+        margin-bottom: 0 !important
+    }
+
+    .accordion-body .accordion-item:not(:last-child) {
+        margin-bottom: 25px;
+        padding-bottom: 25px;
+        border-bottom: 1px solid #e7e7e7
+    }
+
+</style>
+@* <script type="text/javascript">
+
+    var screenWidth = window.innerWidth;
+
+    if (screenWidth >= 360 && screenWidth <= 1024) {
+        // Scroll to specific coordinates (900, 900) for mobile view
+        window.scrollTo(100, 100);
+    } else {
+        $(window).load(function () {
+            // executes when complete page is fully loaded, including all frames, objects and images
+            window.scrollTo(250, 250)
+
+        });
+    }
+</script> *@
+<div class="slideshow-container">
+    <img class="bannerimg" src="~/Uploads/@Model.PagenameBanner" style="display:none">
+    @* <img class="bannerimg" src="~/Uploads/Knowledge-Base-banner-2048x1024.jpg"> *@
+    <div class="category-search__Outer-wrap ">
+        @T("knowledge.help.hint")
+        <div class="category-search__Outer">
+            <svg class="kb-search__mag" width="15" height="15" xmlns="http://www.w3.org/2000/svg">
+                <path d="M14.02 12.672l-3.64-3.64a5.687 5.687 0 0 0 1.06-3.312A5.726 5.726 0 0 0 5.72 0 5.726 5.726 0 0 0 0 5.72a5.726 5.726 0 0 0 5.72 5.72 5.687 5.687 0 0 0 3.311-1.06l3.641 3.64a.95.95 0 0 0 1.348 0 .953.953 0 0 0 0-1.348zm-8.3-3.139a3.813 3.813 0 1 1 0-7.626 3.813 3.813 0 0 1 0 7.626z" fill="#4A4A4A" fill-rule="evenodd"></path>
+            </svg>
+            @await Html.PartialAsync("_search")
+        </div>
+    </div>
+</div>
+<button class="mobileview">
+    Menu
+</button>
+<div id="bone-grafts1" class="content-container" style="padding-top: 80px">
+    <div class="main-body">
+        <div class="kb-sidebar">
+            <div class="side-menu-bar">
+                @*  @foreach (var i in Model.MainMenuList) *@
+                @foreach (var i in Model.Categorylist.GroupBy(x => x).ToList())
+                {
+                    <ul class="menu" id="menu1">
+                        <li class="@(i.Key == Model.Pagename ? "active" : "")">
+
+                            <a>@i.Key</a>
+                            <ul class="menu-level1">
+                                @foreach (var x in Model.subcategoryModelList.Where(d => d.Category == i.Key).GroupBy(k => k.subcategory).ToList())
+                                {
+                                    <li class="products @(Regex.Replace(x.Key.Replace(" ",""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.SubCategoryPagename.Replace(" ",""), "[^a-zA-Z0-9]", "") ? "active" : "")">
+                                        <a>@x.Key</a>
+
+                                        <ul class="menu-level2">
+                                            @foreach (var y in x.GroupBy(d => d.product).ToList())
+                                            {
+                                                <li>
+                                                    @{
+                                                        var subtitle = Regex.Replace(y.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "");  // Remove spaces and special characters
+                                                        var encodedSubtitle = Uri.EscapeDataString(subtitle);
+
+                                                        var pagesubcat = Regex.Replace(x.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "");  // Remove spaces and special characters
+                                                        var encodedpagesubcat = Uri.EscapeDataString(pagesubcat);
+
+                                                        var PageName = Regex.Replace(i.Key.Replace(" ", ""), "[^a-zA-Z0-9]", "");  // Remove spaces and special characters
+                                                        var encodedPageName = Uri.EscapeDataString(PageName);
+                                                    }
+                                                    @*  <a id="partialanswer" class="subInnerItems @(Regex.Replace(y.Key.Replace(" ",""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.ProductPagename.Replace(" ",""), "[^a-zA-Z0-9]", "") && Regex.Replace(x.Key.Replace(" ",""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.SubCategoryPagename.Replace(" ",""), "[^a-zA-Z0-9]", "") ? "active" : "")" href="/KnowledgeBase/Partialquestionanswer?PageNameID=@encodedPageName&pagesubcategory=@encodedpagesubcat&SubtitleId=@encodedSubtitle" class="@y.Key"><span class="customCheck"></span> @y.Key</a> *@
+                                                    <a id="partialanswer"
+                                                       class="subInnerItems @(Regex.Replace(y.Key.Replace(" ",""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.ProductPagename.Replace(" ",""), "[^a-zA-Z0-9]", "") && Regex.Replace(x.Key.Replace(" ",""), "[^a-zA-Z0-9]", "") == Regex.Replace(Model.SubCategoryPagename.Replace(" ",""), "[^a-zA-Z0-9]", "") ? "active" : "")"
+                                                       data-pagename="@encodedPageName"
+                                                       data-subcat="@encodedpagesubcat"
+                                                       data-subtitle="@encodedSubtitle"
+                                                       href="javascript:void(0);">
+                                                        <span class="customCheck"></span> @y.Key
+                                                    </a>
+
+                                                </li>
+
+                                            }
+                                        </ul>
+                                    </li>
+                                }
+                            </ul>
+
+                        </li>
+                    </ul>
+                }
+
+
+            </div>
+        </div>
+
+        @* <div class="kb-content">
+        <div class="kb-categories">
+        <h1 id="bone-grafts">@Model.Pagename</h1>
+        <p class="kb-categories__category-description">@Model.PagenameDescription</p>
+        @foreach (var x in Model.Titlename.Where(d => d.MainPageID == Model.Id))
+        {
+        <div id="@x.SubTitleID@x.MainPageID" class="kb-categories__item">
+        <h4>@x.Titlename</h4>
+        @foreach (var item in Model.ContentModelList.Where(d => d.Tittle == x.Titlename))
+        {
+        <div class="accordion" id="accordionExample">
+        <div class="accordion-item">
+        <h2 class="accordion-header">
+        <button class="accordion-button collapsed Question_@item.Id" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_@item.Id" aria-expanded="false" aria-controls="collapse_@item.Id">
+        @item.Question
+        </button>
+        </h2>
+        <div id="collapse_@item.Id" class="accordion-collapse collapse" data-bs-parent="#accordionExample" style="">
+        <div class="accordion-body">
+        @Html.Raw(@item.Answer)
+        </div>
+        </div>
+        </div>
+        </div>
+        }
+        </div>
+        }
+        </div>
+        </div> *@
+        <div class="pro_part" id="partialContainer">
+
+            @await Html.PartialAsync("_partialQ&A", Model)
+
+
+
+        </div>
+
+
+
+
+
+        <script>
+            $(".accordion-button").click(function () {
+                const target = $(this).data("target");
+                $(this).toggleClass("active")
+                $(`[data-id="${target}"]`).slideToggle().toggleClass("active");
+            })
+
+
+        </script>
+
+        <script>
+            $(".kb-sidebar .menu > li > a").click(function () {
+
+                var $parentListItem = $(this).parent();
+
+                if ($parentListItem.hasClass("active")) {
+                    return; // Do nothing if the clicked menu item is already active
+                }
+
+                $(".kb-sidebar .menu > li").removeClass("active");
+                $parentListItem.addClass("active");
+
+                // Wait for the transition to complete before removing the "active" class from other menu items
+                setTimeout(function () {
+                    $(".kb-sidebar .menu > li").not($parentListItem).removeClass("active");
+                }, 300); // Adjust the duration (in milliseconds) to match your CSS transition time
+            });
+            $(function () {
+                var $items = $(".kb-sidebar .menu li.products");
+
+                $items.on("mouseenter", function () {
+                    var $li = $(this);
+
+                    // Close other items only if they don't have an active .subInnerItems
+                    $items.not($li).each(function () {
+                        var $other = $(this);
+                        if (!$other.find(".subInnerItems.active").length) {
+                            $other.removeClass("active")
+                                .find("> ul").stop(true, true).slideUp(150);
+                        }
+                    });
+
+                    // Open the hovered item
+                    $li.addClass("active")
+                        .find("> ul").stop(true, true).slideDown(150);
+                });
+            });
+
+
+            $(document).on("click", "#partialanswer", function (e) {
+
+                $(".subInnerItems").removeClass("active");
+                $(this).addClass("active");
+
+                $(".products").each(function () {
+                    if ($(this).find(".subInnerItems.active").length === 0) {
+                        $(this).removeClass("active");
+                    } else {
+                        $(this).addClass("active");
+                    }
+                });
+                var pageName = $(this).data("pagename");
+                var subCat = $(this).data("subcat");
+                var subtitleId = $(this).data("subtitle");
+                $.ajax({
+                    type: 'get',
+                    url: '/KnowledgeBase/Partialquestionanswer',
+                    data: {
+                        PageNameID: pageName,
+                        pagesubcategory: subCat,
+                        SubtitleId: subtitleId
+                    },
+                    success: function (data) {
+                        $('.content-container')[0].scrollIntoView({
+                            behavior: 'smooth', // smooth scrolling
+                            block: 'start'      // align to top of viewport
+                        });
+                        $('#partialContainer').html(data);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+                        $(".collapse").css("display", "block");
+                    },
+                    // complete: function () {
+                    //     $("#loader-overlay").hide();
+                    // },
+                })
+            })
+
+
+
+
+            $(document).ready(function () {
+                // debugger
+
+
+
+
+
+
+                var Subtitle = '@ViewBag.Subtitle';
+
+                var pagesubcategory = '@ViewBag.pagesubcategory';
+
+                pagesubcategory = $("<div>").html(pagesubcategory).text();
+                Subtitle = $("<div>").html(Subtitle).text();
+
+
+
+                $(".Question_" + pagesubcategory + Subtitle).click();
+
+
+            });
+            $(window).scroll(function () {
+                var scroll = $(window).scrollTop();
+
+                if (scroll >= 100) {
+                    $("body").addClass("sidebar-is-sticky");
+                } else {
+                    $("body").removeClass("sidebar-is-sticky");
+                }
+            });
+            $(function () {
+                $(".mobileview").click(function () {
+                    if ($(".kb-sidebar").hasClass("mobilesidebar")) {
+                        $(".kb-sidebar").removeClass("mobilesidebar");
+                    } else {
+                        $(".kb-sidebar").addClass("mobilesidebar");
+                    }
+                });
+            });
+            setTimeout(function () {
+                if (!$(".Question_BillingGeneral").hasClass("active")) {
+                    $(".Question_BillingGeneral ").click();
+                }
+            }, 1000);
+        </script>
+    </div>
+
+
+
+

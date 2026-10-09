@@ -1,0 +1,364 @@
+﻿@inject Nop.Services.Common.IGenericAttributeService genericAttributeService
+@using Nop.Core;
+@inject IWorkContext workContext
+@model Nop.Web.Controllers.CustomerController.Graph
+@{
+    var prefix = Model.Prefix;
+    const string hideCardAttributeName = "Reports.HideOrderStatisticsCard";
+    var hideCard = await genericAttributeService.GetAttributeAsync<bool>(await workContext.GetCurrentCustomerAsync(), hideCardAttributeName);
+}
+
+<script src="~/lib_npm/chart.js/Chart.min.js" asp-location="Head"></script>
+<input type="hidden" id="currenttab" value="@Model.GraphName" />
+
+<style>
+  /*   .toggle-btn {
+  padding: 10px 15px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.toggle-btn.active {
+            background-color: #add408;
+
+  color: white;
+            border-color: #a3da40;
+} */
+
+    .toggle-btn {
+        padding: 10px 15px;
+        background-color: #f0f0f0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .toggle-btn-blue.active {
+        background-color: #add408 !important;
+        color: white !important;
+        text-decoration: none !important;
+        border-color: #a3da40 !important;
+        text-decoration: none;
+    }
+
+    .toggle-btn-red.active {
+        background-color: #cd3737 !important;
+        color: white !important;
+        text-decoration: none !important;
+        border-color: #cd3737 !important;
+
+</style>
+<div class="card card-primary card-outline @if (hideCard){
+<text>collapsed-card</text>
+}" id="@(prefix)-card">
+    <div class="card-header with-border">
+        <h2 class="card-title">
+            <i class="fas fa-shopping-cart"></i>
+            @* @T("Admin.SalesReport.OrderStatistics") *@
+            @if (@Model.GraphName == "PaymentInvoice")
+            {
+                       <span>@Model.GraphName-Paid</span>
+            }
+            else if (@Model.GraphName == "PaymentInvoiceNotPaid")
+            {
+
+                        <span>PaymentInvoice-NotPaid</span>
+            }
+            else if (@Model.GraphName == "orders")
+            
+             {
+                 @Model.GraphName
+              
+            }
+            else
+            {
+                 <span> Account Balance</span>
+              
+            }
+        </h2>
+        @if(Model.GraphName == "AccountBalance"){
+                    <button id="toggleBlueLine" class="toggle-btn toggle-btn-blue active" style="text-decoration: line-through;background: #88a900;color: #fff;padding: 5px 10px;font-size: 14px;border-radius: 3px;border: none;">Paid</button>
+                    <button id="toggleRedLine" class="toggle-btn toggle-btn-red active" style="text-decoration: line-through;background: #cd3737;color: #fff;padding: 5px 10px;font-size: 14px;border-radius: 3px;border: none;">Pending</button>
+        }
+        <div class="card-tools float-right">
+            <button class="btn btn-xs btn-info btn-flat margin-r-5" @if (hideCard)
+            {
+                <text> disabled="disabled" </text>
+            } data-chart-role="toggle-chart" data-chart-period="year">@T("Admin.SalesReport.OrderStatistics.Year")</button>
+            <button class="btn btn-xs btn-info btn-flat margin-r-5" @if (hideCard)
+            {
+                <text> disabled="disabled" </text>
+            } data-chart-role="toggle-chart" data-chart-period="month">@T("Admin.SalesReport.OrderStatistics.Month")</button>
+            <button class="btn btn-xs btn-info btn-flat" @if (hideCard)
+            {
+                <text> disabled="disabled" </text>
+            } data-chart-role="toggle-chart" data-chart-period="week">@T("Admin.SalesReport.OrderStatistics.Week")</button>
+            <button type="button" class="btn btn-tool margin-l-10" data-card-widget="collapse">
+                @if (hideCard)
+                {
+                    <text><i class="fas fa-plus"></i></text>
+                }
+                else
+                {
+                    <text><i class="fas fa-minus"></i></text>
+                }
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="chart" style="height: 300px;">
+            <canvas id="@(prefix)-chart" height="300"></canvas>
+             
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var osCurrentPeriod;
+        var osLabels = [];
+        var osData = [];
+        var osData1 = [];
+        
+        // Initialize Chart.js configuration
+        var osConfig = {
+            type: 'line',
+            data: {
+                labels: osLabels,
+                datasets: [{
+                    label: "@(T("Admin.SalesReport.OrderStatistics"))", // Fixed Razor syntax for localization
+                    fillColor: "rgba(60,141,188,0.9)",
+                    strokeColor: "rgba(60,141,188,0.8)",
+                    pointColor: "#3b8bba",
+                    pointStrokeColor: "rgba(60,141,188,1)",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(60,141,188,1)",
+                    borderColor: 'rgba(60, 141, 188, 0.7)',
+                   backgroundColor: 'transparent', // No fill color
+                    pointBorderColor: 'rgba(37, 103, 142, 0.9)',
+                    pointBackgroundColor: 'rgba(60, 141, 188, 0.4)',
+                    pointBorderWidth: 1,
+                    data: osData
+                },
+                {
+                    label: "@(T("Admin.SalesReport.OrderStatistics"))", // Fixed Razor syntax for localization
+                    fillColor: "rgba(60,141,188,0.9)",
+                    strokeColor: "rgba(60,141,188,0.8)",
+                    pointColor: "#3b8bba",
+                    pointStrokeColor: "rgba(60,141,188,1)",
+                    pointHighlightFill: "#fff",
+                    pointHighlightStroke: "rgba(60,141,188,1)",
+                    borderColor: 'rgba(255, 0, 0, 1)',
+                   backgroundColor: 'transparent', // No fill color
+                    pointBorderColor: 'rgba(37, 103, 142, 0.9)',
+                    pointBackgroundColor: 'rgba(60, 141, 188, 0.4)',
+                    pointBorderWidth: 1,
+                    data: osData1
+                }]
+            },
+            options: {
+                legend: {
+                    display: false
+                },
+                scales: {
+                    xAxes: [{
+                        display: true,
+                        ticks: {
+                            userCallback: function (dataLabel, index) {
+                                if (window.orderStatistics && window.orderStatistics.config.data.labels.length > 12) {
+                                    return index % 5 === 0 ? dataLabel : '';
+                                }
+                                return dataLabel;
+                            }
+                        }
+                    }],
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            userCallback: function (dataLabel, index) {
+                                return (dataLabel ^ 0) === dataLabel ? dataLabel : '';
+                            },
+                            min: 0
+                        }
+                    }]
+                },
+                showScale: true,
+                scaleShowGridLines: false,
+                scaleGridLineColor: "rgba(0,0,0,.05)",
+                scaleGridLineWidth: 1,
+                scaleShowHorizontalLines: true,
+                scaleShowVerticalLines: true,
+                bezierCurve: true,
+                pointDot: false,
+                pointDotRadius: 4,
+                pointDotStrokeWidth: 1,
+                pointHitDetectionRadius: 20,
+                datasetStroke: true,
+                datasetFill: true,
+                maintainAspectRatio: false,
+                responsive: true
+            }
+        };
+      
+        var chart = new Chart(document.getElementById("@(prefix)-chart").getContext("2d"), osConfig);
+
+        // Handle collapse card logic
+        $('#@(prefix)-card').on('click', 'button[data-card-widget="collapse"]', function () {
+            var collapsed = !$('#@(prefix)-card').hasClass('collapsed-card');
+            saveUserPreferences('@(Url.Action("SavePreference", "Preferences"))', '@hideCardAttributeName', collapsed);
+
+            if (!collapsed) {
+                $('#@(prefix)-card button[data-chart-role="toggle-chart"]').removeAttr('disabled');
+                if (!osCurrentPeriod) {
+                    $('#@(prefix)-card button[data-chart-role="toggle-chart"][data-chart-period="year"]').trigger('click');
+                }
+            } else {
+                $('#@(prefix)-card button[data-chart-role="toggle-chart"]').attr('disabled', 'disabled');
+            }
+        });
+        if('@(prefix)-chart'=="AccountBalance-statistics-chart"){
+        const myChart = new Chart(chart, osConfig);
+        // Button click events to toggle dataset visibility
+        document.getElementById('toggleBlueLine').addEventListener('click', () => {
+  const blueDatasetIndex = 0; // Index of the blue line dataset
+  const isVisible = myChart.data.datasets[blueDatasetIndex].hidden; // Check current visibility
+
+  // Toggle visibility by setting the 'hidden' property
+  myChart.data.datasets[blueDatasetIndex].hidden = !isVisible;
+
+  // Update the chart to reflect changes
+  myChart.update();
+
+  // Toggle active class for button styling
+  document.getElementById('toggleBlueLine').classList.toggle('active');
+});
+
+       
+      document.getElementById('toggleRedLine').addEventListener('click', () => {
+  const redDatasetIndex = 1; // Index of the red line dataset
+  const isVisible = myChart.data.datasets[redDatasetIndex].hidden; // Check current visibility
+
+  // Toggle visibility by setting the 'hidden' property
+  myChart.data.datasets[redDatasetIndex].hidden = !isVisible;
+
+  // Update the chart to reflect changes
+  myChart.update();
+
+  // Toggle active class for button styling
+  document.getElementById('toggleRedLine').classList.toggle('active');
+});
+       }
+        // Function to load order statistics based on the selected period
+        function loadOrderStatistics(period) {
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "/Customer/LoadOrderStatistics",
+                data: { period: period },
+                success: function (data) {
+                    osLabels = [];
+                    osData = [];
+                    data.forEach(function (item) {                        
+                        osLabels.push(item.date);
+                        osData.push(item.value);
+                    });
+
+                    chart.data.labels = osLabels;
+                    chart.data.datasets[0].data = osData;
+                    chart.update();
+                },
+                error: function () {
+                    $("#loadOrderStatisticsAlert").click();
+                }
+            });
+        }
+        function PaymentInvoiceStatistics(period, feature) {
+
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "/Customer/PaymentInvoiceStatistics",
+                data: { period: period, Feature: feature },
+                success: function (data) {
+                    osLabels = [];
+                    osData = [];
+                    data.forEach(function (item) {
+                        osLabels.push(item.InvoiceDateFormatted);
+                        osData.push(item.TotalInvoices);
+                    });
+
+                    chart.data.labels = osLabels;
+                    chart.data.datasets[0].data = osData;
+                    chart.update();
+                },
+                error: function () {
+                    $("#loadOrderStatisticsAlert").click();
+                }
+            });
+        }
+        function AccountBalanceStatistics(period) {
+            
+            $.ajax({
+                cache: false,
+                type: "GET",
+                url: "/Customer/AccountBalanceStatistics",
+                data: { period: period },
+                success: function (data) {
+                    osLabels = [];
+                    osData = [];
+                    data.forEach(function (item) {                        
+                        osLabels.push(item.date);
+                        var sdata=item.value.split(',');
+                       
+                        osData.push(sdata[1].split(': ')[1]);                     
+                       
+                           osData1.push(sdata[0].split(': ')[1]);
+                       
+                    });
+
+                    chart.data.labels = osLabels;
+                    chart.data.datasets[0].data = osData;
+                    chart.update();
+                },
+                error: function () {
+                    $("#loadOrderStatisticsAlert").click();
+                }
+            });
+        }
+
+        // Handle chart period selection
+        $('#@(prefix)-card button[data-chart-role="toggle-chart"]').on('click', function () {
+            var period = $(this).attr('data-chart-period');
+            osCurrentPeriod = period;
+            var tab = $("#currenttab").val();
+            var modelName = '@Model.GraphName';
+
+            if (modelName == "orders") {
+                loadOrderStatistics(period);
+            }
+            else if (modelName == "PaymentInvoice") {
+                var feature = "Paid"
+                PaymentInvoiceStatistics(period, feature); // You can add different logic for other tabs if needed
+            }
+            else if (modelName == "AccountBalance") {  
+               
+                AccountBalanceStatistics(period); // You can add different logic for other tabs if needed
+            }
+
+            $('#@(prefix)-card button[data-chart-role="toggle-chart"]').removeClass('bg-light-blue');
+            $(this).addClass('bg-light-blue');
+        });
+
+    @if (!hideCard)
+    {
+        <text>
+                $('#@(prefix)-card button[data-chart-role="toggle-chart"][data-chart-period="year"]').trigger('click');
+        </text>
+
+    }
+                });
+</script>

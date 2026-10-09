@@ -1,0 +1,199 @@
+﻿@{
+   // ViewBag.PageTitle = "Distributor Portal Courses";
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("HIDE/SHOW left navigation");
+}
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+
+    <style>
+        .header-bar {
+            background-color: #2c3e50; /* dark navy */
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 6px 6px 0 0;
+            margin-bottom: 20px;
+        }
+
+        .settings-box {
+            background: #f8f9fa; /* light background */
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 0 0 6px 6px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #333;
+        }
+    </style>
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="header-bar">
+        <h3 class="mb-0">Left Navigation Bar Menu – Show / Hide</h3>
+    </div>
+
+    <!-- Settings Form -->
+    <div class="settings-box">
+
+        <!-- Social Media -->
+        <div class="form-group row">
+            <label class="col-md-4 col-form-label" for="SocialactiveInactive">
+                Social Media (Active / InActive)
+            </label>
+            <div class="col-md-8">
+                <input type="checkbox" id="SocialactiveInactive" checked="@ViewBag.SocialMedia">
+            </div>
+        </div>
+
+        <!-- Training -->
+        <div class="form-group row">
+            <label class="col-md-4 col-form-label" for="TrainingactiveInactive">
+                Training (Active / InActive)
+            </label>
+            <div class="col-md-8">
+                <input type="checkbox" id="TrainingactiveInactive" checked="@ViewBag.Training">
+            </div>
+        </div>
+
+        <!-- Product -->
+        <div class="form-group row">
+            <label class="col-md-4 col-form-label" for="ProductsactiveInactive">
+                Product (Active / InActive)
+            </label>
+            <div class="col-md-8">
+                <input type="checkbox" id="productsactiveinactive" checked="@ViewBag.Products">
+            </div>
+        </div>
+
+        <!-- Non-Sterile -->
+        <div class="form-group row">
+            <label class="col-md-4 col-form-label" for="NonSterileactiveInactive">
+                Non-Sterile (Active / InActive)
+            </label>
+            <div class="col-md-8">
+                <input type="checkbox" id="NonSterileactiveInactive" checked="@ViewBag.NonSterile">
+            </div>
+        </div>
+
+        <!-- Message Section -->
+        <div class="form-group row">
+            <div class="col-md-8 offset-md-4">
+                <span id="TrainingSocialmsg"></span>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+    $('#SocialactiveInactive').change(function () {
+        var val = $(this).prop("checked");
+
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("SocialactiveInactive", "DistributorCourses"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#TrainingSocialmsg").text("Social Media Tab are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#TrainingSocialmsg").text("Social Media Tab are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>
+<script>
+    $('#TrainingactiveInactive').change(function () {
+        var val = $(this).prop("checked");
+
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("TrainingactiveInactive", "DistributorCourses"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#TrainingSocialmsg").text("Training Tab are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#TrainingSocialmsg").text("Training Tab are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>
+
+<script>
+    $('#productsactiveinactive').change(function () {
+        var val = $(this).prop("checked");
+       
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("productsactiveinactive", "DistributorCourses"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#TrainingSocialmsg").text("Product Tab are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#TrainingSocialmsg").text("Product Tab are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>
+
+<script>
+    $('#NonSterileactiveInactive').change(function () {
+        var val = $(this).prop("checked");
+       
+        var postData = {
+            priceStatus: val
+        };
+        addAntiForgeryToken(postData);
+
+        $.ajax({
+            cache: false,
+            type: "POST",
+            url: "@(Url.Action("NonSterileactiveInactive", "DistributorCourses"))",
+            data: postData,
+            success: function (data) {
+                if (data.Status == true)
+                    $("#TrainingSocialmsg").text("Non-Sterile Tab are Activated Successfully.").css("color", "Green").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+                else
+                    $("#TrainingSocialmsg").text("Non-Sterile Tab are Deactivated Successfully.").css("color", "Red").css("font-weight", "600").css("display", "block").delay(1000).fadeOut(500);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert('Something went wrong !!');
+            }
+        });
+    });
+</script>

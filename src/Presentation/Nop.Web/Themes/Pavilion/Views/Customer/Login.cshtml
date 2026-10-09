@@ -1,0 +1,251 @@
+﻿@model LoginModel
+@using Nop.Core
+@using Nop.Core.Domain.Customers
+
+@inject IWebHelper webHelper
+@{
+    bool isCalledAsPopup = !string.IsNullOrEmpty(this.Context.Request.Query["isPopup"]);
+
+    Layout = isCalledAsPopup ? "" : "_ColumnsOne";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.Login").Text);
+    //page class
+    NopHtml.AppendPageCssClassParts("html-login-page");
+
+    //register URL with return URL (if specified)
+    var registerUrl = Url.RouteUrl("Register", new { returnUrl = this.Context.Request.Query["returnUrl"] }, webHelper.GetCurrentRequestProtocol());
+}
+<style>
+    #Emptytext {
+        font-size: 13px;
+        margin-top: 7px;
+        display: block;
+    }
+</style>
+<div class="page login-page">
+    <div class="page-title">
+        <h1>@T("Account.Login.Welcome")</h1>
+    </div>
+    @await Html.PartialAsync("_ExternalAuthentication.Errors")
+    <div class="page-body">
+        @if (!isCalledAsPopup)
+        {
+            @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.LoginTop, additionalData = Model })
+
+        }
+        <div class="customer-blocks">
+            @if (Model.RegistrationType == UserRegistrationType.Disabled)
+            {
+                <div class="new-wrapper">
+                    <div class="title">
+                        <strong>@T("Account.Register")</strong>
+                    </div>
+                    <div class="inner-wrapper">
+                        <div class="text">
+                            @T("Account.Register.Result.Disabled")
+                        </div>
+                    </div>
+                </div>
+            }
+            else if (Model.CheckoutAsGuest)
+            {
+                <div class="new-wrapper checkout-as-guest-or-register-block">
+                    <div class="title">
+                        <strong>@T("Account.Login.CheckoutAsGuestOrRegister")</strong>
+                    </div>
+                    <div class="inner-wrapper">
+                        <div class="text">
+                            @await Component.InvokeAsync(typeof(TopicBlockViewComponent), new { systemName = "CheckoutAsGuestOrRegister" })
+                        </div>
+                        <div class="buttons">
+                            <button type="button" class="button-1 checkout-as-guest-button" onclick="location.href='@Url.RouteUrl("Checkout")'">@T("Account.Login.CheckoutAsGuest")</button>
+                            <button type="button" class="button-1 register-button" onclick="location.href='@registerUrl'">@T("Account.Register")</button>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="new-wrapper register-block">
+                    <div class="title">
+                        <strong>@T("Account.Login.NewCustomer")</strong>
+                    </div>
+                    <div class="inner-wrapper">
+                        <div class="text">
+                            @T("Account.Login.NewCustomerText")
+                        </div>
+                        <div class="buttons">
+                            <button type="button" class="button-1 register-button" onclick="location.href='@registerUrl'">@T("Account.Register")</button>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="returning-wrapper fieldset">
+                <form asp-route="Login" asp-route-returnurl="@Context.Request.Query["ReturnUrl"]" method="post" id="Loginformid" autocomplete="off">
+                    <div class="title active">
+                        <strong>@T("Account.Login.ReturningCustomer")</strong>
+                    </div>
+                    <div class="inner-wrapper show">
+                        <div asp-validation-summary="ModelOnly" class="message-error">@T("Account.Login.Unsuccessful")</div>
+                        <div class="form-fields">
+                            @if (Model.UsernamesEnabled)
+                            {
+                                <div class="inputs">
+                                    <label asp-for="Username" asp-postfix=":"></label>
+                                    <input asp-for="Username" class="username" autofocus="autofocus" />
+                                    <span asp-validation-for="Username"></span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="inputs">
+                                    <label asp-for="Email" asp-postfix=":"></label>
+                                    <input asp-for="Email" class="email" autofocus="autofocus" />
+                                    <span asp-validation-for="Email"></span>
+                                </div>
+                            }
+                            <div class="inputs">
+                                <label asp-for="Password" asp-postfix=":"></label>
+                                <input asp-for="Password" class="password" />
+                                <span asp-validation-for="Password"></span>
+
+                            </div>
+                            <div class="inputs">
+                                <div id="twofainput"></div>
+                                <span id="Emptytext"></span>
+                            </div>
+
+
+
+
+                            <div class="inputs reversed">
+                                <input asp-for="RememberMe" />
+                                <label asp-for="RememberMe"></label>
+                                <span class="forgot-password">
+                                    <a asp-route="PasswordRecovery">@T("Account.Login.ForgotPassword")</a>
+                                </span>
+                            </div>
+                            @if (Model.DisplayCaptcha)
+                            {
+                                <nop-captcha />
+                            }
+                        </div>
+                        <input type="hidden" id="hdnisauthenticated" value="@ViewBag.Isauthenticated" />
+                        <div class="buttons">
+                            <button type="submit" onclick="return checkcustomer()" class="button-1 login-button">@T("Account.Login.LoginButton")</button>
+
+
+                        </div>
+                        <input type="hidden" id="hdntwofa" />
+                        <input type="hidden" id="hdnisvalid" />
+                        <input type="hidden" id="hdntimer" />
+
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        @{
+            var externalMethods = await Component.InvokeAsync(typeof(ExternalMethodsViewComponent), "ExternalAuthentication");
+
+            if (!String.IsNullOrEmpty(await externalMethods.RenderHtmlContentAsync()))
+            {
+                <div class="external-authentication">
+                    @externalMethods
+                </div>
+            }
+        }
+
+        @if (!isCalledAsPopup)
+        {
+            @await Component.InvokeAsync(typeof(TopicBlockViewComponent), new { systemName = "LoginRegistrationInfo" })
+            @await Component.InvokeAsync(typeof(WidgetViewComponent), new { widgetZone = PublicWidgetZones.LoginBottom, additionalData = Model })
+
+        }
+        else
+        {
+            <div id="login-modal-window-static-resources">
+                @NopHtml.GenerateCssFiles()
+                @NopHtml.GenerateScripts(ResourceLocation.Head)
+                @NopHtml.GenerateScripts(ResourceLocation.Footer)
+            </div>
+        }
+    </div>
+</div>
+<script>
+
+
+    function checkcustomer() {
+        debugger
+        if ('@ViewBag.Isauthenticated' == 'true') {
+             debugger
+            if ($('#hdnisvalid').val() != "hdnisvalid") {
+                if ($('#hdntimer').val() != "hdntimer") {
+
+                    if ($('#facode').val() == undefined || $("#facode").attr("data-facode") == 'getfacode') {
+                        if ($('#facode').val() != "") {
+
+
+                            $.ajax({
+                                url: '/Customer/Loginwithcode',
+                                type: 'GET', // or 'POST' depending on your requirements
+                                data: { model: $('#Loginformid').serialize(), visit: $('#hdntwofa').val(), uniquecode: $('#facode').val(), ToEMail: $('#Email').val(), Pasword: $('#Password').val() },
+                                success: function (data) {
+                                    debugger
+                                    if (data.result == 0) {
+                                        $('#twofainput').html('');
+                                        $('#hdntwofa').val('first');
+                                        var appendinput = "";
+                                        appendinput += '<label>Verification Code:</label>'
+                                        appendinput += '<input id="facode" type="Password" data-facode="getfacode"/>'
+                                        $('#twofainput').append(appendinput);
+                                        $("#Emptytext").text("Please Enter the Code sent on your given Mail !").css("color", "green")
+                                    }
+                                    else if (data.result == 2) {
+                                        $("#Emptytext").text("Your Entered code is not correct !").css("color", "red");
+                                    }
+                                    else if (data.result == 1) {
+                                        $("#hdnisvalid").val("hdnisvalid");
+                                        $(".login-button").click();
+
+
+                                    }
+                                    else if (data.result == 3) {
+                                        $("#hdntimer").val("hdntimer");
+                                        $(".login-button").click();
+
+
+                                    }
+                                    else if (data.result == 4) {
+                                        $("#Emptytext").text("Entered Username and password not correct!").css("color", "red");
+
+
+                                    }
+                                },
+
+                            });
+                        }
+                        else {
+                            $("#Emptytext").text("Please Enter the Code!").css("color", "red");
+                        }
+                    }
+                    else {
+                        $("#Emptytext").text("Please Enter the Code!").css("color", "red");
+                    }
+
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            }
+            else {
+                return true;
+            }
+        }
+        else {
+            return true;
+        }
+    }
+</script>

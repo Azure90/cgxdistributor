@@ -1,0 +1,549 @@
+﻿@using Nop.Web.Models.CustomDiscount
+@model DiscountAndSpecialProductsModel
+
+@{
+    int[] pageSizes = new[] { 15, 20, 25, 30 };
+}
+
+@* Center Content — Products *@
+<div class="home-page-categories-wrapper">
+    <div class="home-page-slider">
+        @await Component.InvokeAsync("Widget", new { widgetZone = "home_page_main_slider" })
+    </div>
+</div>
+
+<div class="center-2-exclusive-row">
+    <div class="center-2 four-per-row center-exclusive-2">
+        <input id="hdnCategoryIds" type="hidden" />
+        <input id="promotionType" type="hidden" value="@Model.Type" />
+        <input id="hdnBPCode" type="hidden" value="@Model.BpCode" />
+        <input id="hdnDiscounts" type="hidden" value="@Model.DiscountIds" />
+        <input id="hdnCustomerRoleIds" type="hidden" value="@Model.CustomerRoleIds" />
+
+        <style>
+            .center-1 {
+                margin-bottom: 0px !important;
+            }
+
+            #productGrid {
+                position: relative;
+            }
+
+            .side-2 .block-category-navigation {
+                display: block !important;
+                background-color: #ffff;
+            }
+
+            #loader-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 9999;
+                background-color: rgba(255, 255, 255, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .loader {
+                border: 6px solid #f3f3f3;
+                border-top: 6px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+            }
+
+            #loader-overlay .noPagination {
+                height: 100%;
+                width: 100%;
+            }
+
+            li.active > .fil_inner_collapse-exclisive .category-link {
+                color: #88a900 !important;
+                font-weight: 500;
+            }
+
+            .listbox-exclusive {
+                width: 100%;
+            }
+
+            .list-exclisive, .sublist-exclusive {
+                margin: 0;
+                padding: 0;
+                list-style: none;
+            }
+
+            .filter_title-exclisive {
+                min-height: 50px;
+                padding: 0 18px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 1px solid #ddd;
+            }
+
+                .filter_title-exclisive h5 {
+                    font-size: 15px;
+                    font-weight: 500;
+                    color: #333;
+                }
+
+            .fil_inner_collapse-exclisive {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            .list-exclisive > li {
+                border-bottom: 1px solid #ddd;
+                padding: 1px;
+            }
+
+            .sublist-exclusive > li {
+                border-bottom: none;
+            }
+
+
+            .fil_radio-exclusive {
+                flex: 1;
+                padding: 11px;
+            }
+
+            .category-link {
+                display: block;
+                width: 100%;
+                color: #444 !important;
+                text-decoration: none;
+                font-size: 14px;
+                line-height: 20px;
+                font-weight: 400;
+                line-height: 20px;
+            }
+
+                .category-link:hover {
+                    color: #88a900 !important;
+                }
+
+            .sublist-exclusive {
+                padding-left: 18px;
+            }
+
+                .sublist-exclusive .category-link {
+                    font-size: 14px;
+                }
+
+            span.openFilterInnerItem {
+                height: 20px;
+                width: 20px;
+                background-color: #f3f3f3;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all .3s ease-in-out;
+                cursor: pointer;
+            }
+
+            .openFilterInnerItem img,
+            .openFilterItem img {
+                transition: all .3s ease-in-out;
+            }
+
+            /* Child expanded */
+            .openFilterInnerItem.open {
+                background-color: #a3da40;
+            }
+
+            /* Parent expanded */
+            .openFilterItem.active .fil_plus {
+                display: none;
+            }
+
+            .openFilterItem.active .fil_minus {
+                display: block;
+            }
+
+            .fil_minus {
+                display: none;
+            }
+
+            .category-link.active-category {
+                color: #88a900 !important;
+                font-weight: 500;
+            }
+
+            li.active > .fil_inner_collapse-exclisive .category-link {
+                color: #88a900;
+            }
+
+            .list-exclisive li {
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+                .list-exclisive li .fil_inner_collapse-exclisive {
+                    width: 100%;
+                }
+
+            .block .list-exclisive a {
+                font-size: 15px !important;
+            }
+
+            .center-2-exclusive-row {
+                display: flex;
+                flex-direction: row-reverse;
+                flex-wrap: wrap;
+            }
+
+            .side-2.side-exclusive-2 {
+                width: 19%;
+            }
+
+            .center-2.four-per-row.center-exclusive-2 {
+                width: 81%;
+            }
+
+            .block .listbox-exclusive {
+                padding-inline: 0;
+            }
+
+                .block .listbox-exclusive .fil_inner_collapse-exclisive {
+                    padding-inline: 10px 20px;
+                }
+
+            @@keyframes spin {
+                0% {
+                    transform: rotate(0deg);
+                }
+
+                100% {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @@media(max-width:1260px) {
+                .center-2-exclusive-row {
+                    flex-direction: column-reverse;
+                }
+
+                .side-2 .block-category-navigation {
+                    width: 100%;
+                }
+
+                .side-2.side-exclusive-2,
+                .center-2.four-per-row.center-exclusive-2 {
+                    width: 100%;
+                }
+            }
+        </style>
+
+        <div class="page category-page category-page-body">
+            <div class="page-title">
+                <h1>
+                    @(string.IsNullOrEmpty(ViewBag.PageTitle) ? "Exclusive Discounted Products" : @Html.Raw(ViewBag.PageTitle))
+                </h1>
+            </div>
+            <div class="page-body">
+                <div class="product-selectors-exclusive">
+                    <div class="product-page-sizes">
+                        <span>@T("Catalog.PageSize")</span>
+                        <select aria-label="Select number of products per page" id="products-pagesize" name="products-pagesize" class="productsPageSizeDropDown">
+                            @foreach (var pageSize in pageSizes)
+                            {
+                                <option value="@pageSize" selected="@(Model?.CatalogProducts?.PageSize == pageSize ? "selected" : null)">
+                                    @pageSize
+                                </option>
+                            }
+                        </select>
+                        <span>@T("Catalog.PageSize.PerPage")</span>
+                    </div>
+                    <script asp-location="Footer">
+                        $(document).ready(function () {
+                            var $pageSizeEl = $('#products-pagesize');
+                            $pageSizeEl.on('change', function (e) {
+                                e.preventDefault();
+
+                                var pageSize = $pageSizeEl.val();
+                                const categoryId = Number($('#hdnCategoryIds').val()) || null;
+
+                                // Load Products into grid from partial view
+                                loadProducts(categoryId, 1, pageSize);
+                            });
+                        });
+                    </script>
+                </div>
+                <div class="products-container">
+                    <div id="productGrid">
+                        @await Html.PartialAsync("_DiscountAndSpecialProducts", Model?.CatalogProducts)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+
+                // Products open
+                $('[data-id="productsFilter"]').show();
+                $('.openFilterItem').addClass('active');
+
+                // Collapse everything first
+                $('.sublist-exclusive').hide();
+                $('.openFilterInnerItem').removeClass('open');
+
+                // Open ONLY level-1 categories
+                $('.list-exclisive > li').each(function () {
+
+                    $(this)
+                        .children('.sublist-exclusive')
+                        .show();
+
+                    $(this)
+                        .children('.fil_inner_collapse-exclisive')
+                        .find('.openFilterInnerItem')
+                        .addClass('open');
+                });
+
+                $(document).on("click", ".openFilterItem", function () {
+
+                    var target = $(this).data("toopen");
+
+                    $('[data-id="' + target + '"]').slideToggle();
+
+                    $(this).toggleClass("open");
+                });
+
+                $(document).on("click", ".openFilterInnerItem", function (e) {
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    var target = $(this).data("toopen");
+                    var $subList = $('[data-id="' + target + '"]');
+
+                    $subList.slideToggle();
+
+                    // Only parent arrows get open class
+                    if ($(this).hasClass("parent-arrow")) {
+                        $(this).toggleClass("open");
+                    }
+                });
+
+                // Handle category click
+                $(document).on("click", ".category-link", function (e) {
+                    e.preventDefault();
+
+                    var current = $(this);
+                    var categoryId = current.data("category-id");
+                    const pageSize = $('#products-pagesize').val() || 15;
+
+                    // Clear all current actives
+                    $(".category-link").removeClass("active-category");
+                    $(".list-exclisive li").removeClass("active").addClass("inactive");
+
+                    // Mark the clicked item and all its parents as active
+                    current.addClass("active-category");
+                    current.closest("li").removeClass("inactive").addClass("active");
+                    current.parents("li").removeClass("inactive").addClass("active");
+                    $('#hdnCategoryIds').val(categoryId);
+
+                    // Load Products into grid from partial view
+                    loadProducts(categoryId, 1, pageSize);
+                });
+
+                $(document).on('click', '.pager a[data-page]', function (e) {
+                    e.preventDefault();
+
+                    const pageNumber = $(this).data('page');
+                    const pageSize = $('#products-pagesize').val() || 15;
+                    const categoryId = $(".category-link.active-category").data("category-id");
+                    const type = $("#promotionType").val();
+                    const bpCode = $("#hdnBPCode").val() || null;
+                    const discountIds = $("#hdnDiscounts").val() || null;
+                    const roleIds = $("#hdnCustomerRoleIds").val() || null;
+
+                    // Add Loader
+                    $('#loader-overlay').show();
+
+                    $.ajax({
+                        url: '@Url.Action("GetProductsByCategory", "Product")',
+                        type: 'GET',
+                        data: { type, categoryId, bpCode, discountIds, roleIds, pageNumber, pageSize },
+                        success: function (html) {
+                            $('#productGrid').html(html);
+
+                            const $pager = $('#productGrid').find('.pager');
+
+                            // Remove any existing "current" classes
+                            $pager.find('li').removeClass('current');
+
+                            // Add "current" to the clicked page
+                            $pager.find('a[data-page="' + pageNumber + '"]').closest('li').addClass('current');
+
+                            // Rebind events / lazyload etc.
+                            refreshDynamicProducts();
+                        },
+                        error: function () {
+                            $("#productGrid").html("<p>Something went wrong.</p>");
+                        },
+                        complete: function () {
+                            $('#loader-overlay').hide();
+                        }
+                    });
+                });
+            });
+
+            function loadProducts(categoryId, pageNumber = 1, pageSize = 15) {
+
+                const type = $("#promotionType").val() || 'discount';
+                const bpCode = $("#hdnBPCode").val() || null;
+                const discountIds = $("#hdnDiscounts").val() || null;
+                const roleIds = $("#hdnCustomerRoleIds").val() || null;
+
+                $('#loader-overlay').show();
+
+                $.ajax({
+                    url: '@Url.Action("GetProductsByCategory", "Product")',
+                    type: 'GET',
+                    data: { type, categoryId, bpCode, discountIds, roleIds, pageNumber, pageSize },
+                    success: function (result) {
+                        if (result.success === 0) {
+                            $('#productGrid').html("<p>No products found for this category.</p>");
+                        } else {
+                            $('#productGrid').html(result);
+
+                            const $pager = $('#productGrid').find('.pager');
+
+                            // Add or remove nopagination class based on pager existence
+                            if ($pager.length === 0) {
+                                $('#loader-overlay').addClass('noPagination');
+                            } else {
+                                $('#loader-overlay').removeClass('noPagination');
+                            }
+
+                            // refresh lazy load and events
+                            refreshDynamicProducts();
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        $("#productGrid").html("<p>No products found for this category.</p>");
+                        console.error("Error:", error);
+                    },
+                    complete: function () {
+                        $('#loader-overlay').hide();
+                    }
+                });
+            }
+
+            function refreshDynamicProducts() {
+                try {
+                    $(document).trigger("newProductsAddedToPageEvent");
+
+                    // Reload lazy images safely
+                    if (typeof sevenSpikesCore !== "undefined" &&
+                        typeof sevenSpikesCore.loadImagesOnScroll === "function") {
+                        sevenSpikesCore.loadImagesOnScroll();
+                    } else {
+                        $(window).trigger('scroll.lazyLoadImages');
+                    }
+                } catch (err) {
+                    console.warn("Refresh failed:", err);
+                }
+            }
+        </script>
+    </div>
+
+    @***** Sidebar — Category Navigation ******@
+    @if (Model.CategoryNavigation?.Categories?.Count > 0)
+    {
+        <div class="side-2 side-exclusive-2">
+            <div class="block block-category-navigation">
+
+                <div class="title">
+                    <strong>FILTERS (@Model.CategoryNavigation.Categories.Count RESULTS)</strong>
+                </div>
+
+                <!-- Main Products Header -->
+                <div class="filter_title-exclisive">
+                    <h5>Products</h5>
+                    <span class="openFilterItem active"
+                          data-toopen="productsFilter">
+
+                        <img class="fil_plus"
+                             src="/images/fil_plus.svg" />
+
+                        <img class="fil_minus"
+                             src="/images/fil_minus.svg" />
+
+                    </span>
+                </div>
+
+                <div class="listbox-exclusive"
+                     data-id="productsFilter">
+                    <ul class="list-exclisive">
+                        @foreach (var category in Model.CategoryNavigation.Categories)
+                        {
+                            await RenderCategoryLine(category, Model.CategoryNavigation.CurrentCategoryId, true);
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@functions {
+
+    async Task RenderCategoryLine(CategorySimpleModel category, int currentCategoryId, bool isRoot = false)
+    {
+        bool hasChildren = category.SubCategories?.Any() == true;
+
+        <li class="inactive">
+
+            <div class="fil_inner_collapse-exclisive">
+
+                <div class="fil_radio-exclusive">
+
+                    <a href="javascript:void(0);"
+                       class="category-link"
+                       data-category-id="@category.Id">
+
+                        @category.Name
+
+                    </a>
+
+                </div>
+
+                @if (hasChildren)
+                {
+                    <span data-toopen="cat_@category.Id"
+                          class="openFilterInnerItem @(isRoot ? "parent-arrow" : "")">
+
+                        <img class="fil_plus"
+                             src="/images/fil_arw.svg" />
+
+                    </span>
+                }
+
+            </div>
+
+            @if (hasChildren)
+            {
+                <ul class="sublist-exclusive"
+                    data-id="cat_@category.Id"
+                    style="display:none">
+
+                    @foreach (var sub in category.SubCategories)
+                    {
+                        await RenderCategoryLine(sub, currentCategoryId, false);
+                    }
+
+                </ul>
+            }
+
+        </li>
+    }
+}

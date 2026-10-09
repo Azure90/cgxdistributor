@@ -1,0 +1,50 @@
+﻿<div class="ct-Popup_outer">
+    <div class="ct-Popup_inner">
+        <div class="ct-Popup_header">
+            <img src="https://citagenix.com//icons/HM-CGx-logos 1.png" alt="" />
+            <p class="ct-Popup_headerContent">Welcome to Citagenix! Thank you for visiting our website. As some of our products are market specific, please select your region to have an exclusive access to new arrivals and best-in-class solutions.</p>
+        </div>
+        <div class="ct-Popup_content">
+
+            <div class="ct-Popup_contentRow">
+                @if (ViewBag.ISlogin != true)
+                {
+                    <div class="ct-Popup_contentColumn">
+                        <div class="ct-Popup_columnInner active">
+                            <a class="ct-Link" href="https://hansamed.net/about-citagenix">test</a> <span class="ct-Popup_columnImg"><img src="https://citagenix.com//icons/canada.png" alt="" /></span>
+                            <h2 class="columnTitle">canada</h2>
+                            <p>Select from a complete family of best-in-class Citagenix solutions such as bone grafts, membranes and instruments available in Canada.</p>
+                        </div>
+                    </div>
+                }
+                <div class="ct-Popup_contentColumn">
+                    <div class="ct-Popup_columnInner ">
+                        <a class="ct-Link" href="/productgroup/Filterrefistercustomer/usd"></a> <span class="ct-Popup_columnImg"><img src="https://citagenix.com//icons/usa.png" alt="" /></span>
+                        <h2 class="columnTitle">usa</h2>
+                        <p>Select from a complete family of best-in-class Citagenix solutions such as bone grafts, membranes and instruments available in the United States.</p>
+                    </div>
+                </div>
+                <div class="ct-Popup_contentColumn">
+                    <div class="ct-Popup_columnInner">
+                        <a class="ct-Link" href="/productgroup/Filterrefistercustomer/intl"> </a><span class="ct-Popup_columnImg"><img src="https://citagenix.com//icons/international.png" alt="" /></span>
+                        <h2 class="columnTitle">International</h2>
+                        <p>As a distribution partner, you gain access to a uniquely comprehensive line of premier Citagenix solutions that will delight your customers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@* <script>
+    // <![CDATA[
+    $('.ct-Popup_contentColumn .ct-Popup_columnInner').hover(
+        function () {
+            $(".active").removeClass("active")
+
+        },
+
+    );
+    $('body').css("overflow", "hidden");
+    // ]]></script> *@

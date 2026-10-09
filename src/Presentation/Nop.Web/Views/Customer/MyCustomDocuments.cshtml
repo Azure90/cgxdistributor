@@ -1,0 +1,257 @@
+﻿@using Nop.Web.Models.KnowledgeBaseArticle
+
+@model CustomDocumentsModel
+
+@{
+    Layout = "_ColumnsTwo";
+
+    //title
+    NopHtml.AddTitleParts(T("PageTitle.Account").Text);
+
+    //page class
+    NopHtml.AppendPageCssClassParts("html-account-page");
+}
+
+@section left
+{
+    @await Component.InvokeAsync(typeof(CustomerNavigationViewComponent), new { selectedTabId = CustomerNavigationEnum.MyDocuments })
+}
+
+
+<div class="page account-page document-list-page">
+
+    <style>
+        .border_card_mydocuments {
+            border-radius: 6px;
+            border-top: 4px solid #a3da40;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, .15);
+            margin-bottom: 20px;
+        }
+
+            .border_card_mydocuments .card-header {
+                padding: 18px;
+                border-bottom: 1px solid #ddd;
+                margin-bottom: 10px;
+            }
+
+            .border_card_mydocuments .card-body {
+                padding-inline: 20px;
+                padding-bottom: 20px
+            }
+
+            .border_card_mydocuments .card-title {
+                font-size: 16px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .border_card_mydocuments .card-title img {
+                    width: 20px;
+                    height: auto;
+                }
+
+        .card-title .download_alldoc_btn {
+            border: 0;
+            background-color: #005b56;
+            color: #fff;
+            padding: 0 7px 3px;
+            border-radius: 25px;
+        }
+
+            .card-title .download_alldoc_btn img {
+                width: 15px !important;
+                position: relative;
+                top: 2px;
+                filter: invert(1);
+                margin-left: 3px;
+            }
+
+        .document-list-page .product_info_section {
+            padding-block: 0px;
+        }
+    </style>
+
+    <div class="page-title">
+        <h1>@T("Account.MyAccount") - @T("Account.MyDocuments")</h1>
+    </div>
+
+    <div class="page-body">
+
+        @foreach (var mainCategory in Model.MainCategories.Where(x => x.Items.Any()))
+        {
+            var downloadAllClass = string.Empty;
+            var productRowClass = string.Empty;
+            var headerIcon = "/images/documentsIcon.svg";
+
+            var firstItem = mainCategory.Items.First();
+            var totalItems = mainCategory.Items.Count;
+            var isDocument = mainCategory.Items.Any(x =>
+            x.SubCategory.Equals("Pdf", StringComparison.OrdinalIgnoreCase));
+
+            if (firstItem.SubCategory.Equals("Image", StringComparison.OrdinalIgnoreCase))
+            {
+                headerIcon = "/images/images.svg";
+                downloadAllClass = "downloadAllDocImagesBtn";
+                productRowClass = "product_info_row";
+            }
+            else if (firstItem.SubCategory.Equals("Video", StringComparison.OrdinalIgnoreCase))
+            {
+                headerIcon = "/images/videoicon.svg";
+                downloadAllClass = "downloadAllSocialVideosBtn";
+                productRowClass = "product_info_row";
+            }
+
+            <section class="product_info_section">
+
+                <div class="border_card_mydocuments">
+
+                    <div class="card-header with-border">
+                        <h3 class="card-title">
+                            <img src="@headerIcon" />
+                            @mainCategory.MainCategory
+
+                            @if (!isDocument)
+                            {
+                                <button class="download_alldoc_btn @downloadAllClass"
+                                        title="Download All"
+                                        data-category="@mainCategory.MainCategory"
+                                        data-target="@mainCategory.MainCategoryClass">
+                                    Download All @totalItems
+                                    <img src="/images/download.svg" />
+                                </button>
+                            }
+                        </h3>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="@productRowClass @mainCategory.MainCategoryClass">
+
+                            @foreach (var item in mainCategory.Items)
+                            {
+                                <div>
+
+                                    @switch (item.SubCategory.ToLowerInvariant())
+                                    {
+                                        case "pdf":
+                                            {
+                                                <iframe src="@item.DownloadLink"
+                                                        width="100%"
+                                                        height="500"
+                                                        frameborder="0"
+                                                        seamless="seamless" 
+                                                        scrolling="no"
+                                                        allowtransparency="true" 
+                                                        allowfullscreen="">
+                                                </iframe>
+
+                                                break;
+                                            }
+
+                                        case "image":
+                                            {
+                                                <img src="@item.Picture.ImageUrl"
+                                                     alt="@item.Picture.AlternateText" />
+
+                                                break;
+                                            }
+
+                                        case "video":
+                                            {
+                                                @if (!string.IsNullOrWhiteSpace(item.VideoLink))
+                                                {
+                                                    <iframe src="@item.VideoLink"
+                                                            width="640"
+                                                            height="360"
+                                                            frameborder="0"
+                                                            allow="autoplay; fullscreen; picture-in-picture"
+                                                            allowfullscreen>
+                                                    </iframe>
+                                                }
+
+                                                break;
+                                            }
+                                    }
+
+                                    <div class="title__bar">
+                                        <h3>@item.FileName</h3>
+
+                                        @if (item.SubCategory.Equals("Image", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            <button class="downloadDocImages"
+                                                    data-url="@item.DownloadLink">
+                                                <img src="/images/download.svg" />
+                                            </button>
+                                        }
+                                        else if (item.SubCategory.Equals("Video", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            @if (!string.IsNullOrWhiteSpace(item.DownloadLink))
+                                            {
+                                                <button class="go-to-video-url"
+                                                        data-url="@item.DownloadLink">
+                                                    <img src="/images/download.svg"
+                                                         alt="Download" />
+                                                </button>
+                                            }
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </section>
+        }
+    </div>
+
+    <script>
+        $(document).on("click", ".go-to-video-url", function () {
+            var url = $(this).data("url");
+
+            if (!url || !url.toLowerCase().includes(".mp4"))
+                return;
+
+            window.location.href = "/download-image?url=" + encodeURIComponent(url);
+        });
+
+        $(document).on("click", ".downloadDocImages, .downloadDoc", function () {
+            var imageUrl = $(this).data("url");
+
+            if (!imageUrl)
+                return;
+
+            window.location.href = "/download-image?url=" + encodeURIComponent(imageUrl);
+        });
+
+        // download all social media videos
+        $('.downloadAllSocialVideosBtn').on('click', function () {
+            var target = $(this).data('target');
+
+            $('.' + target).find('.go-to-video-url').each(function () {
+
+                var url = $(this).data('url');
+
+                if (url) {
+                    window.open(url, '_blank');
+                }
+            });
+        });
+
+        // download all images
+        $('.downloadAllDocImagesBtn').on('click', function () {
+            var imageUrls = [];
+            var target = $(this).data('target');
+
+            $('.' + target + ' img').each(function () {
+                var src = $(this).attr('src');
+                if (src && src.includes('https://hansamed.blob.core.windows.net')) {
+                    imageUrls.push(src);
+                    const encodedUrl = encodeURIComponent(imageUrls);
+
+                    // Redirect to server-side proxy endpoint
+                    window.location.href = `/download-image?url=${encodedUrl}`;
+                }
+            });
+        });
+    </script>
+</div>

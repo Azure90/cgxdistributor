@@ -1,0 +1,786 @@
+.link-rss,
+.cart .remove-from-cart button:hover,
+.footable.breakpoint .footable-toggle,
+.ajax-loading-block-window:before,
+.eu-cookie-bar-notification button,
+.header-logo a img,
+.mini-shopping-cart .checkout-button,
+.mini-shopping-cart button:only-child,
+.store-search-box .search-box-button,
+.newsletter-email .newsletter-subscribe-button,
+.footer-block .title:after,
+.footer-block.quick-contact span:before,
+.poll .buttons button,
+.filters .ui-slider-range,
+.filters .ui-slider-handle,
+.contact-vendor-button,
+.item-box .rating div,
+.item-box .buttons-upper button:hover,
+.item-box .buttons-lower button span:before,
+.item-box .buttons-lower button span:after,
+.swiper-pagination-bullet-active,
+.pager li > span,
+.product-review-box .rating div,
+.download-sample-button:hover,
+.back-in-stock-subscription .subscribe-button:hover,
+.overview .add-to-cart-button,
+.variant-overview .add-to-cart-button,
+.overview .add-to-wishlist-button:hover,
+.variant-overview .add-to-wishlist-button:hover,
+.overview .add-to-compare-list-button:hover,
+.overview .email-a-friend-button:hover,
+.back-in-stock-subscription-page .button-1,
+.ui-tabs .ui-tabs-nav li a:after,
+.mfp-container .apply-shipping-button,
+.write-review .button-1,
+.update-wishlist-button,
+.wishlist-add-to-cart-button,
+.compare-products-page .remove-button:hover,
+.enter-password-form button,
+.contact-page .button-1,
+.email-a-friend-page .button-1,
+.apply-vendor-page .button-1,
+#check-availability-button:hover,
+.registration-page .button-1,
+.registration-result-page .button-1,
+.login-page .button-1,
+.password-recovery-page .button-1,
+.account-page .button-1,
+.return-request-page .button-1,
+.user-agreement-page .button-1,
+.login-page .customer-blocks .title.active,
+.block-account-navigation .list a:hover,
+.block-account-navigation .list .active a,
+.account-page ul.info + .buttons button:hover,
+.downloadable-products-page .download a:hover,
+.order-progress li.active-step a,
+.shopping-cart-page .button-1,
+.checkout-page .button-1,
+.common-buttons .update-cart-button,
+.common-buttons .continue-shopping-button,
+.cart-collaterals .accordion-tab-title:after,
+.cart-collaterals .estimate-shipping-button,
+.cart-collaterals .coupon-code button,
+.order-details-page .page-title a,
+.order-details-page .actions .re-order-button,
+.order-details-page .actions .return-items-button,
+.opc .back-link a:hover,
+.basic-search .inputs.reversed label:after,
+.search-input .button-1,
+.new-comment .button-1,
+.news-list-homepage .view-all a,
+.forum-search-box .search-box-button,
+.forums-table-section .view-all a,
+.forum-actions .actions a:hover,
+.topic-actions .actions a:hover,
+.topic-post .pm-button:hover,
+.profile-info-box .pm-button:hover,
+.topic-post .post-actions .quote-post-button,
+.topic-post .post-vote > span,
+.forum-edit-page .button-1,
+.move-topic-page .button-1,
+.private-messages .button-1,
+/*plugins*/ .nopAjaxCartPanelAjaxBusy:before,
+.miniProductDetailsPanelAjaxBusy:before,
+.productAddedToCartWindowSummary .button-1,
+.selected-options-list > li span:after,
+.ui-slider-range,
+.ui-slider-handle,
+.productPanelAjaxBusy:before,
+.infinite-scroll-loader:before,
+.nivo-directionNav a:hover,
+.nivo-controlNav a:hover,
+.nivo-controlNav a.active,
+.anywhere-slider:before,
+.anywhere-slider .slick-arrow:hover,
+.anywhere-slider .slick-active button,
+.spc-header li span:after,
+.spc-body .loading-overlay:before,
+.previous-product a:hover,
+.next-product a:hover,
+.quick-view-button a:hover,
+.quickView .k-loading-image:before,
+.quickView .ui-accordion-header-active span,
+.ropc .section .title:after,
+.ropc .estimate-shipping button,
+.ropc .coupon-box-panel .coupon-code button,
+.ropc .giftcard-box-panel .coupon-code button,
+.ropc .complete-button button,
+.rich-blog-homepage .slick-prev:hover,
+.rich-blog-homepage .slick-next:hover,
+.post-navigation a:hover,
+.theme-roller .open-button:hover,
+.k-edit-buttons.k-state-default button.k-dialog-insert.k-button,
+button.ticket-info-button.k-button:before,
+.ticket-buttons .tb-right .k-button.show-reply-button:before,
+.ticket-buttons .tb-right .k-button.mark-resolved-button:before,
+.ticket-buttons .tb-right .k-button.notes-button:before,
+.ticket-buttons .tb-right .k-button.edit-ticket-button:before,
+.ticket-buttons .tb-right .k-button.delete-ticket-button:before,
+#submit-reply .buttons .k-button,
+.my-tickets-page .clear-filters,
+.manage-tickets-page .clear-filters,
+.k-pager-numbers span.k-state-selected,
+.k-widget.confirmation-wrapper button,
+.filter-shops-button,
+.shop-page .back-to-all-shops a:hover:before,
+.shop-map-images .get-directions-to-shop:hover:after,
+.cloudzoom-ajax-loader:before,
+.gallery .slick-dots .slick-active button,
+.overview .submit-ticket-button:hover,
+.sale-of-the-day-offer .slick-prev:hover,
+.sale-of-the-day-offer .slick-next:hover,
+.sale-of-the-day-offer li.slick-active button,
+.sale-of-the-day-offer .go-to-product-page,
+.home-page-filter-button .search-button,
+.jCarouselMainWrapper .slick-prev:hover,
+.jCarouselMainWrapper .slick-next:hover,
+.nop-jcarousel .slick-dots .slick-active button,
+.nop-jcarousel .slick-dots button:hover,
+.price-match-button:hover,
+.save-price-match-button {
+  background-color: #2e8bc9;
+}
+.cart .edit-item a,
+.ui-dialog-titlebar,
+.mini-shopping-cart .cart-button,
+.footer-block a:hover,
+.footer-powered-by a,
+.footer-designed-by a,
+.block .list a:hover,
+.block .view-all a:hover,
+.block .tags li a:hover,
+.product-tags-all-page li a:hover,
+.filters :checked + label,
+.breadcrumb strong,
+.category-item:hover .title a,
+.sub-category-item:hover .title a,
+.manufacturer-item:hover .title a,
+.sub-category-details .inner-title,
+.manufacturer-details .inner-title,
+.sub-category-details li a:hover,
+.vendor-list li a:hover,
+.overview .value a,
+.variant-overview .value a,
+.tier-prices .item-price,
+.product-tags-list a:hover,
+.product-reviews-page h1 a:hover,
+.product-review-helpfulness .vote:hover,
+.update-wishlist-button:hover,
+.wishlist-page .share-info a,
+.enter-password-title,
+.accept-privacy-policy .read,
+.login-page .forgot-password a:hover,
+.login-page .checkout-as-guest-button:hover,
+.account-page .form-fields a,
+.return-request-list-page a:hover,
+.avatar-page .remove-avatar-button:hover,
+.common-buttons button:hover,
+.terms-of-service a,
+.checkout-page .min-amount-warning,
+.order-completed .details a,
+.order-details-page .page-title a:hover,
+.order-details-page .download a,
+.order-details-page .view-details a,
+.order-details-page .actions button:hover,
+.sitemap-page a:hover,
+.post-body a,
+.news-body a,
+.blog-page .tags a,
+.blogpost-page .tags a,
+.blog-posts .read-more:hover,
+.blog-posts .read-comments:hover,
+.news-items .read-more,
+.forum-search-page .search-error,
+.forums-table-section .forum-title a:hover,
+.forums-table-section .topic-title a:hover,
+.topic-post .post-actions .post-link-button,
+.forum-edit-page .button-2:hover,
+.move-topic-page .button-2:hover,
+.private-messages .button-2:hover,
+.private-messages-page .pm-unread,
+.profile-page .topic-title a:hover,
+.vendorinfo-page .remove-picture-button:hover,
+/*plugins*/ .productAddedToCartWindowSummary a:hover,
+.filtersGroupPanel li.checked .filter-item-name,
+.spc-categories .category-inner-title,
+.spc-categories .category-sublist li a:hover,
+.instant-search-item .detail .price,
+.quickView .links-panel a:hover,
+.ropc .cart .remove-product:hover,
+.rich-blog-homepage .read-comments,
+.blog-instant-search .k-item.rich-blog-autocomplete-last-item,
+.blog-page .read-comments,
+.category-list li a,
+.related-posts-list li a,
+.search-term-highlighter,
+.order-details-page .product .submit-ticket-button,
+.getUserGeoLocation:hover,
+.align-map-button:hover,
+.shops-item .show-directions:hover,
+.shop-page .back-to-all-shops a:hover,
+.shop-map-images .get-directions-to-shop:hover,
+.shop-info a,
+.nop-jcarousel .category-item:hover .title a,
+.nop-jcarousel .sub-category-item:hover .title a,
+.nop-jcarousel .manufacturer-item:hover .title a,
+.nop-jcarousel .vendor-item:hover .title a,
+.price-match-form .title strong,
+.price-match-requests-page .details a:hover {
+  color: #2e8bc9;
+}
+.mini-shopping-cart .checkout-button:hover,
+.mini-shopping-cart button:only-child:hover,
+.poll .buttons button:hover,
+.contact-vendor-button:hover,
+.overview .add-to-cart-button:hover,
+.variant-overview .add-to-cart-button:hover,
+.back-in-stock-subscription-page .button-1:hover,
+.mfp-container .apply-shipping-button:hover,
+.write-review .button-1:hover,
+.wishlist-add-to-cart-button:hover,
+.enter-password-form button:hover,
+.contact-page .button-1:hover,
+.email-a-friend-page .button-1:hover,
+.apply-vendor-page .button-1:hover,
+.registration-page .button-1:hover,
+.registration-result-page .button-1:hover,
+.login-page .button-1:hover,
+.password-recovery-page .button-1:hover,
+.account-page .button-1:hover,
+.return-request-page .button-1:hover,
+.user-agreement-page .button-1:hover,
+.shopping-cart-page .button-1:hover,
+.checkout-page .button-1:hover,
+.cart-collaterals .estimate-shipping-button:hover,
+.cart-collaterals .coupon-code button:hover,
+.search-input .button-1:hover,
+.new-comment .button-1:hover,
+.news-list-homepage .view-all a:hover,
+.forums-table-section .view-all a:hover,
+.topic-post .post-actions .quote-post-button:hover,
+.forum-edit-page .button-1:hover,
+.move-topic-page .button-1:hover,
+.private-messages .button-1:hover,
+/*plugins*/ .productAddedToCartWindowSummary .button-1:hover,
+.ropc .estimate-shipping button:hover,
+.ropc .complete-button button:hover,
+.page-body form > .buttons .k-button:hover,
+#submit-reply .buttons .k-button:hover,
+.my-tickets-page .clear-filters:hover,
+.manage-tickets-page .clear-filters:hover,
+.filter-shops-button:hover,
+.sale-of-the-day-offer .go-to-product-page:hover,
+.home-page-filter-button .search-button:hover,
+.save-price-match-button:hover {
+  outline-color: #2e8bc9;
+}
+.cart-collaterals .active .accordion-tab-title,
+/*plugins*/ .quickView .ui-accordion-header-active,
+.ropc .section .title.active {
+  border-bottom-color: #2e8bc9;
+}
+.order-progress li.active-step a:after {
+  border-left-color: #2e8bc9;
+}
+/* secondary color */
+
+.footer-upper,
+.ui-datepicker-header,
+.ui-datepicker-calendar .ui-state-active {
+  background-color: #666666;
+}
+.cart .subtotal,
+.mini-shopping-cart .price strong,
+.mini-shopping-cart .totals strong,
+.item-box .actual-price,
+.overview .product-price,
+.variant-overview .product-price,
+.compare-products-table .product-price td,
+.cart-total .order-total,
+/*plugins*/ .productAddedToCartWindowDescription .price,
+.sale-of-the-day-offer .timer-info-box,
+.sale-of-the-day-offer .price.actual-price {
+  color: #666666;
+}
+.ui-datepicker-calendar .ui-state-active {
+  outline-color: #666666;
+}
+@media all and (max-width: 1024px) {
+  .responsive-nav-wrapper > div,
+  .plus-button {
+    background-color: #2e8bc9;
+  }
+  .shopping-cart-link .cart-qty-mobile,
+  .category-page-body .page-title h1,
+  .manufacturer-page-body .page-title h1,
+  .manufacturer-all-page-body .page-title h1,
+  .vendor-all-page-body .page-title h1,
+  .vendor-page-body .page-title h1,
+  .product-tags-all-page-body .page-title h1,
+  .products-by-tag-page-body .page-title h1,
+  .recently-viewed-products-page-body .page-title h1,
+  .recently-added-products-page-body .page-title h1,
+  .compare-products-page-body .page-title h1,
+  /*plugins*/ .spc-categories .category-title {
+    color: #2e8bc9;
+  }
+  /* secondary color */
+  
+  .admin-header-links,
+  .store-search-box {
+    background-color: #666666;
+  }
+  .responsive-nav-wrapper-parent {
+    border-top-color: #666666;
+  }
+}
+@media all and (min-width: 481px) {
+  /*plugins*/
+  
+  .spc-categories .product-box-add-to-cart-button:hover {
+    background-color: #2e8bc9;
+  }
+}
+@media all and (min-width: 769px) {
+  .bestsellers .slick-prev:hover,
+  .bestsellers .slick-next:hover,
+  .product-selectors .product-viewmode a.selected,
+  .product-list .item-box .buttons-lower button,
+  .topic-post .post-actions .manage-post a:hover {
+    background-color: #2e8bc9;
+  }
+  .product-list .item-box .buttons-lower button:hover {
+    outline-color: #2e8bc9;
+  }
+  /*plugins*/
+  
+  .ropc .section .title {
+    border-bottom-color: #2e8bc9;
+  }
+}
+@media all and (min-width: 1025px) {
+  .cart-trigger:before,
+  .flyout-cart-wrapper:hover .cart-trigger,
+  .category-navigation-title:after,
+  .product-grid.bestsellers .item-box .buttons-lower button:hover,
+  .product-grid .item-box:hover .buttons-lower button,
+  .product-grid .item-box:hover .buttons-lower button span,
+  /*plugins*/ .spc-categories .spc-header li:hover span,
+  .spc-categories .spc-header li.active span,
+  .spc-categories .product-grid .item-box button.button-2:hover,
+  .rich-blog-body .block:hover .title,
+  .rich-blog-body .blog-search-box.active .search-box-button {
+    background-color: #2e8bc9;
+  }
+  .side-2 .page-title h1,
+  .category-navigation-list > li:hover > a,
+  .category-navigation-list > li:hover > span,
+  .category-navigation-list > li > .sublist-wrap > .sublist > li > .sublist-wrap > .sublist li a:hover,
+  .header-menu > ul > li > .sublist-wrap > .sublist > li > .sublist-wrap > .sublist li a:hover,
+  .breadcrumb a:hover,
+  .compare-products-page .clear-list,
+  /*plugins*/ .category-navigation-list > li > .sublist-wrap > .sublist .box li a:hover,
+  .header-menu > ul > li > .sublist-wrap > .sublist .box li a:hover,
+  .spc-categories .category-info:hover .category-title {
+    color: #2e8bc9;
+  }
+  /*plugins*/
+  
+  .ropc .coupon-box-panel .coupon-code button:hover,
+  .ropc .giftcard-box-panel .coupon-code button:hover {
+    outline-color: #2e8bc9;
+  }
+  .flyout-cart-wrapper:hover .cart-trigger {
+    border-color: #2e8bc9;
+  }
+  .header-links,
+  .header-selectors {
+    border-top-color: #2e8bc9;
+  }
+  .category-navigation-list > li > .sublist-wrap > .sublist > li > a,
+  .header-menu > ul > li > .sublist-wrap > .sublist > li > a,
+  /*plugins*/ .category-navigation-list > li > .sublist-wrap > .sublist .box .title,
+  .header-menu > ul > li > .sublist-wrap > .sublist .box .title {
+    border-bottom-color: #2e8bc9;
+  }
+  /* secondary color */
+  
+  .header-lower {
+    background-color: #666666;
+  }
+}
+social-sharing .pinterest
+{
+display:none;
+}
+
+@media (min-width: 1001px)
+{
+   .footer-block
+   {   
+       width:25% !important;
+    }
+}
+
+.menu-lowercase span
+{
+text-transform: none !important;
+}
+
+@media all and (min-width: 981px) {
+
+.ui-dialog {
+    width: 800px !important;
+}
+.ui-dialog-content {    
+    max-height: 500px;
+    overflow: auto;
+}
+
+}
+.header-lower
+{
+//background-color: #8fcb24 !important;
+background-color:#69bef0 !important;
+}
+
+@media (max-width: 769px) {
+	.header-logo .logo
+       {
+          max-width: 40% !Important;
+        }
+        .header-logo
+        {
+           height: 90px !Important;
+         }
+}
+
+@media (max-width: 969px) {
+	#left_nav_advertising
+       {
+          display: none;
+        }
+}
+
+.Hansamed .sublist
+{
+background-color: #f7f7f7 !important;
+}
+
+ .social-sharing .rss {
+    display: none;
+  }
+
+
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Avenir, Arial, sans-serif;
+    margin: 0%;
+}
+
+div.flip-3d {
+    perspective: 1200px;
+    width: 300px;
+    height: 300px;
+    display: inline-block;
+
+   /* border: solid;
+    border-width: 1px;
+    border-color: lightgray;*/
+}
+
+/*   div.flip-3d textCaption{
+                    font-size:40px;
+                }*/
+
+div.descName {
+    /*padding: 15px;*/
+    text-align: center;
+    font-size: 1.2rem
+}
+
+div.descJob {
+    /*padding: 15px;*/
+    text-align: center;
+    font-size: 1rem
+}
+
+div.flip-3d figure {
+    position: relative;
+    transform-style: preserve-3d;
+    transition: 1s transform;
+    /*font-size: 1.6rem;*/
+}
+
+/* div.flip-3d figure p {
+                opacity: 00;
+            }
+    */
+
+div.flip-3d figure img {
+    width: 300px;
+    height: 300px;
+    padding:10px;
+
+    
+}
+
+    div.flip-3d figure figcaption {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        top: 0;
+        transform: rotateY(.5turn) translateZ(1px);
+        background: rgba(255, 255, 255, 0.9);
+        text-align: center;
+        /*padding-top: 45%;*/
+        opacity: 0.6;
+        transition: 1s .5s opacity;
+    }
+
+div.flip-3d:hover figure {
+transform: rotateY(.5turn);
+}
+
+div.flip-3d:hover figure figcaption {
+    opacity: 1;
+}
+
+div.flip-3d figure:after {
+content: " ";
+display: block;
+/*height: 8vw;*/
+width: 300px;
+transform: rotateX(90deg);
+/*background-image: radial-gradient(ellipse closest-side, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0) 100%);*/
+}
+
+@media screen and (max-width: 800px) {
+    div#flip-3d {
+        perspective-origin: center top;
+    }
+
+    div#flip-3d figure {
+    display: block;
+    width: 50%;
+    margin: 0 auto;
+    margin-bottom: 12vw;
+    }
+
+    div#flip-3d figure:last-child {
+        display: none;
+    }
+}
+
+.center {
+display: block;
+margin-left: auto;
+margin-right: auto;
+width: 90%;
+}
+
+
+.page-title {
+    margin: 0 0 30px;
+    border-bottom: 1px solid #ddd;
+    padding: 0 0 10px;
+    text-transform: uppercase;
+}
+
+.page-title h1 {
+    font-size: 22px;
+    color: #333;
+}
+
+.home-page-product-grid .product-ribbon {
+    position: absolute;
+    left: 50% !important;
+    transform: translateX(-50%);
+}
+.home-page-product-grid .ribbon-position.top-left {
+      width: 100%;
+}
+
+
+
+
+/*new start*/
+
+
+	.ct-Popup_outer {
+        position: fixed;
+        text-align: center;
+        width: 100%;
+        height: 100vh;
+        top: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(234,245, 255,0.9);
+        color:#333333;
+
+    }
+
+    .ct-Popup_inner {
+        background: #fff;
+        padding: 40px 70px 30px;
+        box-shadow: 0 0 10px 0 rgba(170,170,170,.5);
+        max-width: 1350px;
+        width: 90%;
+        height: 71vh;
+        margin-top: 110px;
+        overflow-y: auto;
+    }
+
+ .ct-Popup_header img {
+    /* filter: brightness(.5); */
+    max-width: 240px;
+}
+
+ 
+
+    .ct-Popup_contentRow {
+        display: flex;
+    }
+
+    .ct-Popup_contentColumn {
+		flex-grow: 1;
+		padding: 0 15px;
+		width: 50%;
+	}
+
+    .ct-Popup_columnInner {
+        border: 1px solid #e9e9e9;
+        transition: 0.3s all;
+        line-height: 25px;
+		position:relative;
+		padding: 25px;
+		font-size:16px;
+		background:#ffffff;
+		height:100%;
+		border-radius: 10px;
+     
+    }
+    .ct-Popup_columnInner:hover, .ct-Popup_columnInner.active{ 
+        background-color: #0999d6;       
+        border: 1px solid transparent;
+    }
+
+.ct-Popup_header {
+    margin-bottom: 30px;
+}
+.columnTitle {
+    text-transform: uppercase;
+    font-size: 24px;
+    margin: 30px 0 25px;
+    color: #333;
+}
+.ct-Link{
+    all: unset;
+    text-decoration: none;
+    display: block;
+    padding: 20px;
+    cursor: pointer;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    height: 100%;
+    top: 0;
+    box-sizing: border-box;
+    z-index: 5;
+    font-size: 0;
+}
+	
+    .ct-Popup_footer {
+        padding-top: 30px;
+    }
+
+    .ct-Popup_footer p{
+        margin: 10px 0 0;
+    }
+
+   .ct-Popup_columnImg {
+    display: inline-flex;
+    background: #f5f5f5;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 10px;
+    width: 80px;
+    justify-content: center;
+    height: 80px;
+}
+
+  .ct-Popup_headerContent {
+    margin: 20px auto 0;
+    max-width: 820px;
+    line-height: 27px;
+    font-size: 18px;
+}
+	
+	
+	
+
+.ct-Popup_footer p {
+    margin: 15px 0 0;
+    font-size: 16px;
+	color:#333333;
+}
+
+.ct-Popup_columnInner p + p {
+    margin-top: 15px;
+}
+
+.ct-Popup_footer h3 {
+    font-size: 16px;
+	color:#333333;
+}
+
+
+.ct-Popup_columnInner:hover p, .ct-Popup_columnInner:hover h2, .ct-Popup_columnInner.active p, .ct-Popup_columnInner.active h2{
+	color: #ffffff;
+}
+
+
+
+
+@media(max-width:1024px){
+
+.ct-Popup_inner {
+    height: 80vh;
+    margin-top: 40px;
+        padding: 40px 40px 30px;
+}
+
+}
+
+
+@media(max-width:991px){
+    .ct-Popup_contentColumn {
+        width: 100%;
+        flex: 0 0 100%;
+    }
+
+    .ct-Popup_contentRow {
+        flex-wrap: wrap;
+        gap: 30px;
+    }
+}
+
+
+@media(max-width:767px){
+
+    .ct-Popup_inner {
+        padding: 30px 10px 30px;
+    }
+
+    .ct-Popup_footer {
+        padding: 30px 20px 0;
+    }
+
+}

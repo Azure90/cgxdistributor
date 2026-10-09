@@ -1,0 +1,63 @@
+﻿
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css" />
+
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<div class="border_card" >
+<div class="card-header with-border"  style="margin-bottom: 12px">
+        <h2 class="card-title">Latest Orders</h2>
+</div>
+<div class="card-body">
+<table id="example123" class="display">
+    <thead>
+        <tr>
+            <th>CustomOrderNumber</th>
+            <th>OrderStatus</th>
+            <th>CustomerEmail</th>
+            <th>CreatedOn</th>
+            <th>Action</th>
+            
+        </tr>
+    </thead>
+</table>
+</div>
+</div>
+<script>
+    $('#example123').DataTable({
+        serverSide: true,
+        processing: true,
+        pageLength: 5, // Set fixed page length
+        lengthChange: false, // Disable the page length dropdown
+        searching: false,
+        ajax: {
+            url: '/Customer/Latestorders',
+            type: 'Get',
+            error: function (xhr, error, code) {
+                console.error("Ajax Error:", error);
+                console.error("Response Text:", xhr.responseText);
+            }
+        },
+        columns: [
+            { data: 'CustomOrderNumber' },
+            { data: 'OrderStatus' },
+            { data: 'CustomerEmail' },
+            { data: 'CreatedOn' },
+            {
+                data: 'Id',
+                render: function (data, type, row) {
+                    return `
+                        <td class="button-column">
+                            <a class="btn btn-default" onclick="setLocation('/orderdetails/${data}')">
+                                <i class="far fa-eye"></i> View Order
+                            </a>
+                            <a class="btn btn-default" onclick="setLocation('/reorder/${data}')">
+                                <i class="fas fa-sync-alt"></i> Reorder
+                            </a>
+                        </td>`;
+                }
+            }
+        ]
+    });
+
+</script>

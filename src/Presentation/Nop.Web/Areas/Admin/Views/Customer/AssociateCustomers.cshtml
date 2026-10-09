@@ -1,0 +1,57 @@
+﻿@using static Nop.Web.Areas.Admin.Controllers.CustomerController
+@model List<CustomerInfoModel>
+
+
+<head>
+    <title>Grouped Customer Info</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+        ul.largerlist {
+            max-height: 150px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+    <h2>Associated Customer Info</h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>AdminBPCode</th>
+                <th>ChildBPCode List</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.AdminBPCode</td>
+                    <td>
+                        <ul class="largerlist">
+                            @foreach (var childBPCode in item.ChildBPCodeList)
+                            {
+                                <li>@childBPCode</li>
+                            }
+                        </ul>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</body>
+</html>

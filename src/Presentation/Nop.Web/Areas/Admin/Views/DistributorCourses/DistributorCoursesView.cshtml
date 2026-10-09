@@ -1,0 +1,170 @@
+﻿@using Nop.Web.Models.DistributorPortal;
+@model DistributorPortaladminModel
+@{
+    ViewBag.PageTitle = "Distributor Portal Courses";
+    //active menu item (system name)
+    NopHtml.SetActiveMenuItemSystemName("Distributor Portal Courses");
+}
+<style>
+    tbody td{
+        word-break: break-all;
+    }
+
+    .btn{
+        word-break: keep-all
+    }
+</style>
+<section class="content pt-3">
+    <div class="container-fluid">
+        <div class="card card-default">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="clearfix divfileupload">
+                            <h5> Upload Excel file. </h5>
+                            <label>Please choose a <i style="color:blue;text-decoration:underline;">(.xlsx)</i> File.</label> <br />
+                            <div class="d-flex align-items-center">
+                                <div>
+                                    <input type="file" id="File" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+                                </div>
+                                <div>
+                                    <button type="button" onclick="ImportExcelFile()" class="btn bg-olive">
+                                        <i class="fa fa-upload"></i>
+                                        Upload Excel
+                                    </button>
+                                    <a class="btn btn-primary" href="@Url.Action("DownloadVDBfile", "DistributorCourses")">Download Excel</a>
+                                    <span class="excelMessage" style="display: none; color: red; font-weight: 400;"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>                    
+                    
+                    <div>
+                        <div class="form-group">
+                            <div class="col-md-8 col-md-offset-4">
+                                <span id="showrangemsg"></span>
+                            </div>
+                        </div>                        
+                    </div>
+                    
+                </div>
+            </div>
+          
+            <div class="form-horizontal">
+                <div class="cards-group">
+
+                    <div class="card card-default">
+                        <div class="card-body">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    <table id="SpecialPriceList" class="table table-bordered" style="width:100%">
+                                        <thead>
+                                            <tr>
+                                                <th>MainCategory</th>
+                                                <th>SubCategory</th>
+                                                <th>Sku</th>
+                                                <th>Category</th>
+                                                <th>Name</th>
+                                                <th>Description</th>
+                                                <th>ImageLink</th>
+                                                <th>CustomerRole</th>
+                                                <th>ButtonLink</th>                                                
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                         <tbody>
+
+                                            @foreach (var item in Model.ModelList)
+                                            {
+                                                <tr>
+                                                    <td>@item.MainCategory</td>
+                                                    <td>@item.SubCategory</td>
+                                                    <td>@item.Sku</td>
+                                                    <td>@item.Category</td>
+                                                    <td>@item.Name</td>
+                                                    <td>@item.Description</td>
+                                                    <td>@item.ImageLink</td>
+                                                    <td>@item.CustomerRole</td>
+                                                    <td>@item.ButtonLink</td>
+                                                    <td>
+                                                        <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("editDistributorPortal","DistributorCourses", new { @item.Id })'">Edit</button>
+                                                       
+                                                        <button type="button" class="btn btn-danger" id="dltcontent" onclick="Delete(@item.Id)">Delete</button>
+
+                                                    </td>
+                                                </tr>
+                                            }
+
+                                        </tbody> 
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</section>
+<script>
+    $("#SpecialPriceList").dataTable();
+    function ImportExcelFile() {
+        debugger
+        var status = false;
+        var form = $('#__AjaxAntiForgeryForm');
+        var token = $('input[name="__RequestVerificationToken"]', form).val();
+        var formData = new FormData();
+        var file = $('#File')[0].files[0];
+        console.log(file);
+        status = file != "" && file != null ? true : false;
+
+        formData.append('file', file);
+        // var postData = {
+        //     file: file,
+        //     __RequestVerificationToken:token
+        // };
+        // addAntiForgeryToken(postData);
+        if (status) {
+            $.ajax({
+                url: '/Admin/DistributorCourses/ImportExcelFile',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (result) {
+                    $('.excelMessage').text(result).css('display', 'inline-block').fadeOut(5000);
+                    $('#File').val("");
+                    window.location.reload();
+                }
+            });
+        }
+        else {
+            $('.excelMessage').text("Please choose a file.").css('display', 'inline-block').fadeOut(3000);
+        }
+    }
+    function Delete(id) {
+        if (confirm("Are you sure you want to delete this entry? Any related content will also be lost.Warning: This action cannot be undone.") == true) {
+
+            var postData = {
+                id: id
+            };
+            addAntiForgeryToken(postData);
+            $.ajax({
+                type: 'Post',
+                url: '/Admin/DistributorCourses/Delete',
+                data: postData,
+                success: function (data) {
+                    window.location.reload();
+
+                }
+            })
+            return true;
+        } else {
+
+            return false;
+        }
+
+
+    }
+</script>
+
+

@@ -1,0 +1,127 @@
+﻿@using Nop.Web.Areas.Admin.Models.CustomPage
+@model ProductsWithBPCodeModel
+
+<div asp-validation-summary="All"></div>
+<input asp-for="Id" type="hidden" />
+
+@if (ViewBag.RefreshPage == true)
+{
+    <script type="text/javascript">
+        try {
+            window.opener.document.forms['@(ViewBag.formId)'].@(ViewBag.btnId).click();
+
+        }
+        catch (e) { }
+        window.close();
+    </script>
+}
+
+<div class="container-fluid">
+
+    <style>
+        .card-products-with-bpcode {
+            margin-bottom: 10px;
+            border-top: 3px solid #00c0ef;
+            border-left: 0;
+            border-right: 0;
+            border-bottom: 0;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, .1);
+        }
+    </style>
+
+    <div class="form-horizontal">
+        <div class="card card-outline card-ordersummarytext card-products-with-bpcode" id="custom-ordersummarytext-info">
+            <div class="card-header with-border clearfix">
+                <div class="card-title">
+                    <i class="fas fa-th-list"></i>Product with bpcode info
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="col-form-label" for="Name">Product name</label>
+                            <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The name of the selcted product.">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        @Html.TextBoxFor(model => model.ProductId, new { @class = "form-control text-box single-line", @readonly = "readonly" })
+                        @Html.HiddenFor(x => x.ProductId, new { @Id = "ProductId" })
+                        @Html.HiddenFor(x => x.ProductName, new { @Id = "hdnProductName" })
+                        <div id="productname"></div>
+                    </div>
+                    <div class="col-md-5">
+                        <button class="btn btn-primary" type="submit" id="btnAddProduct" onclick="javascript:OpenWindow('@(Url.Action("ProductAddPopup", "ProductsWithBPCode", new { categoryId = Model.Id, btnId = "btnRefreshProducts", formId = "products-bpcode-form", multiple = false  }))', 800, 800, true); return false;">
+                            <i class="fa fa-plus-square"></i>
+                            Add Product
+                        </button>
+
+                        <button type="button" id="btnRefreshPromoProducts" style="display: none" />
+                        <script type="text/javascript">
+                            $(document).ready(function () {
+                                $('#btnRefreshPromoProducts').click(function () {
+                                    return false;
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-md-3">
+                        <div class="label-wrapper">
+                            <label class="col-form-label" for="customersbpcode">Customers bpCode</label>
+                            <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The customer numbers(Bpcode) to be assigned to product.">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <nop-select asp-for="SelectedCustomerBpCodes" asp-items="Model.AvailableCustomers" asp-multiple="true" />
+                        <script>
+                            $(document).ready(function () {
+                                var categoryIdsInput = $('#@Html.IdFor(model => model.SelectedCustomerBpCodes)').data("kendoMultiSelect");
+                                categoryIdsInput.setOptions({
+                                    autoClose: false,
+                                    filter: "contains"
+                                });
+
+                                @if (Model.AvailableCustomers.Count == 0)
+                                {
+                                    <text>
+                                        categoryIdsInput.setOptions({
+                                                enable: false,
+                                                placeholder: '@T("Admin.Catalog.Products.Fields.Categories.NoCategoriesAvailable")'
+                                            });
+                                        categoryIdsInput._placeholder();
+                                        categoryIdsInput._enable();
+                                    </text>
+                                }
+
+                                function renderNames(hiddenId, targetId) {
+                                    var hidden = document.getElementById(hiddenId);
+                                    var target = document.getElementById(targetId);
+
+                                    if (!hidden || !target) return;
+
+                                    var parts = hidden.value.split('$');
+                                    target.innerHTML = parts.join('<br>');
+                                }
+
+                                renderNames("hdnProductName", "productname");
+                                renderNames("hdnSingleProductName", "singleproductname");
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,0 +1,199 @@
+﻿@using Nop.Core.Domain.Orders.PreOrders
+@using Nop.Web.Areas.Admin.Models.Orders.PreOrders
+
+@model PreOrderModel
+
+<div class="card card-outline card-custom-preorders" id="CustomPreOrders-blackout-info">
+    <div class="card-header with-border clearfix">
+        <div class="card-title">
+            <i class="fas fa-calendar-check"></i> Blackout Dates Info
+        </div>
+    </div>
+
+    <div class="card-body">
+       @await Html.PartialAsync("Table", new DataTablesModel
+       {
+           Name = "blackoutDates-grid",
+           UrlRead = new DataUrl("BlackoutDateList", "PreOrder", null),
+           UrlDelete = new DataUrl("DeleteBlackoutDate", "PreOrder", null),
+           Length = Model.BlackoutDateSearchModel.PageSize,
+           LengthMenu = Model.BlackoutDateSearchModel.AvailablePageSizes,
+           ColumnCollection = new List<ColumnProperty>
+           {
+                new ColumnProperty(nameof(BlackoutDates.StartDate))
+                    {
+                    Title = T("Admin.Promotions.Discounts.Fields.StartDate").Text,
+                    Width = "200",
+                    Render = new RenderCustom("renderDate")
+                },
+                new ColumnProperty(nameof(BlackoutDates.EndDate))
+                {
+                    Title = T("Admin.Promotions.Discounts.Fields.EndDate").Text,
+                    Width = "200",
+                    Render = new RenderCustom("renderDate")
+                },
+                new ColumnProperty(nameof(BlackoutDates.Reason))
+                {
+                    Title = T("Admin.Catalog.BlackOutDates.Fields.Reason").Text,
+                    Width = "350"
+                },
+                new ColumnProperty(nameof(BlackoutDates.IsActive))
+                {
+                    Title = T("Admin.Promotions.Discounts.Fields.IsActive").Text,
+                    Width = "80",
+                    ClassName = NopColumnClassDefaults.CenterAll,
+                    Render = new RenderBoolean()
+                },
+                new ColumnProperty(nameof(BlackoutDates.CreatedOnUtc))
+                {
+                    Title = T("Admin.Customers.ActivityLog.Fields.CreatedOn").Text,
+                    Width = "200",
+                    Render = new RenderDate()
+                },
+                new ColumnProperty(nameof(BlogCommentModel.Id))
+                {
+                    Title = T("Admin.Common.Delete").Text,
+                    Width = "100",
+                    Render = new RenderButtonRemove(T("Admin.Common.Delete").Text),
+                    ClassName = NopColumnClassDefaults.Button
+                }
+           }
+       })
+    </div>
+
+    <div class="card card-default no-margin">
+        <div class="card-header">Add new record</div>
+        <div class="card-body">
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="col-form-label" for="StartDateUtc">Start date</label>
+                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The start of the blackout period in Coordinated Universal Time (UTC).">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="BlackoutModel.StartDate" />
+                    <span asp-validation-for="BlackoutModel.StartDate"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="col-form-label" for="EndDateUtc">End date</label>
+                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The end of the blackout period in Coordinated Universal Time (UTC).">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="BlackoutModel.EndDate" />
+                    <span asp-validation-for="BlackoutModel.EndDate"></span>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-3">
+                    <div class="label-wrapper">
+                        <label class="col-form-label" for="ReasonText">Reason</label>
+                        <div title="" data-toggle="tooltip" class="ico-help" data-original-title="The reason for the blackout period (e.g Black Friday, Christmas).">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <nop-editor asp-for="BlackoutModel.Reason" />
+                    <span asp-validation-for="BlackoutModel.Reason"></span>
+                </div>
+            </div>
+            <div class="form-group row mt-2">
+                <div class="col-md-9 offset-md-3">
+                    <button type="button" id="addBlackoutDays" class="btn btn-primary">Add blackout date</button>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(document).ready(function () {
+                $('#addBlackoutDays').click(function () {
+                    $('#addBlackoutDays').attr('disabled', true);
+                    var postData = {
+                        StartDate: $("#@Html.IdFor(model => model.BlackoutModel.StartDate)").val(),
+                        EndDate: $("#@Html.IdFor(model => model.BlackoutModel.EndDate)").val(),
+                        Reason: $("#@Html.IdFor(model => model.BlackoutModel.Reason)").val()
+                    };
+                    addAntiForgeryToken(postData);
+
+                    $.ajax({
+                        cache: false,
+                        type: "POST",
+                        url: "@Html.Raw(Url.Action("CreateBlackoutDate", "Preorder"))",
+                        data: postData,
+                        success: function (data, textStatus, jqXHR) {
+                            if (data.Result) {
+                                //reload grid
+                                updateTable('#blackoutDates-grid');
+
+                                // Clear previous validation messages
+                                clearDateValidationErrors();
+
+                                //clear input value
+                                $("#@Html.IdFor(model => model.BlackoutModel.StartDate)").val('');
+                                $("#@Html.IdFor(model => model.BlackoutModel.EndDate)").val('');
+                                $("#@Html.IdFor(model => model.BlackoutModel.Reason)").val('');
+                            } else {
+
+                                //display errors if returned
+                                displayValidationErrors(data);
+                            }
+                        },
+                        complete: function (jqXHR, textStatus) {
+                            $('#addBlackoutDays').attr('disabled', false);
+                        }
+                    });
+                });
+            });
+
+            function displayValidationErrors(data) {
+
+                // Clear previous validation messages
+                clearDateValidationErrors();
+
+                // Nothing to display
+                if (!data || !data.error || $.isEmptyObject(data.error))
+                    return;
+
+                $.each(data.error, function (fieldName, fieldData) {
+
+                    if (!fieldData.errors || fieldData.errors.length === 0)
+                        return;
+
+                    var message = fieldData.errors[0];
+
+                    if (!message)
+                        return;
+
+                    $("span[data-valmsg-for='BlackoutModel." + fieldName + "']")
+                        .removeClass("field-validation-valid")
+                        .addClass("field-validation-error")
+                        .html("<br><span>" + message + "</span>");
+                });
+            }
+
+            function clearDateValidationErrors() {
+                ["StartDate", "EndDate"].forEach(function (field) {
+                    $("span[data-valmsg-for='BlackoutModel." + field + "']")
+                        .removeClass("field-validation-error")
+                        .addClass("field-validation-valid")
+                        .empty();
+                });
+            }
+
+            function renderDate(data, type, row) {
+                if (!data)
+                    return "";
+
+                return data.split('T')[0];
+            }
+        </script>
+    </div>
+</div>

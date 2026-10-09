@@ -1,0 +1,91 @@
+﻿@model Nop.Web.Areas.Admin.Controllers.CommonController.PopupCustomPromotion
+
+
+
+@{
+    var weeks = new List<SelectListItem>
+    {
+        new SelectListItem { Value = "Monday", Text = "Monday" },
+        new SelectListItem { Value = "Tuesday", Text = "Tuesday" },
+        new SelectListItem { Value = "Wednesday", Text = "Wednesday" },
+        new SelectListItem { Value = "Thursday", Text = "Thursday" },
+        new SelectListItem { Value = "Friday", Text = "Friday" },
+        new SelectListItem { Value = "Saturday", Text = "Saturday" },
+        new SelectListItem { Value = "Sunday", Text = "Sunday" }
+    };
+}
+
+
+<form asp-controller="Common" asp-action="PopupPromotion" method="post">
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="PopupActiveInActive" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="PopupActiveInActive" />
+            <span asp-validation-for="PopupActiveInActive"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="PopupPromotionContent" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="PopupPromotionContent" asp-template="RichEditor" />
+            <span asp-validation-for="PopupPromotionContent"></span>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-3">
+            <nop-label asp-for="PopupPromotionUrl" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="PopupPromotionUrl" />
+            <span asp-validation-for="PopupPromotionUrl"></span>
+        </div>
+    </div>
+
+    <div class="form-group row isactive">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="col-form-label" for="VendorId">Reward offer from</label>
+                @* <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Reward offer From">
+                <i class="fas fa-question-circle">
+
+                </i>
+                </div> *@
+            </div>
+        </div>
+        <div class="col-md-9">
+            @Html.DropDownListFor(m => m.StartWeek, weeks, new { @class = "form-control valid", @data_val = "true", @data_val_required = "The Manager of vendor field is required.", id = "StartWeek", aria_describedby = "VendorId-error", aria_invalid = "false" })
+            <span class="field-validation-valid" data-valmsg-for="VendorId" data-valmsg-replace="true">
+
+            </span>
+        </div>
+    </div>
+    <div class="form-group row isactive">
+        <div class="col-md-3">
+            <div class="label-wrapper">
+                <label class="col-form-label" for="VendorId">Reward offer To</label>
+                @* <div title="" data-toggle="tooltip" class="ico-help" data-original-title="Reward offer To">
+                <i class="fas fa-question-circle">
+
+                </i>
+                </div> *@
+            </div>
+        </div>
+        <div class="col-md-9">
+
+            @Html.DropDownListFor(m => m.EndWeek, weeks, new { @class = "form-control valid", @data_val = "true", @data_val_required = "The Manager of vendor field is required.", id = "EndWeek", aria_describedby = "VendorId-error", aria_invalid = "false" })
+            <span class="field-validation-valid" data-valmsg-for="VendorId" data-valmsg-replace="true">
+
+            </span>
+        </div>
+    </div>
+    <div class="float-right">
+        <button type="submit" name="save" class="btn btn-primary">
+            <i class="far fa-save"></i>
+            @T("Admin.Common.Save")
+        </button>
+    </div>
+</form>

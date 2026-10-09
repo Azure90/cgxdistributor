@@ -1,0 +1,14 @@
+﻿@model Nop.Web.Components.GetCustomerRoleViewComponent.GetCustomer
+
+    @if(Model.IsCADrole)
+    {
+    <label>
+        My Account&nbsp;&nbsp;<span title='Prices are in Canadian Dollars'><img src='/images/flags/ca.png' />&nbsp;CAD</span>
+    </label>    
+        }
+        else
+        {
+<label>My Account&nbsp;&nbsp;<span title='Prices are in USD Dollars'><img src='/images/flags/us.png' />&nbsp;USD</span></label>
+        }
+        
+

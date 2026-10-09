@@ -1,0 +1,24 @@
+﻿@*@model CheckoutConfirmModel*@
+<div class="checkout-data">
+
+    @*@if (!string.IsNullOrEmpty (Model.Warnings.Count > 0))
+    {
+        <div class="section confirm-order">
+            @if (Model.Warnings.Count > 0)
+            {
+                <div class="message-error">
+                    <ul>
+                        @foreach (var warning in Model.Warnings)
+                        {
+                            <li>@warning</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    }*@
+
+    <div class="section order-summary">
+        @await Component.InvokeAsync("OrderSummary", new { prepareAndDisplayOrderReviewData = true })
+    </div>
+</div>
